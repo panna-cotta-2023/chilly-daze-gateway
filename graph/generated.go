@@ -1601,11 +1601,14 @@ func (ec *executionContext) _User_achievements(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Achievement)
 	fc.Result = res
-	return ec.marshalOAchievement2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐAchievementᚄ(ctx, field.Selections, res)
+	return ec.marshalNAchievement2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐAchievementᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_achievements(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1650,11 +1653,14 @@ func (ec *executionContext) _User_chills(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Chill)
 	fc.Result = res
-	return ec.marshalOChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx, field.Selections, res)
+	return ec.marshalNChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_chills(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3924,8 +3930,14 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "achievements":
 			out.Values[i] = ec._User_achievements(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "chills":
 			out.Values[i] = ec._User_chills(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4754,53 +4766,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAchievement2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐAchievementᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Achievement) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAchievement2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐAchievement(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4825,53 +4790,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Chill) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNChill2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChill(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
