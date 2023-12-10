@@ -1,28 +1,89 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
+scalar DateTime
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+directive @isAuthenticated on FIELD_DEFINITION
+
+type ChillSpot {
+    id: ID!
+    coordinate: Coordinate!
+    genre: Genre!
+    users: [User!]!
+}
+
+type Coordinate {
+    latitude: Float!
+    longitude: Float!
+}
+
+type Event {
+    id: ID!
+    timestamp: DateTime!
+    user: User!
+    chillSpot: ChillSpot!
+    playedSeconds: Int!
+    noiseLevel: Int!
+}
+
+type Genre {
+    id: ID!
+    name: String!
+    chillSpots: [ChillSpot!]!
+}
+
+type Song {
+    id: ID!
+    url: String!
+    chillRate: Int!
 }
 
 type User {
-  id: ID!
-  name: String!
+    id: ID!
+    name: String!
+    registeredAt: DateTime!
+    chillPoints: Int!
+    availableSongs: [Song!]!
+    ownedChillSpots: [ChillSpot!]!
+    events: [Event!]!
+}
+
+input ChillSpotsWhere {
+    id: ID
+    centerCoordinate: CoordinateInput
+    latitudalRange: Float
+    longitudinalRange: Float
 }
 
 type Query {
-  todos: [Todo!]!
+    chillSpot(id: ID!): ChillSpot! @isAuthenticated
+    chillSpots(where: ChillSpotsWhere): [ChillSpot!]! @isAuthenticated
+    genre(id: ID!): Genre! @isAuthenticated
+    genres: [Genre!]! @isAuthenticated
+    song(id: ID!): Song! @isAuthenticated
+    songs: [Song!]! @isAuthenticated
+    user(id: ID!): User! @isAuthenticated
+    event(id: ID!): Event! @isAuthenticated
+    events: [Event!]! @isAuthenticated
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+input CoordinateInput {
+    latitude: Float!
+    longitude: Float!
+}
+
+input NewEvent {
+    timestamp: DateTime!
+    userId: String!
+    coordinate: NewCoordinate!
+    genreId: String!
+    playedSeconds: Int!
+    noiseRate: Int!
+}
+
+input NewUser {
+    id: ID!
+    name: String!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+    createEvent(input: NewEvent!): Event! @isAuthenticated
+    createUser(input: NewUser!): User! @isAuthenticated
 }
