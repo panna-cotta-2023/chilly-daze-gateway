@@ -2,19 +2,41 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Achievement struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Chill struct {
+	ID             string      `json:"id"`
+	StartTimestamp string      `json:"startTimestamp"`
+	EndTimestamp   *string     `json:"endTimestamp,omitempty"`
+	Coordinate     *Coordinate `json:"coordinate"`
+}
+
+type Coordinate struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type CoordinateInput struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type EndChillInput struct {
+	ID        string `json:"id"`
+	Timestamp string `json:"timestamp"`
+}
+
+type StartChillInput struct {
+	Coordinate *CoordinateInput `json:"coordinate"`
+	Timestamp  string           `json:"timestamp"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	Achievements []*Achievement `json:"achievements"`
 }

@@ -2,11 +2,16 @@ scalar DateTime
 
 directive @isAuthenticated on FIELD_DEFINITION
 
-type ChillSpot {
+type Achievement {
     id: ID!
-    coordinate: Coordinate!
-    genre: Genre!
-    users: [User!]!
+    name: String!
+    description: String!
+}
+
+type User {
+    id: ID!
+    name: String!
+    achievements: [Achievement!]!
 }
 
 type Coordinate {
@@ -14,54 +19,19 @@ type Coordinate {
     longitude: Float!
 }
 
-type Event {
+type Chill {
     id: ID!
-    timestamp: DateTime!
-    user: User!
-    chillSpot: ChillSpot!
-    playedSeconds: Int!
-    noiseLevel: Int!
-}
+    startTimestamp: DateTime!
+    endTimestamp: DateTime
+    coordinate: Coordinate!
 
-type Genre {
-    id: ID!
-    name: String!
-    chillSpots: [ChillSpot!]!
-}
-
-type Song {
-    id: ID!
-    url: String!
-    chillRate: Int!
-}
-
-type User {
-    id: ID!
-    name: String!
-    registeredAt: DateTime!
-    chillPoints: Int!
-    availableSongs: [Song!]!
-    ownedChillSpots: [ChillSpot!]!
-    events: [Event!]!
-}
-
-input ChillSpotsWhere {
-    id: ID
-    centerCoordinate: CoordinateInput
-    latitudalRange: Float
-    longitudinalRange: Float
 }
 
 type Query {
-    chillSpot(id: ID!): ChillSpot! @isAuthenticated
-    chillSpots(where: ChillSpotsWhere): [ChillSpot!]! @isAuthenticated
-    genre(id: ID!): Genre! @isAuthenticated
-    genres: [Genre!]! @isAuthenticated
-    song(id: ID!): Song! @isAuthenticated
-    songs: [Song!]! @isAuthenticated
-    user(id: ID!): User! @isAuthenticated
-    event(id: ID!): Event! @isAuthenticated
-    events: [Event!]! @isAuthenticated
+    user: User! @isAuthenticated
+    chill(id: ID!): Chill! @isAuthenticated
+    chills: [Chill!]! @isAuthenticated
+    achievements: [Achievement!]! @isAuthenticated
 }
 
 input CoordinateInput {
@@ -69,21 +39,17 @@ input CoordinateInput {
     longitude: Float!
 }
 
-input NewEvent {
+input StartChillInput {
+    coordinate: CoordinateInput!
     timestamp: DateTime!
-    userId: String!
-    coordinate: NewCoordinate!
-    genreId: String!
-    playedSeconds: Int!
-    noiseRate: Int!
 }
 
-input NewUser {
+input EndChillInput {
     id: ID!
-    name: String!
+    timestamp: DateTime!
 }
 
 type Mutation {
-    createEvent(input: NewEvent!): Event! @isAuthenticated
-    createUser(input: NewUser!): User! @isAuthenticated
+    startChill(input: StartChillInput!): Chill! @isAuthenticated
+    endChill(input: EndChillInput!): Chill! @isAuthenticated
 }

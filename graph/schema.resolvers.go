@@ -10,14 +10,34 @@ import (
 	"panna_cotta_gateway/graph/model"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// StartChill is the resolver for the startChill field.
+func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: StartChill - startChill"))
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// EndChill is the resolver for the endChill field.
+func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: EndChill - endChill"))
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
+}
+
+// Chill is the resolver for the chill field.
+func (r *queryResolver) Chill(ctx context.Context, id string) (*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: Chill - chill"))
+}
+
+// Chills is the resolver for the chills field.
+func (r *queryResolver) Chills(ctx context.Context) ([]*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: Chills - chills"))
+}
+
+// Achievements is the resolver for the achievements field.
+func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
+	panic(fmt.Errorf("not implemented: Achievements - achievements"))
 }
 
 // Mutation returns MutationResolver implementation.
