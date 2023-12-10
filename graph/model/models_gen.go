@@ -2,19 +2,71 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type ChillSpot struct {
+	ID         string      `json:"id"`
+	Coordinate *Coordinate `json:"coordinate"`
+	Genre      *Genre      `json:"genre"`
+	Users      []*User     `json:"users"`
 }
 
-type Todo struct {
+type ChillSpotsWhere struct {
+	ID                *string          `json:"id,omitempty"`
+	CenterCoordinate  *CoordinateInput `json:"centerCoordinate,omitempty"`
+	LatitudalRange    *float64         `json:"latitudalRange,omitempty"`
+	LongitudinalRange *float64         `json:"longitudinalRange,omitempty"`
+}
+
+type Coordinate struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type CoordinateInput struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type Event struct {
+	ID            string     `json:"id"`
+	Timestamp     string     `json:"timestamp"`
+	User          *User      `json:"user"`
+	ChillSpot     *ChillSpot `json:"chillSpot"`
+	PlayedSeconds int        `json:"playedSeconds"`
+	NoiseLevel    int        `json:"noiseLevel"`
+}
+
+type Genre struct {
+	ID         string       `json:"id"`
+	Name       string       `json:"name"`
+	ChillSpots []*ChillSpot `json:"chillSpots"`
+}
+
+type NewEvent struct {
+	Timestamp     string           `json:"timestamp"`
+	UserID        string           `json:"userId"`
+	Coordinate    *CoordinateInput `json:"coordinate"`
+	GenreID       string           `json:"genreId"`
+	PlayedSeconds int              `json:"playedSeconds"`
+	NoiseRate     int              `json:"noiseRate"`
+}
+
+type NewUser struct {
 	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+	Name string `json:"name"`
+}
+
+type Song struct {
+	ID        string `json:"id"`
+	URL       string `json:"url"`
+	ChillRate int    `json:"chillRate"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID              string       `json:"id"`
+	Name            string       `json:"name"`
+	RegisteredAt    string       `json:"registeredAt"`
+	ChillPoints     int          `json:"chillPoints"`
+	AvailableSongs  []*Song      `json:"availableSongs"`
+	OwnedChillSpots []*ChillSpot `json:"ownedChillSpots"`
+	Events          []*Event     `json:"events"`
 }

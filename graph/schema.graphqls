@@ -72,7 +72,7 @@ input CoordinateInput {
 input NewEvent {
     timestamp: DateTime!
     userId: String!
-    coordinate: NewCoordinate!
+    coordinate: CoordinateInput!
     genreId: String!
     playedSeconds: Int!
     noiseRate: Int!
