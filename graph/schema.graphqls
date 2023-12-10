@@ -12,6 +12,7 @@ type User {
     id: ID!
     name: String!
     achievements: [Achievement!]!
+    chills: [Chill!]!
 }
 
 type Coordinate {
