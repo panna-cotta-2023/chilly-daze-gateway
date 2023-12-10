@@ -2,18 +2,17 @@
 
 package model
 
-type ChillSpot struct {
-	ID         string      `json:"id"`
-	Coordinate *Coordinate `json:"coordinate"`
-	Genre      *Genre      `json:"genre"`
-	Users      []*User     `json:"users"`
+type Achievement struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-type ChillSpotsWhere struct {
-	ID                *string          `json:"id,omitempty"`
-	CenterCoordinate  *CoordinateInput `json:"centerCoordinate,omitempty"`
-	LatitudalRange    *float64         `json:"latitudalRange,omitempty"`
-	LongitudinalRange *float64         `json:"longitudinalRange,omitempty"`
+type Chill struct {
+	ID             string      `json:"id"`
+	StartTimestamp string      `json:"startTimestamp"`
+	EndTimestamp   *string     `json:"endTimestamp,omitempty"`
+	Coordinate     *Coordinate `json:"coordinate"`
 }
 
 type Coordinate struct {
@@ -26,47 +25,18 @@ type CoordinateInput struct {
 	Longitude float64 `json:"longitude"`
 }
 
-type Event struct {
-	ID            string     `json:"id"`
-	Timestamp     string     `json:"timestamp"`
-	User          *User      `json:"user"`
-	ChillSpot     *ChillSpot `json:"chillSpot"`
-	PlayedSeconds int        `json:"playedSeconds"`
-	NoiseLevel    int        `json:"noiseLevel"`
-}
-
-type Genre struct {
-	ID         string       `json:"id"`
-	Name       string       `json:"name"`
-	ChillSpots []*ChillSpot `json:"chillSpots"`
-}
-
-type NewEvent struct {
-	Timestamp     string           `json:"timestamp"`
-	UserID        string           `json:"userId"`
-	Coordinate    *CoordinateInput `json:"coordinate"`
-	GenreID       string           `json:"genreId"`
-	PlayedSeconds int              `json:"playedSeconds"`
-	NoiseRate     int              `json:"noiseRate"`
-}
-
-type NewUser struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type Song struct {
+type EndChillInput struct {
 	ID        string `json:"id"`
-	URL       string `json:"url"`
-	ChillRate int    `json:"chillRate"`
+	Timestamp string `json:"timestamp"`
+}
+
+type StartChillInput struct {
+	Coordinate *CoordinateInput `json:"coordinate"`
+	Timestamp  string           `json:"timestamp"`
 }
 
 type User struct {
-	ID              string       `json:"id"`
-	Name            string       `json:"name"`
-	RegisteredAt    string       `json:"registeredAt"`
-	ChillPoints     int          `json:"chillPoints"`
-	AvailableSongs  []*Song      `json:"availableSongs"`
-	OwnedChillSpots []*ChillSpot `json:"ownedChillSpots"`
-	Events          []*Event     `json:"events"`
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	Achievements []*Achievement `json:"achievements"`
 }
