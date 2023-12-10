@@ -38,6 +38,6 @@ type StartChillInput struct {
 type User struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
-	Achievements []*Achievement `json:"achievements"`
-	Chills       []*Chill       `json:"chills"`
+	Achievements []*Achievement `json:"achievements,omitempty"`
+	Chills       []*Chill       `json:"chills,omitempty"`
 }
