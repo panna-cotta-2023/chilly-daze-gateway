@@ -74,8 +74,9 @@ type ComplexityRoot struct {
 	}
 
 	Photo struct {
-		ID  func(childComplexity int) int
-		URL func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Timestamp func(childComplexity int) int
+		URL       func(childComplexity int) int
 	}
 
 	Query struct {
@@ -250,6 +251,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Photo.ID(childComplexity), true
+
+	case "Photo.timestamp":
+		if e.complexity.Photo.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.Photo.Timestamp(childComplexity), true
 
 	case "Photo.url":
 		if e.complexity.Photo.URL == nil {
@@ -852,6 +860,8 @@ func (ec *executionContext) fieldContext_Chill_photos(ctx context.Context, field
 				return ec.fieldContext_Photo_id(ctx, field)
 			case "url":
 				return ec.fieldContext_Photo_url(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_Photo_timestamp(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -1447,6 +1457,50 @@ func (ec *executionContext) fieldContext_Photo_url(ctx context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Photo_timestamp(ctx context.Context, field graphql.CollectedField, obj *model.Photo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Photo_timestamp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Photo_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Photo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4340,6 +4394,11 @@ func (ec *executionContext) _Photo(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "url":
 			out.Values[i] = ec._Photo_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "timestamp":
+			out.Values[i] = ec._Photo_timestamp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
