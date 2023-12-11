@@ -39,4 +39,5 @@ type User struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
 	Achievements []*Achievement `json:"achievements"`
+	Chills       []*Chill       `json:"chills"`
 }

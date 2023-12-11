@@ -8,30 +8,36 @@ type Achievement {
     description: String!
 }
 
-type User {
-    id: ID!
-    name: String!
-    achievements: [Achievement!]!
-}
-
 type Coordinate {
     latitude: Float!
     longitude: Float!
 }
 
+type TracePoint {
+    id: ID!                 # Identifier to identify the trace point
+    timestamp: DateTime!
+    coordinate: Coordinate!
+}
+
 type Chill {
     id: ID!
-    startTimestamp: DateTime!
-    endTimestamp: DateTime
-    coordinate: Coordinate!
+    traces: [TracePoint!]!
+}
 
+type User {
+    id: ID!
+    name: String!
+    chills: [Chill!]!
+    achievements: [Achievement!]!
 }
 
 type Query {
-    user: User! @isAuthenticated
-    chill(id: ID!): Chill! @isAuthenticated
-    chills: [Chill!]! @isAuthenticated
-    achievements: [Achievement!]! @isAuthenticated
+    user: User! @isAuthenticated                    # Get current user
+    chill(id: ID!): Chill! @isAuthenticated         # Get a chill of the current user by id
+}
+
+input RegisterUserInput {
+    name: String!   # Username
 }
 
 input CoordinateInput {
@@ -40,16 +46,29 @@ input CoordinateInput {
 }
 
 input StartChillInput {
-    coordinate: CoordinateInput!
     timestamp: DateTime!
+    coordinate: Coordinate!
+}
+
+input TracePointInput {
+    timestamp: DateTime!
+    coordinate: Coordinate!
+}
+
+input TracePointsInput {
+    id: ID!                             # Chill id
+    tracePoints: [TracePointInput!]!
 }
 
 input EndChillInput {
-    id: ID!
+    id: ID!                 # Chill id
     timestamp: DateTime!
+    coordinate: Coordinate!
 }
 
 type Mutation {
+    registerUser(input: RegisterUserInput): User! @isAuthenticated  # Other information can derive from the token
     startChill(input: StartChillInput!): Chill! @isAuthenticated
+    addTracePoint(input: TracePointsInput!): Chill! @isAuthenticated
     endChill(input: EndChillInput!): Chill! @isAuthenticated
 }

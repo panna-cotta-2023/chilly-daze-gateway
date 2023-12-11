@@ -80,6 +80,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		Achievements func(childComplexity int) int
+		Chills       func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Name         func(childComplexity int) int
 	}
@@ -241,6 +242,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Achievements(childComplexity), true
+
+	case "User.chills":
+		if e.complexity.User.Chills == nil {
+			break
+		}
+
+		return e.complexity.User.Chills(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -1115,6 +1123,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_name(ctx, field)
 			case "achievements":
 				return ec.fieldContext_User_achievements(ctx, field)
+			case "chills":
+				return ec.fieldContext_User_chills(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1617,6 +1627,60 @@ func (ec *executionContext) fieldContext_User_achievements(ctx context.Context, 
 				return ec.fieldContext_Achievement_description(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Achievement", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_chills(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_chills(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Chills, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Chill)
+	fc.Result = res
+	return ec.marshalNChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_chills(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Chill_id(ctx, field)
+			case "startTimestamp":
+				return ec.fieldContext_Chill_startTimestamp(ctx, field)
+			case "endTimestamp":
+				return ec.fieldContext_Chill_endTimestamp(ctx, field)
+			case "coordinate":
+				return ec.fieldContext_Chill_coordinate(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
 		},
 	}
 	return fc, nil
@@ -3866,6 +3930,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "achievements":
 			out.Values[i] = ec._User_achievements(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "chills":
+			out.Values[i] = ec._User_chills(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
