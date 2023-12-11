@@ -12,7 +12,6 @@ type User {
     id: ID!
     name: String!
     achievements: [Achievement!]!
-    chills: [Chill!]!
 }
 
 type Coordinate {
@@ -35,6 +34,11 @@ type Query {
     achievements: [Achievement!]! @isAuthenticated
 }
 
+input RegisterUserInput {
+    id: ID!         # Firebase UID
+    name: String!   # Username
+}
+
 input CoordinateInput {
     latitude: Float!
     longitude: Float!
@@ -51,6 +55,7 @@ input EndChillInput {
 }
 
 type Mutation {
+    registerUser(input: RegisterUserInput): User! @isAuthenticated
     startChill(input: StartChillInput!): Chill! @isAuthenticated
     endChill(input: EndChillInput!): Chill! @isAuthenticated
 }
