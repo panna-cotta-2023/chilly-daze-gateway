@@ -1,9 +1,28 @@
 package services
 
-type Services interface {}
+import (
+	"chilly_daze_gateway/graph/model"
+	"chilly_daze_gateway/graph/services/chill"
 
-type services struct {}
+	"database/sql"
+)
 
-func New() Services {
-	return &services{}
+type ChillService interface {
+	StartChill() (*model.Chill, error)
+}
+
+type Services interface{
+	ChillService
+}
+
+type services struct{
+	*chill.ChillService
+}
+
+func New(db *sql.DB) Services {
+	return &services{
+		ChillService: &chill.ChillService{
+			Db: db,
+		},
+	}
 }
