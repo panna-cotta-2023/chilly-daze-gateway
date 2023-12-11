@@ -13,7 +13,7 @@ type TraceService interface {
 		ctx context.Context,
 		input model.TracePointsInput,
 		chillID string,
-	) (*model.Chill, error)
+	) ([]*model.TracePoint, error)
 }
 
 type Services interface {
