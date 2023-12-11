@@ -55,10 +55,9 @@ type ComplexityRoot struct {
 	}
 
 	Chill struct {
-		Coordinate     func(childComplexity int) int
-		EndTimestamp   func(childComplexity int) int
-		ID             func(childComplexity int) int
-		StartTimestamp func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Photos func(childComplexity int) int
+		Traces func(childComplexity int) int
 	}
 
 	Coordinate struct {
@@ -67,15 +66,27 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		EndChill   func(childComplexity int, input model.EndChillInput) int
-		StartChill func(childComplexity int, input model.StartChillInput) int
+		AddPhotos      func(childComplexity int, input model.PhotosInput) int
+		AddTracePoints func(childComplexity int, input model.TracePointsInput) int
+		EndChill       func(childComplexity int, input model.EndChillInput) int
+		RegisterUser   func(childComplexity int, input *model.RegisterUserInput) int
+		StartChill     func(childComplexity int, input model.StartChillInput) int
+	}
+
+	Photo struct {
+		ID  func(childComplexity int) int
+		URL func(childComplexity int) int
 	}
 
 	Query struct {
-		Achievements func(childComplexity int) int
-		Chill        func(childComplexity int, id string) int
-		Chills       func(childComplexity int) int
-		User         func(childComplexity int) int
+		Chill func(childComplexity int, id string) int
+		User  func(childComplexity int) int
+	}
+
+	TracePoint struct {
+		Coordinate func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Timestamp  func(childComplexity int) int
 	}
 
 	User struct {
@@ -87,14 +98,15 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
+	RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error)
 	StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error)
+	AddTracePoints(ctx context.Context, input model.TracePointsInput) (*model.Chill, error)
+	AddPhotos(ctx context.Context, input model.PhotosInput) (*model.Chill, error)
 	EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context) (*model.User, error)
 	Chill(ctx context.Context, id string) (*model.Chill, error)
-	Chills(ctx context.Context) ([]*model.Chill, error)
-	Achievements(ctx context.Context) ([]*model.Achievement, error)
 }
 
 type executableSchema struct {
@@ -137,20 +149,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Achievement.Name(childComplexity), true
 
-	case "Chill.coordinate":
-		if e.complexity.Chill.Coordinate == nil {
-			break
-		}
-
-		return e.complexity.Chill.Coordinate(childComplexity), true
-
-	case "Chill.endTimestamp":
-		if e.complexity.Chill.EndTimestamp == nil {
-			break
-		}
-
-		return e.complexity.Chill.EndTimestamp(childComplexity), true
-
 	case "Chill.id":
 		if e.complexity.Chill.ID == nil {
 			break
@@ -158,12 +156,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chill.ID(childComplexity), true
 
-	case "Chill.startTimestamp":
-		if e.complexity.Chill.StartTimestamp == nil {
+	case "Chill.photos":
+		if e.complexity.Chill.Photos == nil {
 			break
 		}
 
-		return e.complexity.Chill.StartTimestamp(childComplexity), true
+		return e.complexity.Chill.Photos(childComplexity), true
+
+	case "Chill.traces":
+		if e.complexity.Chill.Traces == nil {
+			break
+		}
+
+		return e.complexity.Chill.Traces(childComplexity), true
 
 	case "Coordinate.latitude":
 		if e.complexity.Coordinate.Latitude == nil {
@@ -179,6 +184,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Coordinate.Longitude(childComplexity), true
 
+	case "Mutation.addPhotos":
+		if e.complexity.Mutation.AddPhotos == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addPhotos_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddPhotos(childComplexity, args["input"].(model.PhotosInput)), true
+
+	case "Mutation.addTracePoints":
+		if e.complexity.Mutation.AddTracePoints == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addTracePoints_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddTracePoints(childComplexity, args["input"].(model.TracePointsInput)), true
+
 	case "Mutation.endChill":
 		if e.complexity.Mutation.EndChill == nil {
 			break
@@ -190,6 +219,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EndChill(childComplexity, args["input"].(model.EndChillInput)), true
+
+	case "Mutation.registerUser":
+		if e.complexity.Mutation.RegisterUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_registerUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RegisterUser(childComplexity, args["input"].(*model.RegisterUserInput)), true
 
 	case "Mutation.startChill":
 		if e.complexity.Mutation.StartChill == nil {
@@ -203,12 +244,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.StartChill(childComplexity, args["input"].(model.StartChillInput)), true
 
-	case "Query.achievements":
-		if e.complexity.Query.Achievements == nil {
+	case "Photo.id":
+		if e.complexity.Photo.ID == nil {
 			break
 		}
 
-		return e.complexity.Query.Achievements(childComplexity), true
+		return e.complexity.Photo.ID(childComplexity), true
+
+	case "Photo.url":
+		if e.complexity.Photo.URL == nil {
+			break
+		}
+
+		return e.complexity.Photo.URL(childComplexity), true
 
 	case "Query.chill":
 		if e.complexity.Query.Chill == nil {
@@ -222,19 +270,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Chill(childComplexity, args["id"].(string)), true
 
-	case "Query.chills":
-		if e.complexity.Query.Chills == nil {
-			break
-		}
-
-		return e.complexity.Query.Chills(childComplexity), true
-
 	case "Query.user":
 		if e.complexity.Query.User == nil {
 			break
 		}
 
 		return e.complexity.Query.User(childComplexity), true
+
+	case "TracePoint.coordinate":
+		if e.complexity.TracePoint.Coordinate == nil {
+			break
+		}
+
+		return e.complexity.TracePoint.Coordinate(childComplexity), true
+
+	case "TracePoint.id":
+		if e.complexity.TracePoint.ID == nil {
+			break
+		}
+
+		return e.complexity.TracePoint.ID(childComplexity), true
+
+	case "TracePoint.timestamp":
+		if e.complexity.TracePoint.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.TracePoint.Timestamp(childComplexity), true
 
 	case "User.achievements":
 		if e.complexity.User.Achievements == nil {
@@ -274,7 +336,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCoordinateInput,
 		ec.unmarshalInputEndChillInput,
+		ec.unmarshalInputPhotoInput,
+		ec.unmarshalInputPhotosInput,
+		ec.unmarshalInputRegisterUserInput,
 		ec.unmarshalInputStartChillInput,
+		ec.unmarshalInputTracePointInput,
+		ec.unmarshalInputTracePointsInput,
 	)
 	first := true
 
@@ -391,6 +458,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addPhotos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PhotosInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNPhotosInput2panna_cotta_gatewayᚋgraphᚋmodelᚐPhotosInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_addTracePoints_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.TracePointsInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNTracePointsInput2panna_cotta_gatewayᚋgraphᚋmodelᚐTracePointsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_endChill_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -398,6 +495,21 @@ func (ec *executionContext) field_Mutation_endChill_args(ctx context.Context, ra
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNEndChillInput2panna_cotta_gatewayᚋgraphᚋmodelᚐEndChillInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_registerUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.RegisterUserInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalORegisterUserInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -665,8 +777,8 @@ func (ec *executionContext) fieldContext_Chill_id(ctx context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Chill_startTimestamp(ctx context.Context, field graphql.CollectedField, obj *model.Chill) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chill_startTimestamp(ctx, field)
+func (ec *executionContext) _Chill_traces(ctx context.Context, field graphql.CollectedField, obj *model.Chill) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chill_traces(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -679,7 +791,7 @@ func (ec *executionContext) _Chill_startTimestamp(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.StartTimestamp, nil
+		return obj.Traces, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -691,97 +803,12 @@ func (ec *executionContext) _Chill_startTimestamp(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*model.TracePoint)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNTracePoint2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Chill_startTimestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Chill",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Chill_endTimestamp(ctx context.Context, field graphql.CollectedField, obj *model.Chill) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chill_endTimestamp(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.EndTimestamp, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalODateTime2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Chill_endTimestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Chill",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Chill_coordinate(ctx context.Context, field graphql.CollectedField, obj *model.Chill) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chill_coordinate(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Coordinate, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Coordinate)
-	fc.Result = res
-	return ec.marshalNCoordinate2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐCoordinate(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Chill_coordinate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Chill_traces(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Chill",
 		Field:      field,
@@ -789,12 +816,64 @@ func (ec *executionContext) fieldContext_Chill_coordinate(ctx context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "latitude":
-				return ec.fieldContext_Coordinate_latitude(ctx, field)
-			case "longitude":
-				return ec.fieldContext_Coordinate_longitude(ctx, field)
+			case "id":
+				return ec.fieldContext_TracePoint_id(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_TracePoint_timestamp(ctx, field)
+			case "coordinate":
+				return ec.fieldContext_TracePoint_coordinate(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Coordinate", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TracePoint", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Chill_photos(ctx context.Context, field graphql.CollectedField, obj *model.Chill) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chill_photos(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Photos, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Photo)
+	fc.Result = res
+	return ec.marshalNPhoto2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhotoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Chill_photos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Chill",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Photo_id(ctx, field)
+			case "url":
+				return ec.fieldContext_Photo_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
 	}
 	return fc, nil
@@ -888,6 +967,91 @@ func (ec *executionContext) fieldContext_Coordinate_longitude(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_registerUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_registerUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().RegisterUser(rctx, fc.Args["input"].(*model.RegisterUserInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.User); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *panna_cotta_gateway/graph/model.User`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_registerUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "chills":
+				return ec.fieldContext_User_chills(ctx, field)
+			case "achievements":
+				return ec.fieldContext_User_achievements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_registerUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_startChill(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_startChill(ctx, field)
 	if err != nil {
@@ -949,12 +1113,10 @@ func (ec *executionContext) fieldContext_Mutation_startChill(ctx context.Context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Chill_id(ctx, field)
-			case "startTimestamp":
-				return ec.fieldContext_Chill_startTimestamp(ctx, field)
-			case "endTimestamp":
-				return ec.fieldContext_Chill_endTimestamp(ctx, field)
-			case "coordinate":
-				return ec.fieldContext_Chill_coordinate(ctx, field)
+			case "traces":
+				return ec.fieldContext_Chill_traces(ctx, field)
+			case "photos":
+				return ec.fieldContext_Chill_photos(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
 		},
@@ -967,6 +1129,172 @@ func (ec *executionContext) fieldContext_Mutation_startChill(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_startChill_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addTracePoints(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addTracePoints(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().AddTracePoints(rctx, fc.Args["input"].(model.TracePointsInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Chill); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *panna_cotta_gateway/graph/model.Chill`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Chill)
+	fc.Result = res
+	return ec.marshalNChill2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChill(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addTracePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Chill_id(ctx, field)
+			case "traces":
+				return ec.fieldContext_Chill_traces(ctx, field)
+			case "photos":
+				return ec.fieldContext_Chill_photos(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addTracePoints_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addPhotos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addPhotos(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().AddPhotos(rctx, fc.Args["input"].(model.PhotosInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Chill); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *panna_cotta_gateway/graph/model.Chill`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Chill)
+	fc.Result = res
+	return ec.marshalNChill2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChill(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addPhotos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Chill_id(ctx, field)
+			case "traces":
+				return ec.fieldContext_Chill_traces(ctx, field)
+			case "photos":
+				return ec.fieldContext_Chill_photos(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addPhotos_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1034,12 +1362,10 @@ func (ec *executionContext) fieldContext_Mutation_endChill(ctx context.Context, 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Chill_id(ctx, field)
-			case "startTimestamp":
-				return ec.fieldContext_Chill_startTimestamp(ctx, field)
-			case "endTimestamp":
-				return ec.fieldContext_Chill_endTimestamp(ctx, field)
-			case "coordinate":
-				return ec.fieldContext_Chill_coordinate(ctx, field)
+			case "traces":
+				return ec.fieldContext_Chill_traces(ctx, field)
+			case "photos":
+				return ec.fieldContext_Chill_photos(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
 		},
@@ -1054,6 +1380,94 @@ func (ec *executionContext) fieldContext_Mutation_endChill(ctx context.Context, 
 	if fc.Args, err = ec.field_Mutation_endChill_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Photo_id(ctx context.Context, field graphql.CollectedField, obj *model.Photo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Photo_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Photo_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Photo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Photo_url(ctx context.Context, field graphql.CollectedField, obj *model.Photo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Photo_url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Photo_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Photo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -1121,10 +1535,10 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_id(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
-			case "achievements":
-				return ec.fieldContext_User_achievements(ctx, field)
 			case "chills":
 				return ec.fieldContext_User_chills(ctx, field)
+			case "achievements":
+				return ec.fieldContext_User_achievements(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1193,12 +1607,10 @@ func (ec *executionContext) fieldContext_Query_chill(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Chill_id(ctx, field)
-			case "startTimestamp":
-				return ec.fieldContext_Chill_startTimestamp(ctx, field)
-			case "endTimestamp":
-				return ec.fieldContext_Chill_endTimestamp(ctx, field)
-			case "coordinate":
-				return ec.fieldContext_Chill_coordinate(ctx, field)
+			case "traces":
+				return ec.fieldContext_Chill_traces(ctx, field)
+			case "photos":
+				return ec.fieldContext_Chill_photos(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
 		},
@@ -1213,152 +1625,6 @@ func (ec *executionContext) fieldContext_Query_chill(ctx context.Context, field 
 	if fc.Args, err = ec.field_Query_chill_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_chills(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_chills(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().Chills(rctx)
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.IsAuthenticated == nil {
-				return nil, errors.New("directive isAuthenticated is not implemented")
-			}
-			return ec.directives.IsAuthenticated(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.Chill); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*panna_cotta_gateway/graph/model.Chill`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Chill)
-	fc.Result = res
-	return ec.marshalNChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_chills(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Chill_id(ctx, field)
-			case "startTimestamp":
-				return ec.fieldContext_Chill_startTimestamp(ctx, field)
-			case "endTimestamp":
-				return ec.fieldContext_Chill_endTimestamp(ctx, field)
-			case "coordinate":
-				return ec.fieldContext_Chill_coordinate(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_achievements(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_achievements(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().Achievements(rctx)
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.IsAuthenticated == nil {
-				return nil, errors.New("directive isAuthenticated is not implemented")
-			}
-			return ec.directives.IsAuthenticated(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.Achievement); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*panna_cotta_gateway/graph/model.Achievement`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Achievement)
-	fc.Result = res
-	return ec.marshalNAchievement2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐAchievementᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_achievements(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Achievement_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Achievement_name(ctx, field)
-			case "description":
-				return ec.fieldContext_Achievement_description(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Achievement", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -1492,6 +1758,144 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _TracePoint_id(ctx context.Context, field graphql.CollectedField, obj *model.TracePoint) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TracePoint_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TracePoint_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TracePoint",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TracePoint_timestamp(ctx context.Context, field graphql.CollectedField, obj *model.TracePoint) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TracePoint_timestamp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TracePoint_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TracePoint",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TracePoint_coordinate(ctx context.Context, field graphql.CollectedField, obj *model.TracePoint) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TracePoint_coordinate(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Coordinate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Coordinate)
+	fc.Result = res
+	return ec.marshalNCoordinate2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐCoordinate(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TracePoint_coordinate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TracePoint",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "latitude":
+				return ec.fieldContext_Coordinate_latitude(ctx, field)
+			case "longitude":
+				return ec.fieldContext_Coordinate_longitude(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Coordinate", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_id(ctx, field)
 	if err != nil {
@@ -1580,6 +1984,58 @@ func (ec *executionContext) fieldContext_User_name(ctx context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _User_chills(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_chills(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Chills, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Chill)
+	fc.Result = res
+	return ec.marshalNChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_chills(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Chill_id(ctx, field)
+			case "traces":
+				return ec.fieldContext_Chill_traces(ctx, field)
+			case "photos":
+				return ec.fieldContext_Chill_photos(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_achievements(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_achievements(ctx, field)
 	if err != nil {
@@ -1627,60 +2083,6 @@ func (ec *executionContext) fieldContext_User_achievements(ctx context.Context, 
 				return ec.fieldContext_Achievement_description(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Achievement", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_chills(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_chills(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Chills, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Chill)
-	fc.Result = res
-	return ec.marshalNChill2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐChillᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_chills(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Chill_id(ctx, field)
-			case "startTimestamp":
-				return ec.fieldContext_Chill_startTimestamp(ctx, field)
-			case "endTimestamp":
-				return ec.fieldContext_Chill_endTimestamp(ctx, field)
-			case "coordinate":
-				return ec.fieldContext_Chill_coordinate(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
 		},
 	}
 	return fc, nil
@@ -3500,7 +3902,7 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "timestamp"}
+	fieldsInOrder := [...]string{"id", "timestamp", "coordinate"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3521,6 +3923,101 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 				return it, err
 			}
 			it.Timestamp = data
+		case "coordinate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coordinate"))
+			data, err := ec.unmarshalNCoordinateInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐCoordinateInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Coordinate = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPhotoInput(ctx context.Context, obj interface{}) (model.PhotoInput, error) {
+	var it model.PhotoInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"url"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "url":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URL = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPhotosInput(ctx context.Context, obj interface{}) (model.PhotosInput, error) {
+	var it model.PhotosInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "photos"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "photos":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("photos"))
+			data, err := ec.unmarshalNPhotoInput2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhotoInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Photos = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRegisterUserInput(ctx context.Context, obj interface{}) (model.RegisterUserInput, error) {
+	var it model.RegisterUserInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
 		}
 	}
 
@@ -3534,20 +4031,13 @@ func (ec *executionContext) unmarshalInputStartChillInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"coordinate", "timestamp"}
+	fieldsInOrder := [...]string{"timestamp", "coordinate"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "coordinate":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coordinate"))
-			data, err := ec.unmarshalNCoordinateInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐCoordinateInput(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Coordinate = data
 		case "timestamp":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
 			data, err := ec.unmarshalNDateTime2string(ctx, v)
@@ -3555,6 +4045,81 @@ func (ec *executionContext) unmarshalInputStartChillInput(ctx context.Context, o
 				return it, err
 			}
 			it.Timestamp = data
+		case "coordinate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coordinate"))
+			data, err := ec.unmarshalNCoordinateInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐCoordinateInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Coordinate = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTracePointInput(ctx context.Context, obj interface{}) (model.TracePointInput, error) {
+	var it model.TracePointInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"timestamp", "coordinate"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "timestamp":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
+			data, err := ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Timestamp = data
+		case "coordinate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coordinate"))
+			data, err := ec.unmarshalNCoordinateInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐCoordinateInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Coordinate = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTracePointsInput(ctx context.Context, obj interface{}) (model.TracePointsInput, error) {
+	var it model.TracePointsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "tracePoints"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "tracePoints":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tracePoints"))
+			data, err := ec.unmarshalNTracePointInput2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePointInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TracePoints = data
 		}
 	}
 
@@ -3634,15 +4199,13 @@ func (ec *executionContext) _Chill(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "startTimestamp":
-			out.Values[i] = ec._Chill_startTimestamp(ctx, field, obj)
+		case "traces":
+			out.Values[i] = ec._Chill_traces(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "endTimestamp":
-			out.Values[i] = ec._Chill_endTimestamp(ctx, field, obj)
-		case "coordinate":
-			out.Values[i] = ec._Chill_coordinate(ctx, field, obj)
+		case "photos":
+			out.Values[i] = ec._Chill_photos(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3732,9 +4295,30 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "registerUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_registerUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "startChill":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_startChill(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addTracePoints":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addTracePoints(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addPhotos":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addPhotos(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3743,6 +4327,50 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_endChill(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var photoImplementors = []string{"Photo"}
+
+func (ec *executionContext) _Photo(ctx context.Context, sel ast.SelectionSet, obj *model.Photo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, photoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Photo")
+		case "id":
+			out.Values[i] = ec._Photo_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "url":
+			out.Values[i] = ec._Photo_url(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3832,50 +4460,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "chills":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_chills(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "achievements":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_achievements(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -3884,6 +4468,55 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var tracePointImplementors = []string{"TracePoint"}
+
+func (ec *executionContext) _TracePoint(ctx context.Context, sel ast.SelectionSet, obj *model.TracePoint) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tracePointImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TracePoint")
+		case "id":
+			out.Values[i] = ec._TracePoint_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "timestamp":
+			out.Values[i] = ec._TracePoint_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "coordinate":
+			out.Values[i] = ec._TracePoint_coordinate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3928,13 +4561,13 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "achievements":
-			out.Values[i] = ec._User_achievements(ctx, field, obj)
+		case "chills":
+			out.Values[i] = ec._User_chills(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "chills":
-			out.Values[i] = ec._User_chills(ctx, field, obj)
+		case "achievements":
+			out.Values[i] = ec._User_achievements(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4479,6 +5112,87 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) marshalNPhoto2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhotoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Photo) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPhoto2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhoto(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPhoto2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhoto(ctx context.Context, sel ast.SelectionSet, v *model.Photo) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Photo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNPhotoInput2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhotoInputᚄ(ctx context.Context, v interface{}) ([]*model.PhotoInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.PhotoInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNPhotoInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhotoInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNPhotoInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐPhotoInput(ctx context.Context, v interface{}) (*model.PhotoInput, error) {
+	res, err := ec.unmarshalInputPhotoInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNPhotosInput2panna_cotta_gatewayᚋgraphᚋmodelᚐPhotosInput(ctx context.Context, v interface{}) (model.PhotosInput, error) {
+	res, err := ec.unmarshalInputPhotosInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNStartChillInput2panna_cotta_gatewayᚋgraphᚋmodelᚐStartChillInput(ctx context.Context, v interface{}) (model.StartChillInput, error) {
 	res, err := ec.unmarshalInputStartChillInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4497,6 +5211,87 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNTracePoint2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.TracePoint) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTracePoint2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePoint(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTracePoint2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePoint(ctx context.Context, sel ast.SelectionSet, v *model.TracePoint) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TracePoint(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTracePointInput2ᚕᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePointInputᚄ(ctx context.Context, v interface{}) ([]*model.TracePointInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.TracePointInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNTracePointInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePointInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNTracePointInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐTracePointInput(ctx context.Context, v interface{}) (*model.TracePointInput, error) {
+	res, err := ec.unmarshalInputTracePointInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNTracePointsInput2panna_cotta_gatewayᚋgraphᚋmodelᚐTracePointsInput(ctx context.Context, v interface{}) (model.TracePointsInput, error) {
+	res, err := ec.unmarshalInputTracePointsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUser2panna_cotta_gatewayᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
@@ -4792,20 +5587,12 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+func (ec *executionContext) unmarshalORegisterUserInput2ᚖpanna_cotta_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx context.Context, v interface{}) (*model.RegisterUserInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalString(v)
+	res, err := ec.unmarshalInputRegisterUserInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalODateTime2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalString(*v)
-	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

@@ -9,10 +9,9 @@ type Achievement struct {
 }
 
 type Chill struct {
-	ID             string      `json:"id"`
-	StartTimestamp string      `json:"startTimestamp"`
-	EndTimestamp   *string     `json:"endTimestamp,omitempty"`
-	Coordinate     *Coordinate `json:"coordinate"`
+	ID     string        `json:"id"`
+	Traces []*TracePoint `json:"traces"`
+	Photos []*Photo      `json:"photos"`
 }
 
 type Coordinate struct {
@@ -26,18 +25,53 @@ type CoordinateInput struct {
 }
 
 type EndChillInput struct {
-	ID        string `json:"id"`
-	Timestamp string `json:"timestamp"`
+	ID         string           `json:"id"`
+	Timestamp  string           `json:"timestamp"`
+	Coordinate *CoordinateInput `json:"coordinate"`
+}
+
+type Photo struct {
+	ID  string `json:"id"`
+	URL string `json:"url"`
+}
+
+type PhotoInput struct {
+	URL string `json:"url"`
+}
+
+type PhotosInput struct {
+	ID     string        `json:"id"`
+	Photos []*PhotoInput `json:"photos"`
+}
+
+type RegisterUserInput struct {
+	Name string `json:"name"`
 }
 
 type StartChillInput struct {
-	Coordinate *CoordinateInput `json:"coordinate"`
 	Timestamp  string           `json:"timestamp"`
+	Coordinate *CoordinateInput `json:"coordinate"`
+}
+
+type TracePoint struct {
+	ID         string      `json:"id"`
+	Timestamp  string      `json:"timestamp"`
+	Coordinate *Coordinate `json:"coordinate"`
+}
+
+type TracePointInput struct {
+	Timestamp  string           `json:"timestamp"`
+	Coordinate *CoordinateInput `json:"coordinate"`
+}
+
+type TracePointsInput struct {
+	ID          string             `json:"id"`
+	TracePoints []*TracePointInput `json:"tracePoints"`
 }
 
 type User struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
-	Achievements []*Achievement `json:"achievements"`
 	Chills       []*Chill       `json:"chills"`
+	Achievements []*Achievement `json:"achievements"`
 }

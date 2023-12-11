@@ -53,12 +53,12 @@ input CoordinateInput {
 
 input StartChillInput {
     timestamp: DateTime!
-    coordinate: Coordinate!
+    coordinate: CoordinateInput!
 }
 
 input TracePointInput {
     timestamp: DateTime!
-    coordinate: Coordinate!
+    coordinate: CoordinateInput!
 }
 
 input TracePointsInput {
@@ -78,7 +78,7 @@ input PhotosInput {
 input EndChillInput {
     id: ID!                 # Chill id
     timestamp: DateTime!
-    coordinate: Coordinate!
+    coordinate: CoordinateInput!
 }
 
 type Mutation {
