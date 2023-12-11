@@ -40,9 +40,9 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: User - user"))
 }
 
-// Chill is the resolver for the chill field.
-func (r *queryResolver) Chill(ctx context.Context, id string) (*model.Chill, error) {
-	panic(fmt.Errorf("not implemented: Chill - chill"))
+// Achievements is the resolver for the achievements field.
+func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
+	panic(fmt.Errorf("not implemented: Achievements - achievements"))
 }
 
 // Mutation returns MutationResolver implementation.
@@ -60,9 +60,9 @@ type queryResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) Chill(ctx context.Context, id string) (*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: Chill - chill"))
+}
 func (r *queryResolver) Chills(ctx context.Context) ([]*model.Chill, error) {
 	panic(fmt.Errorf("not implemented: Chills - chills"))
-}
-func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Achievements - achievements"))
 }
