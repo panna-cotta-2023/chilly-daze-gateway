@@ -21,7 +21,7 @@ func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChil
 }
 
 // AddTracePoints is the resolver for the addTracePoints field.
-func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) (*model.Chill, error) {
+func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error) {
 	panic(fmt.Errorf("not implemented: AddTracePoints - addTracePoints"))
 }
 

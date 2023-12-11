@@ -101,7 +101,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error)
 	StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error)
-	AddTracePoints(ctx context.Context, input model.TracePointsInput) (*model.Chill, error)
+	AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error)
 	AddPhotos(ctx context.Context, input model.PhotosInput) (*model.Chill, error)
 	EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error)
 }
@@ -1156,10 +1156,10 @@ func (ec *executionContext) _Mutation_addTracePoints(ctx context.Context, field 
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*model.Chill); ok {
+		if data, ok := tmp.([]*model.TracePoint); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *chilly_daze_gateway/graph/model.Chill`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*chilly_daze_gateway/graph/model.TracePoint`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1171,9 +1171,9 @@ func (ec *executionContext) _Mutation_addTracePoints(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Chill)
+	res := resTmp.([]*model.TracePoint)
 	fc.Result = res
-	return ec.marshalNChill2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐChill(ctx, field.Selections, res)
+	return ec.marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addTracePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1185,13 +1185,13 @@ func (ec *executionContext) fieldContext_Mutation_addTracePoints(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Chill_id(ctx, field)
-			case "traces":
-				return ec.fieldContext_Chill_traces(ctx, field)
-			case "photos":
-				return ec.fieldContext_Chill_photos(ctx, field)
+				return ec.fieldContext_TracePoint_id(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_TracePoint_timestamp(ctx, field)
+			case "coordinate":
+				return ec.fieldContext_TracePoint_coordinate(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TracePoint", field.Name)
 		},
 	}
 	defer func() {
@@ -4063,7 +4063,7 @@ func (ec *executionContext) unmarshalInputStartChillInput(ctx context.Context, o
 		switch k {
 		case "timestamp":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
-			data, err := ec.unmarshalODateTime2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNDateTime2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5241,6 +5241,44 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx context.Context, sel ast.SelectionSet, v []*model.TracePoint) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTracePoint2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
 func (ec *executionContext) marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.TracePoint) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -5615,22 +5653,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalString(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalODateTime2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalString(*v)
-	return res
-}
-
 func (ec *executionContext) unmarshalORegisterUserInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx context.Context, v interface{}) (*model.RegisterUserInput, error) {
 	if v == nil {
 		return nil, nil
@@ -5653,6 +5675,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOTracePoint2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx context.Context, sel ast.SelectionSet, v *model.TracePoint) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TracePoint(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
