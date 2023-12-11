@@ -11,6 +11,7 @@ type Achievement {
 type User {
     id: ID!
     name: String!
+    chills: [Chill!]!
     achievements: [Achievement!]!
 }
 
@@ -33,8 +34,6 @@ type Chill {
 type Query {
     user: User! @isAuthenticated                    # Get current user
     chill(id: ID!): Chill! @isAuthenticated         # Get a chill of the current user by id
-    chills: [Chill!]! @isAuthenticated              # All of chills of the current user
-    achievements: [Achievement!]! @isAuthenticated  # All of achivements that include the current user does not have
 }
 
 input RegisterUserInput {
