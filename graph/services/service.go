@@ -2,6 +2,7 @@ package services
 
 import (
 	"chilly_daze_gateway/graph/model"
+	"chilly_daze_gateway/graph/services/photo"
 	"chilly_daze_gateway/graph/services/trace"
 	"context"
 
@@ -21,7 +22,7 @@ type PhotoService interface {
 		ctx context.Context,
 		input model.PhotosInput,
 		chillID string,
-	)
+	) (*model.Chill, error)
 }
 
 type Services interface {

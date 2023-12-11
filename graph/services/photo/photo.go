@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type PhotoService struct {
@@ -33,9 +33,8 @@ func (u *PhotoService) AddPhotos(
 		db_photo := &db.Photo{
 			ID:        uuid.New().String(),
 			ChillID:   chillID,
-			Latitude:  photo.Coordinate.Latitude,
-			Longitude: photo.Coordinate.Longitude,
 			Timestamp: timestamp,
+			URL:       photo.URL,
 		}
 
 		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
