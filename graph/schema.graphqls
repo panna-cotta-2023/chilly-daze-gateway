@@ -39,7 +39,7 @@ type User {
 
 type Query {
     user: User! @isAuthenticated                    # Get current user
-    chill(id: ID!): Chill! @isAuthenticated         # Get a chill of the current user by id
+    achievements: [Achievement!]! @isAuthenticated  # Get all achievements
 }
 
 input RegisterUserInput {
