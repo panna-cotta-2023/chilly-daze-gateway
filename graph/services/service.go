@@ -2,31 +2,28 @@ package services
 
 import (
 	"chilly_daze_gateway/graph/model"
-	"chilly_daze_gateway/graph/services/chill"
+	"chilly_daze_gateway/graph/services/trace"
 	"context"
 
-	"database/sql"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
-type ChillService interface {
-	StartChill(
+type TraceService interface {
+	AddTracePoints(
 		ctx context.Context,
-		input model.StartChillInput,
+		input model.TracePointsInput,
 	) (*model.Chill, error)
 }
 
 type Services interface {
-	ChillService
+	TraceService
 }
-
 type services struct {
-	*chill.ChillService
+	*trace.TraceService
 }
 
-func New(db *sql.DB) Services {
+func New(exec boil.ContextExecutor) Services {
 	return &services{
-		ChillService: &chill.ChillService{
-			Db: db,
-		},
+		TraceService: &trace.TraceService{Exec: exec},
 	}
 }

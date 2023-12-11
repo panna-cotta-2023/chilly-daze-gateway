@@ -53,7 +53,7 @@ input CoordinateInput {
 }
 
 input StartChillInput {
-    timestamp: DateTime
+    timestamp: DateTime!
     coordinate: CoordinateInput!
 }
 
