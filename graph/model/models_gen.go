@@ -26,7 +26,7 @@ type CoordinateInput struct {
 
 type EndChillInput struct {
 	ID         string           `json:"id"`
-	Timestamp  string           `json:"timestamp"`
+	Timestamp  *string          `json:"timestamp,omitempty"`
 	Coordinate *CoordinateInput `json:"coordinate"`
 }
 
@@ -50,7 +50,7 @@ type RegisterUserInput struct {
 }
 
 type StartChillInput struct {
-	Timestamp  string           `json:"timestamp"`
+	Timestamp  *string          `json:"timestamp,omitempty"`
 	Coordinate *CoordinateInput `json:"coordinate"`
 }
 
