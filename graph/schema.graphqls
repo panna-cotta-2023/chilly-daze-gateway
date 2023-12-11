@@ -78,7 +78,7 @@ input PhotosInput {
 
 input EndChillInput {
     id: ID!                 # Chill id
-    timestamp: DateTime
+    timestamp: DateTime!
     coordinate: CoordinateInput!
 }
 

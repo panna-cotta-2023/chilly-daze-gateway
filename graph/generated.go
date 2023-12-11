@@ -3941,7 +3941,7 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 			it.ID = data
 		case "timestamp":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
-			data, err := ec.unmarshalODateTime2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNDateTime2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

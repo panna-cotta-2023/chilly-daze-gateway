@@ -3,19 +3,23 @@ package services
 import (
 	"chilly_daze_gateway/graph/model"
 	"chilly_daze_gateway/graph/services/chill"
+	"context"
 
 	"database/sql"
 )
 
 type ChillService interface {
-	StartChill() (*model.Chill, error)
+	StartChill(
+		ctx context.Context,
+		input model.StartChillInput,
+	) (*model.Chill, error)
 }
 
-type Services interface{
+type Services interface {
 	ChillService
 }
 
-type services struct{
+type services struct {
 	*chill.ChillService
 }
 
