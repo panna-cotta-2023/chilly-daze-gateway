@@ -18,7 +18,6 @@ func (u *PhotoService) AddPhotos(
 	ctx context.Context,
 	input model.PhotosInput,
 	chillID string,
-	Photos []*model.Photo,
 ) ([]*model.Photo, error) {
 	photos := input.Photos
 
