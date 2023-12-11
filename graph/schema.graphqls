@@ -69,6 +69,7 @@ input TracePointsInput {
 
 input PhotoInput {
     url: String!
+    timestamp: DateTime!
 }
 
 input PhotosInput {
