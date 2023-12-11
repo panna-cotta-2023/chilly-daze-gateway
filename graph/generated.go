@@ -3966,7 +3966,7 @@ func (ec *executionContext) unmarshalInputPhotoInput(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"url"}
+	fieldsInOrder := [...]string{"url", "timestamp"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3980,6 +3980,13 @@ func (ec *executionContext) unmarshalInputPhotoInput(ctx context.Context, obj in
 				return it, err
 			}
 			it.URL = data
+		case "timestamp":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
+			data, err := ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Timestamp = data
 		}
 	}
 
@@ -4063,7 +4070,7 @@ func (ec *executionContext) unmarshalInputStartChillInput(ctx context.Context, o
 		switch k {
 		case "timestamp":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
-			data, err := ec.unmarshalODateTime2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNDateTime2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5612,22 +5619,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalString(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalODateTime2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalString(*v)
 	return res
 }
 

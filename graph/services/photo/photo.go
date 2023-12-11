@@ -25,7 +25,7 @@ func (u *PhotoService) AddPhotos(
 
 	for _, photo := range photos {
 
-		timestamp, err := time.Parse(time.RFC3339, photo.)
+		timestamp, err := time.Parse(time.RFC3339, photo.Timestamp)
 		if err != nil {
 			return nil, err
 		}
