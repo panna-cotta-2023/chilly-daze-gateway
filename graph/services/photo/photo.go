@@ -19,13 +19,10 @@ func (u *PhotoService) AddPhotos(
 	input model.PhotosInput,
 	chillID string,
 	Photos []*model.Photo,
-) (*model.Chill, error) {
-	chill := &model.Chill{
-		ID: chillID,
-		Photos: Photos,
-	}
-
+) ([]*model.Photo, error) {
 	photos := input.Photos
+
+	result := []*model.Photo{}
 
 	for _, photo := range photos {
 
@@ -41,9 +38,9 @@ func (u *PhotoService) AddPhotos(
 			URL:       photo.URL,
 		}
 
-		chill.Photos = append(chill.Photos, &model.Photo{
+		result = append(result, &model.Photo{
 			ID:        db_photo.ID,
-			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05:000+00:00"),
+			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05.00:00+00:00"),
 			URL:       db_photo.URL,
 		})
 
@@ -53,6 +50,5 @@ func (u *PhotoService) AddPhotos(
 		}
 	}
 
-
-	return chill, nil
+	return result, nil
 }

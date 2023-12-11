@@ -22,7 +22,7 @@ type PhotoService interface {
 		ctx context.Context,
 		input model.PhotosInput,
 		chillID string,
-	) (*model.Chill, error)
+	) ([]*model.Photo, error)
 }
 
 type Services interface {
