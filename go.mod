@@ -1,4 +1,4 @@
-module panna_cotta_gateway
+module chilly_daze_gateway
 
 go 1.21.4
 

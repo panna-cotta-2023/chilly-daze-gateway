@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"panna_cotta_gateway/graph"
-	"panna_cotta_gateway/lib"
+	"chilly_daze_gateway/graph"
+	"chilly_daze_gateway/lib"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
