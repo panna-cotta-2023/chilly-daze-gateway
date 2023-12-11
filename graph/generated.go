@@ -8,7 +8,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"panna_cotta_gateway/graph/model"
+	"chilly_daze_gateway/graph/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
