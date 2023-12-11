@@ -102,7 +102,7 @@ type MutationResolver interface {
 	RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error)
 	StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error)
 	AddTracePoints(ctx context.Context, input model.TracePointsInput) (*model.Chill, error)
-	AddPhotos(ctx context.Context, input model.PhotosInput) (*model.Chill, error)
+	AddPhotos(ctx context.Context, input model.PhotosInput) ([]*model.Photo, error)
 	EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error)
 }
 type QueryResolver interface {
@@ -1239,10 +1239,10 @@ func (ec *executionContext) _Mutation_addPhotos(ctx context.Context, field graph
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*model.Chill); ok {
+		if data, ok := tmp.([]*model.Photo); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *chilly_daze_gateway/graph/model.Chill`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*chilly_daze_gateway/graph/model.Photo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1254,9 +1254,9 @@ func (ec *executionContext) _Mutation_addPhotos(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Chill)
+	res := resTmp.([]*model.Photo)
 	fc.Result = res
-	return ec.marshalNChill2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐChill(ctx, field.Selections, res)
+	return ec.marshalNPhoto2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐPhotoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addPhotos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1268,13 +1268,13 @@ func (ec *executionContext) fieldContext_Mutation_addPhotos(ctx context.Context,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Chill_id(ctx, field)
-			case "traces":
-				return ec.fieldContext_Chill_traces(ctx, field)
-			case "photos":
-				return ec.fieldContext_Chill_photos(ctx, field)
+				return ec.fieldContext_Photo_id(ctx, field)
+			case "url":
+				return ec.fieldContext_Photo_url(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_Photo_timestamp(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Chill", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
 	}
 	defer func() {

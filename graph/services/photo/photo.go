@@ -18,8 +18,12 @@ func (u *PhotoService) AddPhotos(
 	ctx context.Context,
 	input model.PhotosInput,
 	chillID string,
+	Photos []*model.Photo,
 ) (*model.Chill, error) {
-	chill := &model.Chill{}
+	chill := &model.Chill{
+		ID: chillID,
+		Photos: Photos,
+	}
 
 	photos := input.Photos
 
@@ -37,11 +41,18 @@ func (u *PhotoService) AddPhotos(
 			URL:       photo.URL,
 		}
 
+		chill.Photos = append(chill.Photos, &model.Photo{
+			ID:        db_photo.ID,
+			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05:000+00:00"),
+			URL:       db_photo.URL,
+		})
+
 		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
 		if err != nil {
 			return nil, err
 		}
 	}
+
 
 	return chill, nil
 }
