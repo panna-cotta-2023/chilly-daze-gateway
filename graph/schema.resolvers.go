@@ -10,9 +10,24 @@ import (
 	"panna_cotta_gateway/graph/model"
 )
 
+// RegisterUser is the resolver for the registerUser field.
+func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: RegisterUser - registerUser"))
+}
+
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
 	panic(fmt.Errorf("not implemented: StartChill - startChill"))
+}
+
+// AddTracePoints is the resolver for the addTracePoints field.
+func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) (*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: AddTracePoints - addTracePoints"))
+}
+
+// AddPhotos is the resolver for the addPhotos field.
+func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput) (*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: AddPhotos - addPhotos"))
 }
 
 // EndChill is the resolver for the endChill field.
@@ -30,16 +45,6 @@ func (r *queryResolver) Chill(ctx context.Context, id string) (*model.Chill, err
 	panic(fmt.Errorf("not implemented: Chill - chill"))
 }
 
-// Chills is the resolver for the chills field.
-func (r *queryResolver) Chills(ctx context.Context) ([]*model.Chill, error) {
-	panic(fmt.Errorf("not implemented: Chills - chills"))
-}
-
-// Achievements is the resolver for the achievements field.
-func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Achievements - achievements"))
-}
-
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -48,3 +53,16 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) Chills(ctx context.Context) ([]*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: Chills - chills"))
+}
+func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
+	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+}
