@@ -12,6 +12,7 @@ type TraceService interface {
 	AddTracePoints(
 		ctx context.Context,
 		input model.TracePointsInput,
+		chillID string,
 	) (*model.Chill, error)
 }
 
