@@ -25,7 +25,7 @@ type PhotoService interface {
 }
 
 type ChillService interface {
-	AddChill(
+	StartChill(
 		ctx context.Context,
 		startChill model.StartChillInput,
 	) (*model.Chill, error)

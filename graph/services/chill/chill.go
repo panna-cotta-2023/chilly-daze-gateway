@@ -14,7 +14,7 @@ type ChillService struct {
 	Exec boil.ContextExecutor
 }
 
-func (u *ChillService) AddChill(
+func (u *ChillService) StartChill(
 	ctx context.Context,
 	startChill model.StartChillInput,
 ) (*model.Chill, error) {
