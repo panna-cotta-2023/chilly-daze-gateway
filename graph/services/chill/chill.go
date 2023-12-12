@@ -1,9 +1,10 @@
 package chill
 
 import (
-	"chilly_daze_gateway/graph/model"
 	"chilly_daze_gateway/graph/db"
+	"chilly_daze_gateway/graph/model"
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -18,14 +19,30 @@ func (u *ChillService) AddChill(
 	startChill model.StartChillInput,
 ) (*model.Chill, error) {
 	result := &model.Chill{
-		ID: uuid.New().String(),
+		ID:     uuid.New().String(),
+		Traces: []*model.TracePoint{},
+	}
+
+	result.Traces = append(result.Traces, &model.TracePoint{
+		ID:        uuid.New().String(),
+		Timestamp: startChill.Timestamp,
+		Coordinate: &model.Coordinate{
+			Latitude:  startChill.Coordinate.Latitude,
+			Longitude: startChill.Coordinate.Longitude,
+		},
+	})
+
+	createTimeStamp, err := time.Parse(time.RFC3339, startChill.Timestamp)
+	if err != nil {
+		return nil, err
 	}
 
 	db_chill := &db.Chill{
-		ID: result.ID,
+		ID:         result.ID,
+		CreatedAt: createTimeStamp,
 	}
 
-	err := db_chill.Insert(ctx, u.Exec, boil.Infer())
+	err = db_chill.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		return nil, err
 	}

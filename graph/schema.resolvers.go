@@ -17,8 +17,12 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.Regist
 
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
-	// chillId := uuid.New().String()
-	panic(fmt.Errorf("not implemented: StartChill - startChill"))
+	chill, err := r.Srv.AddChill(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return chill, nil
 }
 
 // AddTracePoints is the resolver for the addTracePoints field.
