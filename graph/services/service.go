@@ -29,6 +29,10 @@ type ChillService interface {
 		ctx context.Context,
 		startChill model.StartChillInput,
 	) (*model.Chill, error)
+	EndChill(
+		ctx context.Context,
+		endChill model.EndChillInput,
+	) (*model.Chill, error)
 }
 
 type Services interface {
