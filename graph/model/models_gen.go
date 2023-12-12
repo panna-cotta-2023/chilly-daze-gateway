@@ -37,7 +37,8 @@ type Photo struct {
 }
 
 type PhotoInput struct {
-	URL string `json:"url"`
+	URL       string `json:"url"`
+	Timestamp string `json:"timestamp"`
 }
 
 type PhotosInput struct {

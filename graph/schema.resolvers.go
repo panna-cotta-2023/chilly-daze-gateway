@@ -26,7 +26,7 @@ func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.Trace
 }
 
 // AddPhotos is the resolver for the addPhotos field.
-func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput) (*model.Chill, error) {
+func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput) ([]*model.Photo, error) {
 	panic(fmt.Errorf("not implemented: AddPhotos - addPhotos"))
 }
 
