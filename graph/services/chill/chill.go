@@ -16,13 +16,9 @@ type ChillService struct {
 func (u *ChillService) AddChill(
 	ctx context.Context,
 	startChill model.StartChillInput,
-	tracePoints []*model.TracePoint,
-	photos []*model.Photo,
 ) (*model.Chill, error) {
 	result := &model.Chill{
 		ID: uuid.New().String(),
-		Traces: tracePoints,
-		Photos: photos,
 	}
 
 	db_chill := &db.Chill{
