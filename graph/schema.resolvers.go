@@ -47,7 +47,12 @@ func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInpu
 
 // EndChill is the resolver for the endChill field.
 func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
-	panic(fmt.Errorf("not implemented: EndChill - endChill"))
+	chill, err := r.Srv.EndChill(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return chill, nil
 }
 
 // User is the resolver for the user field.
