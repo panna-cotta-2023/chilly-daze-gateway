@@ -14,6 +14,7 @@ var Directive DirectiveRoot = DirectiveRoot{
 }
 
 func IsAuthenticated(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+
 	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
 		log.Fatalln("firebase.NewApp error:", err)
