@@ -17,7 +17,6 @@ type TraceService struct {
 func (u *TraceService) AddTracePoints(
 	ctx context.Context,
 	input model.TracePointsInput,
-	chillID string,
 ) ([]*model.TracePoint, error) {
 	tracePoints := input.TracePoints
 
@@ -32,14 +31,14 @@ func (u *TraceService) AddTracePoints(
 
 		db_tracePoint := &db.TracePoint{
 			ID:        uuid.New().String(),
-			ChillID:   chillID,
+			ChillID:   input.ID,
 			Latitude:  tracePoint.Coordinate.Latitude,
 			Longitude: tracePoint.Coordinate.Longitude,
 			Timestamp: timestamp,
 		}
 
 		result = append(result, &model.TracePoint{
-			ID:        db_tracePoint.ID,
+			ID:        db_tracePoint.ChillID,
 			Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05.00:00+00:00"),
 			Coordinate: &model.Coordinate{
 				Latitude:  db_tracePoint.Latitude,
