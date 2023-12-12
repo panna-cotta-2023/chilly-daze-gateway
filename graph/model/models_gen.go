@@ -51,10 +51,8 @@ type RegisterUserInput struct {
 }
 
 type StartChillInput struct {
-	Timestamp   string             `json:"timestamp"`
-	Coordinate  *CoordinateInput   `json:"coordinate"`
-	Photos      []*PhotoInput      `json:"photos"`
-	TracePoints []*TracePointInput `json:"tracePoints"`
+	Timestamp  string           `json:"timestamp"`
+	Coordinate *CoordinateInput `json:"coordinate"`
 }
 
 type TracePoint struct {

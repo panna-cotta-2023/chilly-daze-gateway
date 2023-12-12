@@ -55,8 +55,6 @@ input CoordinateInput {
 input StartChillInput {
     timestamp: DateTime!
     coordinate: CoordinateInput!
-    photos: [PhotoInput!]!
-    tracePoints: [TracePointInput!]!
 }
 
 input TracePointInput {
