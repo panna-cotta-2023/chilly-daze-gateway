@@ -13,13 +13,29 @@ import (
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
-	
-	user, err := r.Srv.CreateUser(ctx, *input, uid)
-	if err != nil {
-		return nil, err
-	}
+	var err error
 
-	return user, nil
+	if user, ok := r.Srv.GetUser(ctx, uid); ok {
+		if user.Name != input.Name {
+			user, err = r.Srv.UpdateUserName(ctx, uid, input.Name)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if user.Avatar != input.Avatar {
+			user, err = r.Srv.UpdateUserAvatar(ctx, uid, input.Avatar)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return user, nil
+	} else {
+		user, err := r.Srv.CreateUser(ctx, *input, uid)
+		if err != nil {
+			return nil, err
+		}
+		return user, nil
+	}
 }
 
 // StartChill is the resolver for the startChill field.

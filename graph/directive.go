@@ -37,7 +37,6 @@ func IsAuthenticated(ctx context.Context, obj interface{}, next graphql.Resolver
 			log.Println("client.VerifyIDToken error:", err)
 			return nil, err
 		}
-
 		ctx = SetAuthToken(ctx, authToken.UID)
 	}
 	return next(ctx)
