@@ -85,3 +85,23 @@ func (u *ChillService) EndChill(
 
 	return result, nil
 }
+
+func (u *ChillService) AddUserChill (
+	ctx context.Context,
+	userID string,
+	chillID string,
+) error {
+	
+
+	db_userChill := &db.UserChill{
+		UserID: userID,
+		ChillID: chillID,
+	}
+
+	err := db_userChill.Insert(ctx, u.Exec, boil.Infer())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

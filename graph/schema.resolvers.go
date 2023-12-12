@@ -45,6 +45,16 @@ func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChil
 		return nil, err
 	}
 
+	uid := GetAuthToken(ctx)
+	if _, ok := r.Srv.GetUser(ctx, uid); !ok {
+		return nil, fmt.Errorf("user not found")
+	}
+	
+	err = r.Srv.AddUserChill(ctx, uid, chill.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return chill, nil
 }
 
