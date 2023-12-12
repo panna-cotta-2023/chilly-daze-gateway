@@ -24,3 +24,4 @@ go.work
 .env
 chilly-daze-firebase-adminsdk-rnk1p-ee7472261e.json
 docs
+sqlboiler.toml
