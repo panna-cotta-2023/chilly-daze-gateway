@@ -4061,7 +4061,7 @@ func (ec *executionContext) unmarshalInputStartChillInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"timestamp", "coordinate"}
+	fieldsInOrder := [...]string{"timestamp", "coordinate", "photos", "tracePoints"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4082,6 +4082,20 @@ func (ec *executionContext) unmarshalInputStartChillInput(ctx context.Context, o
 				return it, err
 			}
 			it.Coordinate = data
+		case "photos":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("photos"))
+			data, err := ec.unmarshalNPhotoInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐPhotoInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Photos = data
+		case "tracePoints":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tracePoints"))
+			data, err := ec.unmarshalNTracePointInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TracePoints = data
 		}
 	}
 

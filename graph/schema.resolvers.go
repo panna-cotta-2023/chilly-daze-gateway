@@ -8,8 +8,6 @@ import (
 	"chilly_daze_gateway/graph/model"
 	"context"
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
 // RegisterUser is the resolver for the registerUser field.
@@ -19,27 +17,30 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.Regist
 
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
-	chillId := uuid.New().String()
+	// chillId := uuid.New().String()
+	panic(fmt.Errorf("not implemented: StartChill - startChill"))
 }
 
 // AddTracePoints is the resolver for the addTracePoints field.
-func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput, chillId string) ([]*model.TracePoint, error) {
-	tracePoints, err := r.Srv.AddTracePoints(ctx, input, chillId)
-	if err != nil {
-		return nil, err
-	}
+func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error) {
+	// tracePoints, err := r.Srv.AddTracePoints(ctx, input, chillId)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return tracePoints, nil
+	// return tracePoints, nil
+	panic(fmt.Errorf("not implemented: AddTracePoints - addTracePoints"))
 }
 
 // AddPhotos is the resolver for the addPhotos field.
-func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput, chillId string) ([]*model.Photo, error) {
-	photos, err := r.Srv.AddPhotos(ctx, input, chillId)
-	if err != nil {
-		return nil, err
-	}
+func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput) ([]*model.Photo, error) {
+	// photos, err := r.Srv.AddPhotos(ctx, input, chillId)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return photos, nil
+	// return photos, nil
+	panic(fmt.Errorf("not implemented: AddPhotos - addPhotos"))
 }
 
 // EndChill is the resolver for the endChill field.
