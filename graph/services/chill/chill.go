@@ -49,3 +49,39 @@ func (u *ChillService) StartChill(
 
 	return result, nil
 }
+
+func (u *ChillService) EndChill(
+	ctx context.Context,
+	endChill model.EndChillInput,
+) (*model.Chill, error) {
+	result := &model.Chill{
+		ID:     endChill.ID,
+		Traces: []*model.TracePoint{},
+	}
+
+	result.Traces = append(result.Traces, &model.TracePoint{
+		ID:        uuid.New().String(),
+		Timestamp: endChill.Timestamp,
+		Coordinate: &model.Coordinate{
+			Latitude:  endChill.Coordinate.Latitude,
+			Longitude: endChill.Coordinate.Longitude,
+		},
+	})
+
+	createTimeStamp, err := time.Parse(time.RFC3339, endChill.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
+	db_chill := &db.Chill{
+		ID:         result.ID,
+		CreatedAt: createTimeStamp,
+	}
+
+	err = db_chill.Insert(ctx, u.Exec, boil.Infer())
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
