@@ -17,7 +17,6 @@ type PhotoService struct {
 func (u *PhotoService) AddPhotos(
 	ctx context.Context,
 	input model.PhotosInput,
-	chillID string,
 ) ([]*model.Photo, error) {
 	photos := input.Photos
 
@@ -32,13 +31,13 @@ func (u *PhotoService) AddPhotos(
 
 		db_photo := &db.Photo{
 			ID:        uuid.New().String(),
-			ChillID:   chillID,
+			ChillID:   input.ID,
 			Timestamp: timestamp,
 			URL:       photo.URL,
 		}
 
 		result = append(result, &model.Photo{
-			ID:        db_photo.ID,
+			ID:        db_photo.ChillID,
 			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05.00:00+00:00"),
 			URL:       db_photo.URL,
 		})

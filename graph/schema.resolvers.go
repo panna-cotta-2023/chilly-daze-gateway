@@ -22,25 +22,23 @@ func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChil
 }
 
 // AddTracePoints is the resolver for the addTracePoints field.
-func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error) {
-	// tracePoints, err := r.Srv.AddTracePoints(ctx, input, chillId)
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput, chillId string) ([]*model.TracePoint, error) {
+	tracePoints, err := r.Srv.AddTracePoints(ctx, input)
+	if err != nil {
+		return nil, err
+	}
 
-	// return tracePoints, nil
-	panic(fmt.Errorf("not implemented: AddTracePoints - addTracePoints"))
+	return tracePoints, nil
 }
 
 // AddPhotos is the resolver for the addPhotos field.
-func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput) ([]*model.Photo, error) {
-	// photos, err := r.Srv.AddPhotos(ctx, input, chillId)
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput, chillId string) ([]*model.Photo, error) {
+	photos, err := r.Srv.AddPhotos(ctx, input)
+	if err != nil {
+		return nil, err
+	}
 
-	// return photos, nil
-	panic(fmt.Errorf("not implemented: AddPhotos - addPhotos"))
+	return photos, nil
 }
 
 // EndChill is the resolver for the endChill field.
