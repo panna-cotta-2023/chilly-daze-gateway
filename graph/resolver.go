@@ -1,11 +1,11 @@
 package graph
 
-import "database/sql"
+import "chilly_daze_gateway/graph/services"
 
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB *sql.DB
+	Srv services.Services
 }
