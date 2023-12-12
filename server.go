@@ -1,14 +1,16 @@
 package main
 
 import (
+	"chilly_daze_gateway/graph"
+	"chilly_daze_gateway/graph/services"
+	"chilly_daze_gateway/lib"
 	"log"
 	"net/http"
 	"os"
-	"chilly_daze_gateway/graph"
-	"chilly_daze_gateway/lib"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 const defaultPort = "8080"
@@ -26,14 +28,22 @@ func main() {
 
 	defer db.Close()
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
-		Resolvers: &graph.Resolver{
-			DB: db,
-		}}))
+	mode := os.Getenv("MODE")
+	boil.DebugMode = mode == "DEBUG"
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	services := services.New(db)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		Srv: services,
+	}}))
+
+	http.Handle("/", srv)
+	if boil.DebugMode {
+		http.Handle("/playground", playground.Handler("GraphQL playground", "/"))
+	}
+
+	if boil.DebugMode {
+		log.Printf("connect to http://localhost:%s/playground for GraphQL playground", port)
+	}
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
