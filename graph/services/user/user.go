@@ -6,7 +6,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -17,9 +16,12 @@ type UserService struct {
 func (u *UserService) CreateUser(
 	ctx context.Context,
 	input model.RegisterUserInput,
+	uid string,
 ) (*model.User, error) {
+	
+
 	result := &model.User{
-		ID:     uuid.New().String(),
+		ID:     uid,
 		Name:   input.Name,
 		Avatar: input.Avatar,
 	}
@@ -36,5 +38,4 @@ func (u *UserService) CreateUser(
 	}
 
 	return result, nil
-
 }

@@ -15,6 +15,7 @@ type UserService interface {
 	CreateUser(
 		ctx context.Context,
 		input model.RegisterUserInput,
+		uid string,
 	) (*model.User, error)
 }
 
@@ -58,6 +59,7 @@ type services struct {
 
 func New(exec boil.ContextExecutor) Services {
 	return &services{
+		UserService:  &user.UserService{Exec: exec},
 		TraceService: &trace.TraceService{Exec: exec},
 		PhotoService: &photo.PhotoService{Exec: exec},
 		ChillService: &chill.ChillService{Exec: exec},

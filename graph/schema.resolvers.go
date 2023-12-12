@@ -12,7 +12,14 @@ import (
 
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: RegisterUser - registerUser"))
+	uid := GetAuthToken(ctx)
+	
+	user, err := r.Srv.CreateUser(ctx, *input, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // StartChill is the resolver for the startChill field.
