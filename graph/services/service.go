@@ -70,6 +70,10 @@ type ChillService interface {
 		userID string,
 		chillID string,
 	) error
+	GetChillsByUserId(
+		ctx context.Context,
+		user_id string,
+	) ([]*model.Chill, error)
 }
 
 type AchievementService interface {

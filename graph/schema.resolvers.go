@@ -115,6 +115,13 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	if !ok {
 		return nil, fmt.Errorf("user not found")
 	}
+
+	userChills, err := r.Srv.GetChillsByUserId(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Chills = userChills
 	return user, nil
 
 }

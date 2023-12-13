@@ -183,11 +183,28 @@ func (u *ChillService) GetChillsByUserId(
 			})
 		}
 
+		db_photos, err := db.Photos(
+			db.PhotoWhere.ChillID.EQ(db_chill.ID),
+		).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.Photos error:", err)
+			return nil, err
+		}
+
+		photos := []*model.Photo{}
+
+		for _, db_photo := range db_photos {
+			photos = append(photos, &model.Photo{
+				ID:        db_photo.ID,
+				Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+				URL:       db_photo.URL,
+			})
+		}
+
 		result = append(result, &model.Chill{
 			ID:        db_chill.ID,
 			Traces:    traces,
-			CreatedAt: db_chill.CreatedAt.Format("2006-01-02T15:04:05+09:00"),
-			EndedAt:   db_chill.EndedAt.Time.Format("2006-01-02T15:04:05+09:00"),
+			Photos:    photos,
 		})
 	}
 
