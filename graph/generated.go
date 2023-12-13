@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 	Achievement struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
+		Image       func(childComplexity int) int
 		Name        func(childComplexity int) int
 	}
 
@@ -143,6 +144,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Achievement.ID(childComplexity), true
+
+	case "Achievement.image":
+		if e.complexity.Achievement.Image == nil {
+			break
+		}
+
+		return e.complexity.Achievement.Image(childComplexity), true
 
 	case "Achievement.name":
 		if e.complexity.Achievement.Name == nil {
@@ -345,6 +353,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAchievementInput,
 		ec.unmarshalInputCoordinateInput,
 		ec.unmarshalInputEndChillInput,
 		ec.unmarshalInputPhotoInput,
@@ -717,6 +726,50 @@ func (ec *executionContext) _Achievement_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext_Achievement_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Achievement",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Achievement_image(ctx context.Context, field graphql.CollectedField, obj *model.Achievement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Achievement_image(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Achievement_image(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Achievement",
 		Field:      field,
@@ -1183,7 +1236,7 @@ func (ec *executionContext) _Mutation_addTracePoints(ctx context.Context, field 
 	}
 	res := resTmp.([]*model.TracePoint)
 	fc.Result = res
-	return ec.marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx, field.Selections, res)
+	return ec.marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addTracePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1657,6 +1710,8 @@ func (ec *executionContext) fieldContext_Query_achievements(ctx context.Context,
 				return ec.fieldContext_Achievement_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Achievement_description(ctx, field)
+			case "image":
+				return ec.fieldContext_Achievement_image(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Achievement", field.Name)
 		},
@@ -2160,6 +2215,8 @@ func (ec *executionContext) fieldContext_User_achievements(ctx context.Context, 
 				return ec.fieldContext_Achievement_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Achievement_description(ctx, field)
+			case "image":
+				return ec.fieldContext_Achievement_image(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Achievement", field.Name)
 		},
@@ -3940,6 +3997,33 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAchievementInput(ctx context.Context, obj interface{}) (model.AchievementInput, error) {
+	var it model.AchievementInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCoordinateInput(ctx context.Context, obj interface{}) (model.CoordinateInput, error) {
 	var it model.CoordinateInput
 	asMap := map[string]interface{}{}
@@ -3981,7 +4065,7 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "timestamp", "coordinate"}
+	fieldsInOrder := [...]string{"id", "timestamp", "coordinate", "achievements"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4009,6 +4093,13 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 				return it, err
 			}
 			it.Coordinate = data
+		case "achievements":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("achievements"))
+			data, err := ec.unmarshalNAchievementInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Achievements = data
 		}
 	}
 
@@ -4250,6 +4341,11 @@ func (ec *executionContext) _Achievement(ctx context.Context, sel ast.SelectionS
 			}
 		case "description":
 			out.Values[i] = ec._Achievement_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "image":
+			out.Values[i] = ec._Achievement_image(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5077,6 +5173,28 @@ func (ec *executionContext) marshalNAchievement2ᚖchilly_daze_gatewayᚋgraph�
 	return ec._Achievement(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAchievementInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInputᚄ(ctx context.Context, v interface{}) ([]*model.AchievementInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AchievementInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAchievementInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNAchievementInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInput(ctx context.Context, v interface{}) (*model.AchievementInput, error) {
+	res, err := ec.unmarshalInputAchievementInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5314,44 +5432,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx context.Context, sel ast.SelectionSet, v []*model.TracePoint) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOTracePoint2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
 }
 
 func (ec *executionContext) marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.TracePoint) graphql.Marshaler {
@@ -5750,13 +5830,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOTracePoint2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePoint(ctx context.Context, sel ast.SelectionSet, v *model.TracePoint) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._TracePoint(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

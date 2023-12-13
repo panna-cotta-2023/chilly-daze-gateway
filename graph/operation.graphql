@@ -23,6 +23,7 @@ query User{
       id
       name
       discriptioin
+      image
     }
   }
 }
@@ -32,6 +33,7 @@ query Achievements{
     id
     name
     discriptioin
+    image
   }
 }
 
@@ -61,7 +63,8 @@ mutation registerUser(
     achievements {
       id
       name
-      discriptioin
+      description
+      image
     }
   }
 }
@@ -88,7 +91,7 @@ mutation startChill(
 }
 
 mutation addTracePoints(
-  $input: TracePointInput!
+  $input: TracePointsInput!
   ) {
   addTracePoints(input: $input) {
     id

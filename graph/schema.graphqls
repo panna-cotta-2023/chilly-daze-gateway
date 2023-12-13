@@ -6,6 +6,7 @@ type Achievement {
     id: ID!
     name: String!
     description: String!
+    image: String!
 }
 
 type Coordinate {
@@ -79,16 +80,21 @@ input PhotosInput {
     photos: [PhotoInput!]!
 }
 
+input AchievementInput {
+    id: ID!
+}
+
 input EndChillInput {
     id: ID!                 # Chill id
     timestamp: DateTime!
     coordinate: CoordinateInput!
+    achievements: [AchievementInput!]!
 }
 
 type Mutation {
     registerUser(input: RegisterUserInput): User! @isAuthenticated  # Other information can derive from the token
     startChill(input: StartChillInput!): Chill! @isAuthenticated
-    addTracePoints(input: TracePointsInput!): [TracePoint]! @isAuthenticated
+    addTracePoints(input: TracePointsInput!): [TracePoint!]! @isAuthenticated
     addPhotos(input: PhotosInput!): [Photo!]! @isAuthenticated
     endChill(input: EndChillInput!): Chill! @isAuthenticated
 }

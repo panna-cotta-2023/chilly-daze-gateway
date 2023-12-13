@@ -2,6 +2,7 @@ package services
 
 import (
 	"chilly_daze_gateway/graph/model"
+	"chilly_daze_gateway/graph/services/achievement"
 	"chilly_daze_gateway/graph/services/chill"
 	"chilly_daze_gateway/graph/services/photo"
 	"chilly_daze_gateway/graph/services/trace"
@@ -38,12 +39,20 @@ type TraceService interface {
 		ctx context.Context,
 		input model.TracePointsInput,
 	) ([]*model.TracePoint, error)
+	GetTracesByChillId(
+		ctx context.Context,
+		chillId string,
+	) ([]*model.TracePoint, error)
 }
 
 type PhotoService interface {
 	AddPhotos(
 		ctx context.Context,
 		input model.PhotosInput,
+	) ([]*model.Photo, error)
+	GetPhotosByChillId(
+		ctx context.Context,
+		chillId string,
 	) ([]*model.Photo, error)
 }
 
@@ -63,17 +72,32 @@ type ChillService interface {
 	) error
 }
 
+type AchievementService interface {
+	AddAchievementToUser(
+		ctx context.Context,
+		user_id string,
+		achievements []*model.AchievementInput,
+		having_achievementIds []string,
+	) error
+	GetAchievementsByUserId(
+		ctx context.Context,
+		user_id string,
+	) ([]string, error)
+}
+
 type Services interface {
 	UserService
 	TraceService
 	PhotoService
 	ChillService
+	AchievementService
 }
 type services struct {
 	*user.UserService
 	*trace.TraceService
 	*photo.PhotoService
 	*chill.ChillService
+	*achievement.AchievementService
 }
 
 func New(exec boil.ContextExecutor) Services {
@@ -82,5 +106,6 @@ func New(exec boil.ContextExecutor) Services {
 		TraceService: &trace.TraceService{Exec: exec},
 		PhotoService: &photo.PhotoService{Exec: exec},
 		ChillService: &chill.ChillService{Exec: exec},
+		AchievementService: &achievement.AchievementService{Exec: exec},
 	}
 }
