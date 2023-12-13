@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -73,12 +74,18 @@ func (u *ChillService) EndChill(
 		return nil, err
 	}
 
+	endTimeStamp, err := time.Parse(time.RFC3339, endChill.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
 	db_chill := &db.Chill{
 		ID:         result.ID,
 		CreatedAt: createTimeStamp,
+		EndedAt: null.TimeFrom(endTimeStamp),
 	}
 
-	err = db_chill.Insert(ctx, u.Exec, boil.Infer())
+	_, err = db_chill.Update(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		return nil, err
 	}
