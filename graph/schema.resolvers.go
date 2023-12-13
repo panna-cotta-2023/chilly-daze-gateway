@@ -110,7 +110,13 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	uid := GetAuthToken(ctx)
+	user, ok := r.Srv.GetUser(ctx, uid)
+	if !ok {
+		return nil, fmt.Errorf("user not found")
+	}
+	return user, nil
+
 }
 
 // Achievements is the resolver for the achievements field.

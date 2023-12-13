@@ -138,3 +138,59 @@ func (u *ChillService) AddUserChill(
 
 	return nil
 }
+
+func (u *ChillService) GetChillsByUserId(
+	ctx context.Context,
+	userID string,
+) ([]*model.Chill, error) {
+	db_userChills, err := db.UserChills(
+		db.UserChillWhere.UserID.EQ(userID),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.UserChills error:", err)
+		return nil, err
+	}
+
+	result := []*model.Chill{}
+
+	for _, db_userChill := range db_userChills {
+		db_chill, err := db.Chills(
+			db.ChillWhere.ID.EQ(db_userChill.ChillID),
+		).One(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.Chills error:", err)
+			return nil, err
+		}
+
+		db_tracePoints, err := db.TracePoints(
+			db.TracePointWhere.ChillID.EQ(db_chill.ID),
+		).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.TracePoints error:", err)
+			return nil, err
+		}
+
+		traces := []*model.TracePoint{}
+
+		for _, db_tracePoint := range db_tracePoints {
+			traces = append(traces, &model.TracePoint{
+				ID:        db_tracePoint.ID,
+				Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+				Coordinate: &model.Coordinate{
+					Latitude:  db_tracePoint.Latitude,
+					Longitude: db_tracePoint.Longitude,
+				},
+			})
+		}
+
+		result = append(result, &model.Chill{
+			ID:        db_chill.ID,
+			Traces:    traces,
+			CreatedAt: db_chill.CreatedAt.Format("2006-01-02T15:04:05+09:00"),
+			EndedAt:   db_chill.EndedAt.Time.Format("2006-01-02T15:04:05+09:00"),
+		})
+	}
+
+	return result, nil
+
+}
