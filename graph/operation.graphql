@@ -1,0 +1,132 @@
+query User{
+  user {
+    id
+    name
+    avatar
+    chills {
+      id
+      traces {
+        id
+        timestamp
+        coordinate {
+          latitude
+          longitude
+        }
+      }
+      photos {
+        id
+        url
+        timestamp
+      }
+    }
+    achievements {
+      id
+      name
+      discriptioin
+    }
+  }
+}
+
+query Achievements{
+  achievements {
+    id
+    name
+    discriptioin
+  }
+}
+
+mutation registerUser(
+  $input: RegisterUserInput!
+  ) {
+  registerUser(input: $input) {
+    id
+    name
+    avatar
+    chills {
+      id
+      traces {
+        id
+        timestamp
+        coordinate {
+          latitude
+          longitude
+        }
+      }
+      photos {
+        id
+        url
+        timestamp
+      }
+    }
+    achievements {
+      id
+      name
+      discriptioin
+    }
+  }
+}
+
+mutation startChill(
+  $input: StartChillInput!
+  ) {
+  startChill(input: $input) {
+    id
+    traces {
+      id
+      timestamp
+      coordinate {
+        latitude
+        longitude
+      }
+    }
+    photos {
+      id
+      url
+      timestamp
+    }
+  }
+}
+
+mutation addTracePoints(
+  $input: TracePointInput!
+  ) {
+  addTracePoints(input: $input) {
+    id
+      timestamp
+      coordinate {
+        latitude
+        longitude
+      }
+  }
+}
+
+mutation addPhotos(
+  $input: PhotosInput!
+  ) {
+  addPhotos(input: $input) {
+    id
+    url
+    timestamp
+  }
+}
+
+mutation endChill(
+  $input: EndChillInput!
+  ) {
+  endChill(input: $input) {
+    id
+    traces {
+      id
+      timestamp
+      coordinate {
+        latitude
+        longitude
+      }
+    }
+    photos {
+      id
+      url
+      timestamp
+    }
+  }
+}
