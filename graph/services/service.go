@@ -56,6 +56,11 @@ type ChillService interface {
 		ctx context.Context,
 		endChill model.EndChillInput,
 	) (*model.Chill, error)
+	AddUserChill(
+		ctx context.Context,
+		userID string,
+		chillID string,
+	) error
 }
 
 type Services interface {
