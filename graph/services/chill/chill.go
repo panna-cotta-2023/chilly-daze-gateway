@@ -3,6 +3,7 @@ package chill
 import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
+	"chilly_daze_gateway/graph/services/lib"
 	"context"
 	"log"
 	"time"
@@ -25,19 +26,22 @@ func (u *ChillService) StartChill(
 		Traces: []*model.TracePoint{},
 	}
 
+	createTimeStampString := lib.CovertTimestampString(startChill.Timestamp)
+
+	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
+	if err != nil {
+		log.Println("time.Parse error:", err)
+		return nil, err
+	}
+
 	result.Traces = append(result.Traces, &model.TracePoint{
 		ID:        uuid.New().String(),
-		Timestamp: startChill.Timestamp,
+		Timestamp: createTimeStampString,
 		Coordinate: &model.Coordinate{
 			Latitude:  startChill.Coordinate.Latitude,
 			Longitude: startChill.Coordinate.Longitude,
 		},
 	})
-
-	createTimeStamp, err := time.Parse(time.RFC3339, startChill.Timestamp)
-	if err != nil {
-		return nil, err
-	}
 
 	db_chill := &db.Chill{
 		ID:        result.ID,
@@ -46,6 +50,21 @@ func (u *ChillService) StartChill(
 
 	err = db_chill.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
+		log.Println("db_chill.Insert error:", err)
+		return nil, err
+	}
+
+	db_tracePoint := &db.TracePoint{
+		ID:        result.Traces[0].ID,
+		Timestamp: createTimeStamp,
+		ChillID:   result.ID,
+		Latitude:  startChill.Coordinate.Latitude,
+		Longitude: startChill.Coordinate.Longitude,
+	}
+
+	err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
+	if err != nil {
+		log.Println("db_tracePoint.Insert error:", err)
 		return nil, err
 	}
 
@@ -70,17 +89,21 @@ func (u *ChillService) EndChill(
 		},
 	})
 
-	createTimeStamp, err := time.Parse(time.RFC3339, endChill.Timestamp)
+	createTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
+
+	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
 	if err != nil {
+		log.Println("time.Parse error:", err)
 		return nil, err
 	}
 
-	endTimeStamp, err := time.Parse(time.RFC3339, endChill.Timestamp)
+	endTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
+
+	endTimeStamp, err := time.Parse(time.RFC3339, endTimeStampString)
 	if err != nil {
+		log.Println("time.Parse error:", err)
 		return nil, err
 	}
-
-	log.Println(endTimeStamp)
 
 	db_chill := &db.Chill{
 		ID:        result.ID,
@@ -90,6 +113,7 @@ func (u *ChillService) EndChill(
 
 	_, err = db_chill.Update(ctx, u.Exec, boil.Infer())
 	if err != nil {
+		log.Println("db_chill.Update error:", err)
 		return nil, err
 	}
 
@@ -108,6 +132,7 @@ func (u *ChillService) AddUserChill(
 
 	err := db_userChill.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
+		log.Println("db_userChill.Insert error:", err)
 		return err
 	}
 

@@ -82,9 +82,25 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 		return nil, err
 	}
 
-	haviing_achievementIds, err := r.Srv.GetAchievementsByUserId(ctx, uid)
+	traces, err := r.Srv.GetTracesByChillId(ctx, chill.ID)
+	if err != nil {
+		return nil, err
+	}
 
-	err = r.Srv.AddAchievementToUser(ctx, uid, input.Achievements, haviing_achievementIds)
+	photos, err := r.Srv.GetPhotosByChillId(ctx, chill.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	chill.Traces = append(chill.Traces, traces...)
+	chill.Photos = append(chill.Photos, photos...)
+
+	having_achievementIds, err := r.Srv.GetAchievementsByUserId(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.Srv.AddAchievementToUser(ctx, uid, input.Achievements, having_achievementIds)
 	if err != nil {
 		return nil, err
 	}

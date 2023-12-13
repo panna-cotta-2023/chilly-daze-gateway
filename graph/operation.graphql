@@ -63,7 +63,7 @@ mutation registerUser(
     achievements {
       id
       name
-      discriptioin
+      description
       image
     }
   }
@@ -91,7 +91,7 @@ mutation startChill(
 }
 
 mutation addTracePoints(
-  $input: TracePointInput!
+  $input: TracePointsInput!
   ) {
   addTracePoints(input: $input) {
     id
