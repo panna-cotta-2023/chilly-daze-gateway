@@ -345,6 +345,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAchievementInput,
 		ec.unmarshalInputCoordinateInput,
 		ec.unmarshalInputEndChillInput,
 		ec.unmarshalInputPhotoInput,
@@ -3940,6 +3941,33 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAchievementInput(ctx context.Context, obj interface{}) (model.AchievementInput, error) {
+	var it model.AchievementInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCoordinateInput(ctx context.Context, obj interface{}) (model.CoordinateInput, error) {
 	var it model.CoordinateInput
 	asMap := map[string]interface{}{}
@@ -3981,7 +4009,7 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "timestamp", "coordinate"}
+	fieldsInOrder := [...]string{"id", "timestamp", "coordinate", "achievements"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4009,6 +4037,13 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 				return it, err
 			}
 			it.Coordinate = data
+		case "achievements":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("achievements"))
+			data, err := ec.unmarshalNAchievementInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Achievements = data
 		}
 	}
 
@@ -5075,6 +5110,28 @@ func (ec *executionContext) marshalNAchievement2ᚖchilly_daze_gatewayᚋgraph�
 		return graphql.Null
 	}
 	return ec._Achievement(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAchievementInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInputᚄ(ctx context.Context, v interface{}) ([]*model.AchievementInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AchievementInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAchievementInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNAchievementInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐAchievementInput(ctx context.Context, v interface{}) (*model.AchievementInput, error) {
+	res, err := ec.unmarshalInputAchievementInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

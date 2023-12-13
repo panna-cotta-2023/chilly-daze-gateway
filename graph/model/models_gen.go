@@ -8,6 +8,10 @@ type Achievement struct {
 	Description string `json:"description"`
 }
 
+type AchievementInput struct {
+	ID string `json:"id"`
+}
+
 type Chill struct {
 	ID     string        `json:"id"`
 	Traces []*TracePoint `json:"traces"`
@@ -25,9 +29,10 @@ type CoordinateInput struct {
 }
 
 type EndChillInput struct {
-	ID         string           `json:"id"`
-	Timestamp  string           `json:"timestamp"`
-	Coordinate *CoordinateInput `json:"coordinate"`
+	ID           string              `json:"id"`
+	Timestamp    string              `json:"timestamp"`
+	Coordinate   *CoordinateInput    `json:"coordinate"`
+	Achievements []*AchievementInput `json:"achievements"`
 }
 
 type Photo struct {
