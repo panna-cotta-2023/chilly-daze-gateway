@@ -39,6 +39,10 @@ type TraceService interface {
 		ctx context.Context,
 		input model.TracePointsInput,
 	) ([]*model.TracePoint, error)
+	GetTracesByChillId(
+		ctx context.Context,
+		chillId string,
+	) ([]*model.TracePoint, error)
 }
 
 type PhotoService interface {

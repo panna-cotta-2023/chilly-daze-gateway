@@ -54,3 +54,31 @@ func (u *TraceService) AddTracePoints(
 
 	return result, nil
 }
+
+func (u *TraceService) GetTracesByChillId(
+	ctx context.Context,
+	chillId string,
+) ([]*model.TracePoint, error) {
+
+	db_traces, err := db.TracePoints(
+		db.TracePointWhere.ChillID.EQ(chillId),
+	).All(ctx, u.Exec)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*model.TracePoint{}
+
+	for _, db_trace := range db_traces {
+		result = append(result, &model.TracePoint{
+			ID:        db_trace.ID,
+			Timestamp: db_trace.Timestamp.Format("2006-01-02T15:04:05.00:00+00:00"),
+			Coordinate: &model.Coordinate{
+				Latitude:  db_trace.Latitude,
+				Longitude: db_trace.Longitude,
+			},
+		})
+	}
+
+	return result, nil
+}
