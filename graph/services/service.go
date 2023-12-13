@@ -80,13 +80,13 @@ type AchievementService interface {
 	AddAchievementToUser(
 		ctx context.Context,
 		user_id string,
-		achievements []*model.AchievementInput,
-		having_achievementIds []string,
+		get_achievements []*model.AchievementInput,
+		having_achievementIds []*model.Achievement,
 	) error
 	GetAchievementsByUserId(
 		ctx context.Context,
 		user_id string,
-	) ([]string, error)
+	) ([]*model.Achievement, error)
 }
 
 type Services interface {
