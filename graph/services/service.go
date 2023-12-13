@@ -2,6 +2,7 @@ package services
 
 import (
 	"chilly_daze_gateway/graph/model"
+	"chilly_daze_gateway/graph/services/achievement"
 	"chilly_daze_gateway/graph/services/chill"
 	"chilly_daze_gateway/graph/services/photo"
 	"chilly_daze_gateway/graph/services/trace"
@@ -63,17 +64,27 @@ type ChillService interface {
 	) error
 }
 
+type AchievementService interface {
+	AddAchievementToUser(
+		ctx context.Context,
+		user_id string,
+		achievements []*model.AchievementInput,
+	) error
+}
+
 type Services interface {
 	UserService
 	TraceService
 	PhotoService
 	ChillService
+	AchievementService
 }
 type services struct {
 	*user.UserService
 	*trace.TraceService
 	*photo.PhotoService
 	*chill.ChillService
+	*achievement.AchievementService
 }
 
 func New(exec boil.ContextExecutor) Services {

@@ -82,7 +82,7 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 		return nil, err
 	}
 
-	err = r.Srv.AddUserChill(ctx, uid, chill.ID)
+	err = r.Srv.AddAchievementToUser(ctx, uid, input.Achievements)
 	if err != nil {
 		return nil, err
 	}
