@@ -72,26 +72,15 @@ var PhotoWhere = struct {
 
 // PhotoRels is where relationship names are stored.
 var PhotoRels = struct {
-	Chill string
-}{
-	Chill: "Chill",
-}
+}{}
 
 // photoR is where relationships are stored.
 type photoR struct {
-	Chill *Chill `boil:"Chill" json:"Chill" toml:"Chill" yaml:"Chill"`
 }
 
 // NewStruct creates a new relationship struct
 func (*photoR) NewStruct() *photoR {
 	return &photoR{}
-}
-
-func (r *photoR) GetChill() *Chill {
-	if r == nil {
-		return nil
-	}
-	return r.Chill
 }
 
 // photoL is where Load methods for each relationship are stored.
@@ -381,184 +370,6 @@ func (q photoQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	}
 
 	return count > 0, nil
-}
-
-// Chill pointed to by the foreign key.
-func (o *Photo) Chill(mods ...qm.QueryMod) chillQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.ChillID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return Chills(queryMods...)
-}
-
-// LoadChill allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (photoL) LoadChill(ctx context.Context, e boil.ContextExecutor, singular bool, maybePhoto interface{}, mods queries.Applicator) error {
-	var slice []*Photo
-	var object *Photo
-
-	if singular {
-		var ok bool
-		object, ok = maybePhoto.(*Photo)
-		if !ok {
-			object = new(Photo)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybePhoto)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybePhoto))
-			}
-		}
-	} else {
-		s, ok := maybePhoto.(*[]*Photo)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybePhoto)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybePhoto))
-			}
-		}
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &photoR{}
-		}
-		args = append(args, object.ChillID)
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &photoR{}
-			}
-
-			for _, a := range args {
-				if a == obj.ChillID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ChillID)
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`chills`),
-		qm.WhereIn(`chills.id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load Chill")
-	}
-
-	var resultSlice []*Chill
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Chill")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for chills")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for chills")
-	}
-
-	if len(chillAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Chill = foreign
-		if foreign.R == nil {
-			foreign.R = &chillR{}
-		}
-		foreign.R.Photos = append(foreign.R.Photos, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.ChillID == foreign.ID {
-				local.R.Chill = foreign
-				if foreign.R == nil {
-					foreign.R = &chillR{}
-				}
-				foreign.R.Photos = append(foreign.R.Photos, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// SetChill of the photo to the related item.
-// Sets o.R.Chill to related.
-// Adds o to related.R.Photos.
-func (o *Photo) SetChill(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Chill) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"photos\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
-		strmangle.WhereClause("\"", "\"", 2, photoPrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.ChillID = related.ID
-	if o.R == nil {
-		o.R = &photoR{
-			Chill: related,
-		}
-	} else {
-		o.R.Chill = related
-	}
-
-	if related.R == nil {
-		related.R = &chillR{
-			Photos: PhotoSlice{o},
-		}
-	} else {
-		related.R.Photos = append(related.R.Photos, o)
-	}
-
-	return nil
 }
 
 // Photos retrieves all the records using an executor.
