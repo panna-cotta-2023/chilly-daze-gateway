@@ -26,15 +26,6 @@ func (u *ChillService) StartChill(
 		Traces: []*model.TracePoint{},
 	}
 
-	result.Traces = append(result.Traces, &model.TracePoint{
-		ID:        uuid.New().String(),
-		Timestamp: startChill.Timestamp,
-		Coordinate: &model.Coordinate{
-			Latitude:  startChill.Coordinate.Latitude,
-			Longitude: startChill.Coordinate.Longitude,
-		},
-	})
-
 	createTimeStampString := lib.CovertTimestampString(startChill.Timestamp)
 
 	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
@@ -42,6 +33,15 @@ func (u *ChillService) StartChill(
 		log.Println("time.Parse error:", err)
 		return nil, err
 	}
+
+	result.Traces = append(result.Traces, &model.TracePoint{
+		ID:        uuid.New().String(),
+		Timestamp: createTimeStampString,
+		Coordinate: &model.Coordinate{
+			Latitude:  startChill.Coordinate.Latitude,
+			Longitude: startChill.Coordinate.Longitude,
+		},
+	})
 
 	db_chill := &db.Chill{
 		ID:        result.ID,
@@ -51,6 +51,20 @@ func (u *ChillService) StartChill(
 	err = db_chill.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		log.Println("db_chill.Insert error:", err)
+		return nil, err
+	}
+
+	db_tracePoint := &db.TracePoint{
+		ID:        result.Traces[0].ID,
+		Timestamp: createTimeStamp,
+		ChillID:   result.ID,
+		Latitude:  startChill.Coordinate.Latitude,
+		Longitude: startChill.Coordinate.Longitude,
+	}
+
+	err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
+	if err != nil {
+		log.Println("db_tracePoint.Insert error:", err)
 		return nil, err
 	}
 
