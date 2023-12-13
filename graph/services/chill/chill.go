@@ -4,6 +4,7 @@ import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
 	"context"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,7 +40,7 @@ func (u *ChillService) StartChill(
 	}
 
 	db_chill := &db.Chill{
-		ID:         result.ID,
+		ID:        result.ID,
 		CreatedAt: createTimeStamp,
 	}
 
@@ -79,10 +80,12 @@ func (u *ChillService) EndChill(
 		return nil, err
 	}
 
+	log.Println(endTimeStamp)
+
 	db_chill := &db.Chill{
-		ID:         result.ID,
+		ID:        result.ID,
 		CreatedAt: createTimeStamp,
-		EndedAt: null.TimeFrom(endTimeStamp),
+		EndedAt:   null.TimeFrom(endTimeStamp),
 	}
 
 	_, err = db_chill.Update(ctx, u.Exec, boil.Infer())
@@ -93,13 +96,13 @@ func (u *ChillService) EndChill(
 	return result, nil
 }
 
-func (u *ChillService) AddUserChill (
+func (u *ChillService) AddUserChill(
 	ctx context.Context,
 	userID string,
 	chillID string,
 ) error {
 	db_userChill := &db.UserChill{
-		UserID: userID,
+		UserID:  userID,
 		ChillID: chillID,
 	}
 

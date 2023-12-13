@@ -70,6 +70,10 @@ type AchievementService interface {
 		user_id string,
 		achievements []*model.AchievementInput,
 	) error
+	GetAchievementsByUserId(
+		ctx context.Context,
+		user_id string,
+	) ([]string, error)
 }
 
 type Services interface {
@@ -93,5 +97,6 @@ func New(exec boil.ContextExecutor) Services {
 		TraceService: &trace.TraceService{Exec: exec},
 		PhotoService: &photo.PhotoService{Exec: exec},
 		ChillService: &chill.ChillService{Exec: exec},
+		AchievementService: &achievement.AchievementService{Exec: exec},
 	}
 }
