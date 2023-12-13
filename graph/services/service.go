@@ -50,6 +50,10 @@ type PhotoService interface {
 		ctx context.Context,
 		input model.PhotosInput,
 	) ([]*model.Photo, error)
+	GetPhotosByChillId(
+		ctx context.Context,
+		chillId string,
+	) ([]*model.Photo, error)
 }
 
 type ChillService interface {
