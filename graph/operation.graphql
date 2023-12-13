@@ -23,6 +23,7 @@ query User{
       id
       name
       discriptioin
+      image
     }
   }
 }
@@ -32,6 +33,7 @@ query Achievements{
     id
     name
     discriptioin
+    image
   }
 }
 
@@ -62,6 +64,7 @@ mutation registerUser(
       id
       name
       discriptioin
+      image
     }
   }
 }
