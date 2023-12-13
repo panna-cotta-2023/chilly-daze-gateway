@@ -6,6 +6,7 @@ type Achievement {
     id: ID!
     name: String!
     description: String!
+    image: String!
 }
 
 type Coordinate {
