@@ -46,10 +46,6 @@ func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChil
 	}
 
 	uid := GetAuthToken(ctx)
-	if _, ok := r.Srv.GetUser(ctx, uid); !ok {
-		return nil, fmt.Errorf("user not found")
-	}
-	
 	err = r.Srv.AddUserChill(ctx, uid, chill.ID)
 	if err != nil {
 		return nil, err
@@ -80,7 +76,13 @@ func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInpu
 
 // EndChill is the resolver for the endChill field.
 func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
+	uid := GetAuthToken(ctx)
 	chill, err := r.Srv.EndChill(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.Srv.AddUserChill(ctx, uid, chill.ID)
 	if err != nil {
 		return nil, err
 	}

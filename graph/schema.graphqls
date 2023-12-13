@@ -79,10 +79,15 @@ input PhotosInput {
     photos: [PhotoInput!]!
 }
 
+input AchievementInput {
+    id: ID!
+}
+
 input EndChillInput {
     id: ID!                 # Chill id
     timestamp: DateTime!
     coordinate: CoordinateInput!
+    achievements: [AchievementInput!]!
 }
 
 type Mutation {

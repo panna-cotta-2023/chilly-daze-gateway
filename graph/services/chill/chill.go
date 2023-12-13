@@ -91,8 +91,6 @@ func (u *ChillService) AddUserChill (
 	userID string,
 	chillID string,
 ) error {
-	
-
 	db_userChill := &db.UserChill{
 		UserID: userID,
 		ChillID: chillID,
