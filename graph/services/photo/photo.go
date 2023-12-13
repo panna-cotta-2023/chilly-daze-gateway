@@ -3,7 +3,9 @@ package photo
 import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
+	"chilly_daze_gateway/graph/services/lib"
 	"context"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,8 +26,11 @@ func (u *PhotoService) AddPhotos(
 
 	for _, photo := range photos {
 
-		timestamp, err := time.Parse(time.RFC3339, photo.Timestamp)
+		timestampString := lib.CovertTimestampString(photo.Timestamp)
+
+		timestamp, err := time.Parse(time.RFC3339, timestampString)
 		if err != nil {
+			log.Println("time.Parse error:", err)
 			return nil, err
 		}
 
@@ -38,12 +43,13 @@ func (u *PhotoService) AddPhotos(
 
 		result = append(result, &model.Photo{
 			ID:        db_photo.ChillID,
-			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05.00:00+00:00"),
+			Timestamp: timestampString,
 			URL:       db_photo.URL,
 		})
 
 		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
 		if err != nil {
+			log.Println("db_photo.Insert error:", err)
 			return nil, err
 		}
 	}
@@ -59,6 +65,7 @@ func (u *PhotoService) GetPhotosByChillId(
 		db.PhotoWhere.ChillID.EQ(chillId),
 	).All(ctx, u.Exec)
 	if err != nil {
+		log.Println("db.Photos error:", err)
 		return nil, err
 	}
 
@@ -67,7 +74,7 @@ func (u *PhotoService) GetPhotosByChillId(
 	for _, db_photo := range db_photos {
 		result = append(result, &model.Photo{
 			ID:        db_photo.ChillID,
-			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05.00:00+00:00"),
+			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
 			URL:       db_photo.URL,
 		})
 	}

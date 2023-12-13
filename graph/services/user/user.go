@@ -5,6 +5,7 @@ import (
 	"chilly_daze_gateway/graph/model"
 	"context"
 	"log"
+	"time"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -18,8 +19,6 @@ func (u *UserService) CreateUser(
 	input model.RegisterUserInput,
 	uid string,
 ) (*model.User, error) {
-	
-
 	result := &model.User{
 		ID:     uid,
 		Name:   input.Name,
@@ -30,11 +29,13 @@ func (u *UserService) CreateUser(
 		ID:        result.ID,
 		Name:      result.Name,
 		AvatarURL: result.Avatar,
+		CreatedAt: time.Now(),
 	}
 
 	err := db_user.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		log.Println("db_user.Insert error:", err)
+		return nil, err
 	}
 
 	return result, nil
@@ -55,7 +56,7 @@ func (u *UserService) GetUser(
 	result.ID = db_user.ID
 	result.Name = db_user.Name
 	result.Avatar = db_user.AvatarURL
-	
+
 	return result, true
 }
 
@@ -116,5 +117,3 @@ func (u *UserService) UpdateUserAvatar(
 
 	return result, nil
 }
-
-

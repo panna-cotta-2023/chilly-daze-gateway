@@ -63,7 +63,7 @@ mutation registerUser(
     achievements {
       id
       name
-      discriptioin
+      description
       image
     }
   }
