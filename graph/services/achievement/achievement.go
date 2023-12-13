@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"golang.org/x/exp/slices"
 )
 
 type AchievementService struct {
@@ -17,16 +18,19 @@ func (u *AchievementService) AddAchievementToUser(
 	ctx context.Context,
 	user_id string,
 	achievements []*model.AchievementInput,
+	having_achievementIds []string,
 ) error {
 
-	db_user_achievement := &db.UserAchievement{}
-
-	for _, achievement := range achievements {
-
-		db_user_achievement = &db.UserAchievement{
+	for _, achievement := range achievements {		
+		db_user_achievement := &db.UserAchievement{
 			UserID:        user_id,
 			AchievementID: achievement.ID,
 		}
+
+		if slices.Contains(having_achievementIds, achievement.ID) {
+			continue
+		}
+
 		err := db_user_achievement.Insert(ctx, u.Exec, boil.Infer())
 		if err != nil {
 			log.Println("db_user_achievement.Insert error:", err)

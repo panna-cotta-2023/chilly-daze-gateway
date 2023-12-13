@@ -69,6 +69,7 @@ type AchievementService interface {
 		ctx context.Context,
 		user_id string,
 		achievements []*model.AchievementInput,
+		having_achievementIds []string,
 	) error
 	GetAchievementsByUserId(
 		ctx context.Context,
