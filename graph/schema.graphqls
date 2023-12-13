@@ -1,0 +1,94 @@
+scalar DateTime
+
+directive @isAuthenticated on FIELD_DEFINITION
+
+type Achievement {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+type Coordinate {
+    latitude: Float!
+    longitude: Float!
+}
+
+type TracePoint {
+    id: ID!                 # Identifier to identify the trace point
+    timestamp: DateTime!
+    coordinate: Coordinate!
+}
+
+type Photo {
+    id: ID!         # Identifier to identify the photo
+    url: String!
+    timestamp: DateTime!
+}
+
+type Chill {
+    id: ID!
+    traces: [TracePoint!]!
+    photos: [Photo!]!
+}
+
+type User {
+    id: ID!
+    name: String!
+    avatar: String!
+    chills: [Chill!]!
+    achievements: [Achievement!]!
+}
+
+type Query {
+    user: User! @isAuthenticated                    # Get current user
+    achievements: [Achievement!]! @isAuthenticated  # Get all achievements
+}
+
+input RegisterUserInput {
+    name: String!   # Username
+    avatar: String! # URL to avatar
+}
+
+input CoordinateInput {
+    latitude: Float!
+    longitude: Float!
+}
+
+input StartChillInput {
+    timestamp: DateTime!
+    coordinate: CoordinateInput!
+}
+
+input TracePointInput {
+    timestamp: DateTime!
+    coordinate: CoordinateInput!
+}
+
+input TracePointsInput {
+    id: ID!                             # Chill id
+    tracePoints: [TracePointInput!]!
+}
+
+input PhotoInput {
+    url: String!
+    timestamp: DateTime!
+}
+
+input PhotosInput {
+    id: ID!                 # Chill id
+    photos: [PhotoInput!]!
+}
+
+input EndChillInput {
+    id: ID!                 # Chill id
+    timestamp: DateTime!
+    coordinate: CoordinateInput!
+}
+
+type Mutation {
+    registerUser(input: RegisterUserInput): User! @isAuthenticated  # Other information can derive from the token
+    startChill(input: StartChillInput!): Chill! @isAuthenticated
+    addTracePoints(input: TracePointsInput!): [TracePoint]! @isAuthenticated
+    addPhotos(input: PhotosInput!): [Photo!]! @isAuthenticated
+    endChill(input: EndChillInput!): Chill! @isAuthenticated
+}
