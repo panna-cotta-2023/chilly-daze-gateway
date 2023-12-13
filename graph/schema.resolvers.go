@@ -12,12 +12,45 @@ import (
 
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: RegisterUser - registerUser"))
+	uid := GetAuthToken(ctx)
+	var err error
+
+	if user, ok := r.Srv.GetUser(ctx, uid); ok {
+		if user.Name != input.Name {
+			user, err = r.Srv.UpdateUserName(ctx, uid, input.Name)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if user.Avatar != input.Avatar {
+			user, err = r.Srv.UpdateUserAvatar(ctx, uid, input.Avatar)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return user, nil
+	} else {
+		user, err := r.Srv.CreateUser(ctx, *input, uid)
+		if err != nil {
+			return nil, err
+		}
+		return user, nil
+	}
 }
 
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
 	chill, err := r.Srv.StartChill(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	uid := GetAuthToken(ctx)
+	if _, ok := r.Srv.GetUser(ctx, uid); !ok {
+		return nil, fmt.Errorf("user not found")
+	}
+	
+	err = r.Srv.AddUserChill(ctx, uid, chill.ID)
 	if err != nil {
 		return nil, err
 	}

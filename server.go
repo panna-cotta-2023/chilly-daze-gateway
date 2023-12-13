@@ -4,6 +4,7 @@ import (
 	"chilly_daze_gateway/graph"
 	"chilly_daze_gateway/graph/services"
 	"chilly_daze_gateway/lib"
+	"chilly_daze_gateway/middleware/auth"
 	"log"
 	"net/http"
 	"os"
@@ -33,11 +34,15 @@ func main() {
 
 	services := services.New(db)
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		Srv: services,
-	}}))
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{
+			Srv: services,
+		},
+		Directives: graph.Directive,
+	}))
 
-	http.Handle("/", srv)
+	http.Handle("/", auth.AuthMiddleware(srv))
+	
 	if boil.DebugMode {
 		http.Handle("/playground", playground.Handler("GraphQL playground", "/"))
 	}

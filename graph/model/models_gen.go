@@ -47,7 +47,8 @@ type PhotosInput struct {
 }
 
 type RegisterUserInput struct {
-	Name string `json:"name"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
 }
 
 type StartChillInput struct {
@@ -74,6 +75,7 @@ type TracePointsInput struct {
 type User struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
+	Avatar       string         `json:"avatar"`
 	Chills       []*Chill       `json:"chills"`
 	Achievements []*Achievement `json:"achievements"`
 }

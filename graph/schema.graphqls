@@ -34,6 +34,7 @@ type Chill {
 type User {
     id: ID!
     name: String!
+    avatar: String!
     chills: [Chill!]!
     achievements: [Achievement!]!
 }
@@ -45,6 +46,7 @@ type Query {
 
 input RegisterUserInput {
     name: String!   # Username
+    avatar: String! # URL to avatar
 }
 
 input CoordinateInput {
