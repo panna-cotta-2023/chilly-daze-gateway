@@ -1,33 +1,8 @@
 query User {
-  id
-  name
-  avatar {
+  user {
     id
     name
-    displayName
-    description
-    category {
-      id
-      name
-      displayName
-    }
-  }
-  chills {
-    id
-    traces {
-      id
-      timestamp
-      coordinate {
-        latitude
-        longitude
-      }
-    }
-    photos {
-      id
-      url
-      timestamp
-    }
-    newAchievements {
+    avatar {
       id
       name
       displayName
@@ -38,16 +13,43 @@ query User {
         displayName
       }
     }
-  }
-  achievements {
-    id
-    name
-    displayName
-    description
-    category {
+    chills {
+      id
+      traces {
+        id
+        timestamp
+        coordinate {
+          latitude
+          longitude
+        }
+      }
+      photos {
+        id
+        url
+        timestamp
+      }
+      newAchievements {
+        id
+        name
+        displayName
+        description
+        category {
+          id
+          name
+          displayName
+        }
+      }
+    }
+    achievements {
       id
       name
       displayName
+      description
+      category {
+        id
+        name
+        displayName
+      }
     }
   }
 }
