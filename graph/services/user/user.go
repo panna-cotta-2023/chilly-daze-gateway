@@ -188,7 +188,7 @@ func (u *UserService) GetUser(
 
 	result.Name = db_user.Name
 
-	db_achievements, err := db.Achievements(db.AchievementWhere.Name.EQ(db_user.Avatar.String)).All(ctx, u.Exec)
+	db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(db_user.Avatar.String)).All(ctx, u.Exec)
 	if err != nil {
 		log.Println("db_achievement.Select error:", err)
 		return nil, false
