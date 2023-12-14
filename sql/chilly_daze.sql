@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS achievements (
 
 CREATE TABLE IF NOT EXISTS users (
   id VARCHAR(256) PRIMARY KEY,
-  name TEXT NOT NULL,
-  avatar_url TEXT NOT NULL,
+  name TEXT,
+  avatar_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
