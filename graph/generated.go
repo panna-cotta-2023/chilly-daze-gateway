@@ -72,7 +72,7 @@ type ComplexityRoot struct {
 		AddPhotos      func(childComplexity int, input model.PhotosInput) int
 		AddTracePoints func(childComplexity int, input model.TracePointsInput) int
 		EndChill       func(childComplexity int, input model.EndChillInput) int
-		RegisterUser   func(childComplexity int, input *model.RegisterUserInput) int
+		RegisterUser   func(childComplexity int, input model.RegisterUserInput) int
 		StartChill     func(childComplexity int, input model.StartChillInput) int
 	}
 
@@ -103,7 +103,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error)
+	RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error)
 	StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error)
 	AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error)
 	AddPhotos(ctx context.Context, input model.PhotosInput) ([]*model.Photo, error)
@@ -256,7 +256,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RegisterUser(childComplexity, args["input"].(*model.RegisterUserInput)), true
+		return e.complexity.Mutation.RegisterUser(childComplexity, args["input"].(model.RegisterUserInput)), true
 
 	case "Mutation.startChill":
 		if e.complexity.Mutation.StartChill == nil {
@@ -541,10 +541,10 @@ func (ec *executionContext) field_Mutation_endChill_args(ctx context.Context, ra
 func (ec *executionContext) field_Mutation_registerUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.RegisterUserInput
+	var arg0 model.RegisterUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalORegisterUserInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRegisterUserInput2chilly_daze_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1148,7 +1148,7 @@ func (ec *executionContext) _Mutation_registerUser(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().RegisterUser(rctx, fc.Args["input"].(*model.RegisterUserInput))
+			return ec.resolvers.Mutation().RegisterUser(rctx, fc.Args["input"].(model.RegisterUserInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.IsAuthenticated == nil {
@@ -5500,6 +5500,11 @@ func (ec *executionContext) unmarshalNPhotosInput2chilly_daze_gatewayᚋgraphᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNRegisterUserInput2chilly_daze_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx context.Context, v interface{}) (model.RegisterUserInput, error) {
+	res, err := ec.unmarshalInputRegisterUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNStartChillInput2chilly_daze_gatewayᚋgraphᚋmodelᚐStartChillInput(ctx context.Context, v interface{}) (model.StartChillInput, error) {
 	res, err := ec.unmarshalInputStartChillInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5892,14 +5897,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) unmarshalORegisterUserInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐRegisterUserInput(ctx context.Context, v interface{}) (*model.RegisterUserInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputRegisterUserInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
