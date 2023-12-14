@@ -6,6 +6,7 @@ package db
 var TableNames = struct {
 	AchievementCategories string
 	Achievements          string
+	ChillAchievements     string
 	Chills                string
 	Photos                string
 	TracePoints           string
@@ -15,6 +16,7 @@ var TableNames = struct {
 }{
 	AchievementCategories: "achievement_categories",
 	Achievements:          "achievements",
+	ChillAchievements:     "chill_achievements",
 	Chills:                "chills",
 	Photos:                "photos",
 	TracePoints:           "trace_points",

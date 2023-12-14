@@ -79,20 +79,23 @@ var AchievementWhere = struct {
 
 // AchievementRels is where relationship names are stored.
 var AchievementRels = struct {
-	Category         string
-	UserAchievements string
-	AvatarUsers      string
+	Category          string
+	ChillAchievements string
+	UserAchievements  string
+	AvatarUsers       string
 }{
-	Category:         "Category",
-	UserAchievements: "UserAchievements",
-	AvatarUsers:      "AvatarUsers",
+	Category:          "Category",
+	ChillAchievements: "ChillAchievements",
+	UserAchievements:  "UserAchievements",
+	AvatarUsers:       "AvatarUsers",
 }
 
 // achievementR is where relationships are stored.
 type achievementR struct {
-	Category         *AchievementCategory `boil:"Category" json:"Category" toml:"Category" yaml:"Category"`
-	UserAchievements UserAchievementSlice `boil:"UserAchievements" json:"UserAchievements" toml:"UserAchievements" yaml:"UserAchievements"`
-	AvatarUsers      UserSlice            `boil:"AvatarUsers" json:"AvatarUsers" toml:"AvatarUsers" yaml:"AvatarUsers"`
+	Category          *AchievementCategory  `boil:"Category" json:"Category" toml:"Category" yaml:"Category"`
+	ChillAchievements ChillAchievementSlice `boil:"ChillAchievements" json:"ChillAchievements" toml:"ChillAchievements" yaml:"ChillAchievements"`
+	UserAchievements  UserAchievementSlice  `boil:"UserAchievements" json:"UserAchievements" toml:"UserAchievements" yaml:"UserAchievements"`
+	AvatarUsers       UserSlice             `boil:"AvatarUsers" json:"AvatarUsers" toml:"AvatarUsers" yaml:"AvatarUsers"`
 }
 
 // NewStruct creates a new relationship struct
@@ -105,6 +108,13 @@ func (r *achievementR) GetCategory() *AchievementCategory {
 		return nil
 	}
 	return r.Category
+}
+
+func (r *achievementR) GetChillAchievements() ChillAchievementSlice {
+	if r == nil {
+		return nil
+	}
+	return r.ChillAchievements
 }
 
 func (r *achievementR) GetUserAchievements() UserAchievementSlice {
@@ -421,6 +431,20 @@ func (o *Achievement) Category(mods ...qm.QueryMod) achievementCategoryQuery {
 	return AchievementCategories(queryMods...)
 }
 
+// ChillAchievements retrieves all the chill_achievement's ChillAchievements with an executor.
+func (o *Achievement) ChillAchievements(mods ...qm.QueryMod) chillAchievementQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"chilly_daze\".\"chill_achievements\".\"achievement_id\"=?", o.ID),
+	)
+
+	return ChillAchievements(queryMods...)
+}
+
 // UserAchievements retrieves all the user_achievement's UserAchievements with an executor.
 func (o *Achievement) UserAchievements(mods ...qm.QueryMod) userAchievementQuery {
 	var queryMods []qm.QueryMod
@@ -561,6 +585,120 @@ func (achievementL) LoadCategory(ctx context.Context, e boil.ContextExecutor, si
 					foreign.R = &achievementCategoryR{}
 				}
 				foreign.R.CategoryAchievements = append(foreign.R.CategoryAchievements, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadChillAchievements allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (achievementL) LoadChillAchievements(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAchievement interface{}, mods queries.Applicator) error {
+	var slice []*Achievement
+	var object *Achievement
+
+	if singular {
+		var ok bool
+		object, ok = maybeAchievement.(*Achievement)
+		if !ok {
+			object = new(Achievement)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeAchievement)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAchievement))
+			}
+		}
+	} else {
+		s, ok := maybeAchievement.(*[]*Achievement)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeAchievement)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAchievement))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &achievementR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &achievementR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`chilly_daze.chill_achievements`),
+		qm.WhereIn(`chilly_daze.chill_achievements.achievement_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load chill_achievements")
+	}
+
+	var resultSlice []*ChillAchievement
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice chill_achievements")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on chill_achievements")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for chill_achievements")
+	}
+
+	if len(chillAchievementAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.ChillAchievements = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &chillAchievementR{}
+			}
+			foreign.R.Achievement = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.AchievementID {
+				local.R.ChillAchievements = append(local.R.ChillAchievements, foreign)
+				if foreign.R == nil {
+					foreign.R = &chillAchievementR{}
+				}
+				foreign.R.Achievement = local
 				break
 			}
 		}
@@ -841,6 +979,59 @@ func (o *Achievement) SetCategory(ctx context.Context, exec boil.ContextExecutor
 		related.R.CategoryAchievements = append(related.R.CategoryAchievements, o)
 	}
 
+	return nil
+}
+
+// AddChillAchievements adds the given related objects to the existing relationships
+// of the achievement, optionally inserting them as new records.
+// Appends related to o.R.ChillAchievements.
+// Sets related.R.Achievement appropriately.
+func (o *Achievement) AddChillAchievements(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ChillAchievement) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.AchievementID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"chilly_daze\".\"chill_achievements\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"achievement_id"}),
+				strmangle.WhereClause("\"", "\"", 2, chillAchievementPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.AchievementID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &achievementR{
+			ChillAchievements: related,
+		}
+	} else {
+		o.R.ChillAchievements = append(o.R.ChillAchievements, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &chillAchievementR{
+				Achievement: o,
+			}
+		} else {
+			rel.R.Achievement = o
+		}
+	}
 	return nil
 }
 
