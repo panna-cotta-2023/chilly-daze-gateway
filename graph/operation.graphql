@@ -22,7 +22,7 @@ query User{
     achievements {
       id
       name
-      discriptioin
+      description
       image
     }
   }
@@ -32,7 +32,7 @@ query Achievements{
   achievements {
     id
     name
-    discriptioin
+    description
     image
   }
 }

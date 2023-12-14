@@ -6,7 +6,6 @@ import (
 	"chilly_daze_gateway/graph/services/lib"
 	"context"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
@@ -25,18 +24,16 @@ func (u *ChillService) StartChill(
 		ID:     uuid.New().String(),
 		Traces: []*model.TracePoint{},
 	}
-
-	createTimeStampString := lib.CovertTimestampString(startChill.Timestamp)
-
-	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
+	
+	createTimeStamp, err := lib.ParseTimestamp(startChill.Timestamp)
 	if err != nil {
-		log.Println("time.Parse error:", err)
+		log.Println("lib.ParseTimestamp error:", err)
 		return nil, err
 	}
 
 	result.Traces = append(result.Traces, &model.TracePoint{
 		ID:        uuid.New().String(),
-		Timestamp: createTimeStampString,
+		Timestamp: createTimeStamp.Format("2006-01-02T15:04:05+09:00"),
 		Coordinate: &model.Coordinate{
 			Latitude:  startChill.Coordinate.Latitude,
 			Longitude: startChill.Coordinate.Longitude,
@@ -80,30 +77,71 @@ func (u *ChillService) EndChill(
 		Traces: []*model.TracePoint{},
 	}
 
-	result.Traces = append(result.Traces, &model.TracePoint{
-		ID:        uuid.New().String(),
-		Timestamp: endChill.Timestamp,
-		Coordinate: &model.Coordinate{
-			Latitude:  endChill.Coordinate.Latitude,
-			Longitude: endChill.Coordinate.Longitude,
-		},
-	})
+	for _, tracePoint := range endChill.TracePoints {
+		timestamp, err := lib.ParseTimestamp(tracePoint.Timestamp)
+		if err != nil {
+			log.Println("lib.ParseTimestamp error:", err)
+			return nil, err
+		}
 
-	createTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
+		db_tracePoint := &db.TracePoint{
+			ID:        uuid.New().String(),
+			Timestamp: timestamp,
+			ChillID:   endChill.ID,
+			Latitude:  tracePoint.Coordinate.Latitude,
+			Longitude: tracePoint.Coordinate.Longitude,
+		}
 
-	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
+		err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
+		if err != nil {
+			log.Println("db_tracePoint.Insert error:", err)
+			return nil, err
+		}
+
+		result.Traces = append(result.Traces, &model.TracePoint{
+			ID:        db_tracePoint.ID,
+			Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+			Coordinate: &model.Coordinate{
+				Latitude:  db_tracePoint.Latitude,
+				Longitude: db_tracePoint.Longitude,
+			},
+		})
+	}
+
+	for _, photo := range endChill.Photos {
+		timestamp, err := lib.ParseTimestamp(photo.Timestamp)
+		if err != nil {
+			log.Println("lib.ParseTimestamp error:", err)
+			return nil, err
+		}
+
+		db_photo := &db.Photo{
+			ID:        uuid.New().String(),
+			ChillID:   endChill.ID,
+			Timestamp: timestamp,
+			URL:       photo.URL,
+		}
+
+		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
+		if err != nil {
+			log.Println("db_photo.Insert error:", err)
+			return nil, err
+		}
+
+		result.Photos = append(result.Photos, &model.Photo{
+			ID:        db_photo.ID,
+			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+			URL:       db_photo.URL,
+		})
+	}
+
+	createTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
 	if err != nil {
-		log.Println("time.Parse error:", err)
+		log.Println("lib.ParseTimestamp error:", err)
 		return nil, err
 	}
 
-	endTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
-
-	endTimeStamp, err := time.Parse(time.RFC3339, endTimeStampString)
-	if err != nil {
-		log.Println("time.Parse error:", err)
-		return nil, err
-	}
+	endTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
 
 	db_chill := &db.Chill{
 		ID:        result.ID,
@@ -137,4 +175,77 @@ func (u *ChillService) AddUserChill(
 	}
 
 	return nil
+}
+
+func (u *ChillService) GetChillsByUserId(
+	ctx context.Context,
+	userID string,
+) ([]*model.Chill, error) {
+	db_userChills, err := db.UserChills(
+		db.UserChillWhere.UserID.EQ(userID),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.UserChills error:", err)
+		return nil, err
+	}
+
+	result := []*model.Chill{}
+
+	for _, db_userChill := range db_userChills {
+		db_chill, err := db.Chills(
+			db.ChillWhere.ID.EQ(db_userChill.ChillID),
+		).One(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.Chills error:", err)
+			return nil, err
+		}
+
+		db_tracePoints, err := db.TracePoints(
+			db.TracePointWhere.ChillID.EQ(db_chill.ID),
+		).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.TracePoints error:", err)
+			return nil, err
+		}
+
+		traces := []*model.TracePoint{}
+
+		for _, db_tracePoint := range db_tracePoints {
+			traces = append(traces, &model.TracePoint{
+				ID:        db_tracePoint.ID,
+				Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+				Coordinate: &model.Coordinate{
+					Latitude:  db_tracePoint.Latitude,
+					Longitude: db_tracePoint.Longitude,
+				},
+			})
+		}
+
+		db_photos, err := db.Photos(
+			db.PhotoWhere.ChillID.EQ(db_chill.ID),
+		).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.Photos error:", err)
+			return nil, err
+		}
+
+		photos := []*model.Photo{}
+
+		for _, db_photo := range db_photos {
+			photos = append(photos, &model.Photo{
+				ID:        db_photo.ID,
+				Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+				URL:       db_photo.URL,
+			})
+		}
+
+		result = append(result, &model.Chill{
+			ID:     db_chill.ID,
+			Traces: traces,
+			Photos: photos,
+		})
+	}
+
+	return result, nil
+
 }

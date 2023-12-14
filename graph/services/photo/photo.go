@@ -6,7 +6,6 @@ import (
 	"chilly_daze_gateway/graph/services/lib"
 	"context"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -26,13 +25,7 @@ func (u *PhotoService) AddPhotos(
 
 	for _, photo := range photos {
 
-		timestampString := lib.CovertTimestampString(photo.Timestamp)
-
-		timestamp, err := time.Parse(time.RFC3339, timestampString)
-		if err != nil {
-			log.Println("time.Parse error:", err)
-			return nil, err
-		}
+		timestamp, err := lib.ParseTimestamp(photo.Timestamp)
 
 		db_photo := &db.Photo{
 			ID:        uuid.New().String(),
@@ -43,7 +36,7 @@ func (u *PhotoService) AddPhotos(
 
 		result = append(result, &model.Photo{
 			ID:        db_photo.ChillID,
-			Timestamp: timestampString,
+			Timestamp: timestamp.Format("2006-01-02T15:04:05+09:00"),
 			URL:       db_photo.URL,
 		})
 
