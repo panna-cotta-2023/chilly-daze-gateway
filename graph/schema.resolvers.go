@@ -13,22 +13,13 @@ import (
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
-	var err error
 
 	if user, ok := r.Srv.GetUser(ctx, uid); ok {
-		if input.Name != nil {
-			user, err = r.Srv.UpdateUserName(ctx, uid, *input.Name)
-			if err != nil {
-				return nil, err
-			}
+		updated_user, err := r.Srv.UpdateUser(ctx, *user, input.Name, input.Avatar)
+		if err != nil {
+			return nil, err
 		}
-		if input.Avatar != nil {
-			user, err = r.Srv.UpdateUserAvatar(ctx, uid, *input.Avatar)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return user, nil
+		return updated_user, nil
 	} else {
 		user, err := r.Srv.CreateUser(ctx, input, uid)
 		if err != nil {

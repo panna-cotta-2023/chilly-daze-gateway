@@ -71,23 +71,36 @@ func (u *UserService) GetUser(
 	return result, true
 }
 
-func (u *UserService) UpdateUserName(
+func (u *UserService) UpdateUser(
 	ctx context.Context,
-	uid string,
-	name string,
+	user model.User,
+	nameStr *string,
+	avatarStr *string,
 ) (*model.User, error) {
-
 	result := &model.User{}
 
-	db_user, err := db.Users(db.UserWhere.ID.EQ(uid)).One(ctx, u.Exec)
-	if err != nil {
-		log.Println("db_user.Select error:", err)
-		return nil, err
+	name := ""
+	avatar := ""
+
+	if nameStr != nil {
+		name = *nameStr
+	} else {
+		name = user.Name
 	}
 
-	db_user.Name = name
+	if avatarStr != nil {
+		avatar = *avatarStr
+	} else {
+		avatar = user.Avatar
+	}
 
-	_, err = db_user.Update(ctx, u.Exec, boil.Infer())
+	db_user := &db.User{
+		ID:        user.ID,
+		Name:      name,
+		AvatarURL: avatar,
+	}
+
+	_, err := db_user.Update(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		log.Println("db_user.Update error:", err)
 		return nil, err
@@ -98,33 +111,5 @@ func (u *UserService) UpdateUserName(
 	result.Avatar = db_user.AvatarURL
 
 	return result, nil
-}
-
-func (u *UserService) UpdateUserAvatar(
-	ctx context.Context,
-	uid string,
-	avatar string,
-) (*model.User, error) {
-
-	result := &model.User{}
-
-	db_user, err := db.Users(db.UserWhere.ID.EQ(uid)).One(ctx, u.Exec)
-	if err != nil {
-		log.Println("db_user.Select error:", err)
-		return nil, err
-	}
-
-	db_user.AvatarURL = avatar
-
-	_, err = db_user.Update(ctx, u.Exec, boil.Infer())
-	if err != nil {
-		log.Println("db_user.Update error:", err)
-		return nil, err
-	}
-
-	result.ID = db_user.ID
-	result.Name = db_user.Name
-	result.Avatar = db_user.AvatarURL
-
-	return result, nil
+	
 }
