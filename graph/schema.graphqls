@@ -2,12 +2,19 @@ scalar DateTime
 
 directive @isAuthenticated on FIELD_DEFINITION
 
+type AchievementCategory {
+    id: ID!
+    name: String!                   # Name of the category (identifiable, e.g. "area")
+    displayName: String!            # Display name (JA) of the category
+    achievements: [Achievement!]!
+}
+
 type Achievement {
     id: ID!
-    name: String!
-    description: String!
-    category: String!
-    image: String!
+    name: String!                   # Name of the achievement (identifiable, e.g. "area1")
+    displayName: String!            # Display name (JA) of the achievement
+    description: String!            # Description (JA) of the achievement
+    category: AchievementCategory!
 }
 
 type Coordinate {
@@ -37,7 +44,7 @@ type Chill {
 type User {
     id: ID!
     name: String!
-    avatar: String!
+    avatar: Achievement             # Achievement using as avatar
     chills: [Chill!]!
     achievements: [Achievement!]!
 }
