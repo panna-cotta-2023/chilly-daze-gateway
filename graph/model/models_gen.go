@@ -6,17 +6,15 @@ type Achievement struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Category    string `json:"category"`
 	Image       string `json:"image"`
 }
 
-type AchievementInput struct {
-	ID string `json:"id"`
-}
-
 type Chill struct {
-	ID     string        `json:"id"`
-	Traces []*TracePoint `json:"traces"`
-	Photos []*Photo      `json:"photos"`
+	ID              string         `json:"id"`
+	Traces          []*TracePoint  `json:"traces"`
+	Photos          []*Photo       `json:"photos"`
+	NewAchievements []*Achievement `json:"newAchievements"`
 }
 
 type Coordinate struct {
@@ -30,10 +28,10 @@ type CoordinateInput struct {
 }
 
 type EndChillInput struct {
-	ID           string              `json:"id"`
-	Timestamp    string              `json:"timestamp"`
-	Coordinate   *CoordinateInput    `json:"coordinate"`
-	Achievements []*AchievementInput `json:"achievements"`
+	ID          string             `json:"id"`
+	TracePoints []*TracePointInput `json:"tracePoints"`
+	Photos      []*PhotoInput      `json:"photos"`
+	Timestamp   string             `json:"timestamp"`
 }
 
 type Photo struct {
@@ -53,8 +51,8 @@ type PhotosInput struct {
 }
 
 type RegisterUserInput struct {
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
+	Name   *string `json:"name,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
 }
 
 type StartChillInput struct {

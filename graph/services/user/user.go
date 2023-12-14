@@ -19,10 +19,21 @@ func (u *UserService) CreateUser(
 	input model.RegisterUserInput,
 	uid string,
 ) (*model.User, error) {
+	name := ""
+	avatar := ""
+
+	if input.Name != nil {
+		name = *input.Name
+	}
+
+	if input.Avatar != nil {
+		avatar = *input.Avatar
+	}
+
 	result := &model.User{
 		ID:     uid,
-		Name:   input.Name,
-		Avatar: input.Avatar,
+		Name:   name,
+		Avatar: avatar,
 	}
 
 	db_user := &db.User{

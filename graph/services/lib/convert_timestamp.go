@@ -5,11 +5,12 @@ import (
 	"time"
 )
 
-func CovertTimestampString(timesString string) string {
-	timestamp, err := time.Parse(time.RFC3339, timesString)
+func ParseTimestamp(timesString string) (time.Time, error) {
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+	timestamp, err := time.ParseInLocation(time.RFC3339, timesString, jst)
 	if err != nil {
-		log.Println("time.Parse error:", err)
-		return ""
+		log.Println("time.ParseInLocation error:", err)
+		return time.Time{}, err
 	}
-	return timestamp.Format("2006-01-02T15:04:05+09:00")
+	return timestamp, nil
 }

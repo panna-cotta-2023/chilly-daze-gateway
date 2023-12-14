@@ -70,19 +70,20 @@ type ChillService interface {
 		userID string,
 		chillID string,
 	) error
+	GetChillsByUserId(
+		ctx context.Context,
+		user_id string,
+	) ([]*model.Chill, error)
 }
 
 type AchievementService interface {
-	AddAchievementToUser(
-		ctx context.Context,
-		user_id string,
-		achievements []*model.AchievementInput,
-		having_achievementIds []string,
-	) error
 	GetAchievementsByUserId(
 		ctx context.Context,
 		user_id string,
-	) ([]string, error)
+	) ([]*model.Achievement, error)
+	GetAchievements(
+		ctx context.Context,
+	) ([]*model.Achievement, error)
 }
 
 type Services interface {

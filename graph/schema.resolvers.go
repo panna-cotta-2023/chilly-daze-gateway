@@ -11,26 +11,26 @@ import (
 )
 
 // RegisterUser is the resolver for the registerUser field.
-func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
+func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
 	var err error
 
 	if user, ok := r.Srv.GetUser(ctx, uid); ok {
-		if user.Name != input.Name {
-			user, err = r.Srv.UpdateUserName(ctx, uid, input.Name)
+		if input.Name != nil {
+			user, err = r.Srv.UpdateUserName(ctx, uid, *input.Name)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if user.Avatar != input.Avatar {
-			user, err = r.Srv.UpdateUserAvatar(ctx, uid, input.Avatar)
+		if input.Avatar != nil {
+			user, err = r.Srv.UpdateUserAvatar(ctx, uid, *input.Avatar)
 			if err != nil {
 				return nil, err
 			}
 		}
 		return user, nil
 	} else {
-		user, err := r.Srv.CreateUser(ctx, *input, uid)
+		user, err := r.Srv.CreateUser(ctx, input, uid)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +76,6 @@ func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInpu
 
 // EndChill is the resolver for the endChill field.
 func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
-	uid := GetAuthToken(ctx)
 	chill, err := r.Srv.EndChill(ctx, input)
 	if err != nil {
 		return nil, err
@@ -95,27 +94,42 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 	chill.Traces = append(chill.Traces, traces...)
 	chill.Photos = append(chill.Photos, photos...)
 
-	having_achievementIds, err := r.Srv.GetAchievementsByUserId(ctx, uid)
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.Srv.AddAchievementToUser(ctx, uid, input.Achievements, having_achievementIds)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Check achievement
 
 	return chill, nil
 }
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	uid := GetAuthToken(ctx)
+	user, ok := r.Srv.GetUser(ctx, uid)
+	if !ok {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	userChills, err := r.Srv.GetChillsByUserId(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	userAchivements, err := r.Srv.GetAchievementsByUserId(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Chills = userChills
+	user.Achievements = userAchivements
+	return user, nil
 }
 
 // Achievements is the resolver for the achievements field.
 func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+	achievements, err := r.Srv.GetAchievements(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return achievements, nil
 }
 
 // Mutation returns MutationResolver implementation.
