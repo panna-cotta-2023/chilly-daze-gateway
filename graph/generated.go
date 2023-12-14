@@ -4163,7 +4163,7 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "tracePoints", "photos"}
+	fieldsInOrder := [...]string{"id", "tracePoints", "photos", "timestamp"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4191,6 +4191,13 @@ func (ec *executionContext) unmarshalInputEndChillInput(ctx context.Context, obj
 				return it, err
 			}
 			it.Photos = data
+		case "timestamp":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
+			data, err := ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Timestamp = data
 		}
 	}
 

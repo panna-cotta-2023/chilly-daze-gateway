@@ -13,46 +13,6 @@ type AchievementService struct {
 	Exec boil.ContextExecutor
 }
 
-func (u *AchievementService) AddAchievementToUser(
-	ctx context.Context,
-	user_id string,
-	get_achievements []*model.AchievementInput,
-	having_achievements []*model.Achievement,
-) error {
-	isHavingList := map[string]bool{}
-
-	for _, get_achievement := range get_achievements {
-		isHavingList[get_achievement.ID] = false
-
-		for _, having_achievement := range having_achievements {
-
-			if having_achievement.ID == get_achievement.ID {
-				isHavingList[get_achievement.ID] = true
-				break
-			}
-		}
-	}
-
-	for _, get_achievement := range get_achievements {
-		if isHavingList[get_achievement.ID] {
-			continue
-		}
-
-		db_user_achievement := &db.UserAchievement{
-			UserID:       user_id,
-			AchievementID: get_achievement.ID,
-		}
-
-		err := db_user_achievement.Insert(ctx, u.Exec, boil.Infer())
-		if err != nil {
-			log.Println("db_user_achievement.Insert error:", err)
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (u *AchievementService) GetAchievementsByUserId(
 	ctx context.Context,
 	user_id string,

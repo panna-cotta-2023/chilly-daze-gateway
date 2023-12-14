@@ -86,6 +86,7 @@ input EndChillInput {
     id: ID!                 # Chill id
     tracePoints: [TracePointInput!]!
     photos: [PhotoInput!]!
+    timestamp: DateTime!
 }
 
 type Mutation {

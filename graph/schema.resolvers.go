@@ -14,16 +14,25 @@ import (
 func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
 	var err error
+	avatar := ""
+	name := ""
+
+	if input.Avatar != nil {
+		avatar = *input.Avatar
+	}
+	if input.Name != nil {
+		name = *input.Name
+	}
 
 	if user, ok := r.Srv.GetUser(ctx, uid); ok {
-		if user.Name != input.Name {
-			user, err = r.Srv.UpdateUserName(ctx, uid, input.Name)
+		if user.Name != name {
+			user, err = r.Srv.UpdateUserName(ctx, uid, name)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if user.Avatar != input.Avatar {
-			user, err = r.Srv.UpdateUserAvatar(ctx, uid, input.Avatar)
+		if user.Avatar != avatar {
+			user, err = r.Srv.UpdateUserAvatar(ctx, uid, avatar)
 			if err != nil {
 				return nil, err
 			}
@@ -76,7 +85,6 @@ func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInpu
 
 // EndChill is the resolver for the endChill field.
 func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
-	uid := GetAuthToken(ctx)
 	chill, err := r.Srv.EndChill(ctx, input)
 	if err != nil {
 		return nil, err
@@ -95,15 +103,7 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 	chill.Traces = append(chill.Traces, traces...)
 	chill.Photos = append(chill.Photos, photos...)
 
-	having_achievements, err := r.Srv.GetAchievementsByUserId(ctx, uid)
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.Srv.AddAchievementToUser(ctx, uid, input.Achievements, having_achievements)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Check achievement
 
 	return chill, nil
 }

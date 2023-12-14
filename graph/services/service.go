@@ -77,12 +77,6 @@ type ChillService interface {
 }
 
 type AchievementService interface {
-	AddAchievementToUser(
-		ctx context.Context,
-		user_id string,
-		get_achievements []*model.AchievementInput,
-		having_achievementIds []*model.Achievement,
-	) error
 	GetAchievementsByUserId(
 		ctx context.Context,
 		user_id string,

@@ -31,6 +31,7 @@ type EndChillInput struct {
 	ID          string             `json:"id"`
 	TracePoints []*TracePointInput `json:"tracePoints"`
 	Photos      []*PhotoInput      `json:"photos"`
+	Timestamp   string             `json:"timestamp"`
 }
 
 type Photo struct {

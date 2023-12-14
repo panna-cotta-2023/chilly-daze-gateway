@@ -80,14 +80,69 @@ func (u *ChillService) EndChill(
 		Traces: []*model.TracePoint{},
 	}
 
-	result.Traces = append(result.Traces, &model.TracePoint{
-		ID:        uuid.New().String(),
-		Timestamp: endChill.Timestamp,
-		Coordinate: &model.Coordinate{
-			Latitude:  endChill.Coordinate.Latitude,
-			Longitude: endChill.Coordinate.Longitude,
-		},
-	})
+	for _, tracePoint := range endChill.TracePoints {
+		timestampString := lib.CovertTimestampString(tracePoint.Timestamp)
+
+		timestamp, err := time.Parse(time.RFC3339, timestampString)
+		if err != nil {
+			log.Println("time.Parse error:", err)
+			return nil, err
+		}
+
+		db_tracePoint := &db.TracePoint{
+			ID:        uuid.New().String(),
+			Timestamp: timestamp,
+			ChillID:   endChill.ID,
+			Latitude:  tracePoint.Coordinate.Latitude,
+			Longitude: tracePoint.Coordinate.Longitude,
+		}
+
+		err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
+		if err != nil {
+			log.Println("db_tracePoint.Insert error:", err)
+			return nil, err
+		}
+
+		result.Traces = append(result.Traces, &model.TracePoint{
+			ID:        db_tracePoint.ID,
+			Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+			Coordinate: &model.Coordinate{
+				Latitude:  db_tracePoint.Latitude,
+				Longitude: db_tracePoint.Longitude,
+			},
+		})
+	}
+
+	for _, photo := range endChill.Photos {
+		timestampString := lib.CovertTimestampString(photo.Timestamp)
+
+		timestamp, err := time.Parse(time.RFC3339, timestampString)
+		if err != nil {
+			log.Println("time.Parse error:", err)
+			return nil, err
+		}
+
+		db_photo := &db.Photo{
+			ID:        uuid.New().String(),
+			ChillID:   endChill.ID,
+			Timestamp: timestamp,
+			URL:       photo.URL,
+		}
+
+		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
+		if err != nil {
+			log.Println("db_photo.Insert error:", err)
+			return nil, err
+		}
+
+		result.Photos = append(result.Photos, &model.Photo{
+			ID:        db_photo.ID,
+			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+			URL:       db_photo.URL,
+		})
+	}
+
+	
 
 	createTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
 
