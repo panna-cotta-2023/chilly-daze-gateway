@@ -129,7 +129,6 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	user.Chills = userChills
 	user.Achievements = userAchivements
 	return user, nil
-
 }
 
 // Achievements is the resolver for the achievements field.
