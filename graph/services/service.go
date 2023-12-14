@@ -22,15 +22,11 @@ type UserService interface {
 		ctx context.Context,
 		uid string,
 	) (*model.User, bool)
-	UpdateUserName(
+	UpdateUser(
 		ctx context.Context,
-		uid string,
-		name string,
-	) (*model.User, error)
-	UpdateUserAvatar(
-		ctx context.Context,
-		uid string,
-		avatar string,
+		user model.User,
+		nameStr *string,
+		avatarStr *string,
 	) (*model.User, error)
 }
 
