@@ -14,25 +14,16 @@ import (
 func (r *mutationResolver) RegisterUser(ctx context.Context, input *model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
 	var err error
-	avatar := ""
-	name := ""
-
-	if input.Avatar != nil {
-		avatar = *input.Avatar
-	}
-	if input.Name != nil {
-		name = *input.Name
-	}
 
 	if user, ok := r.Srv.GetUser(ctx, uid); ok {
-		if user.Name != name {
-			user, err = r.Srv.UpdateUserName(ctx, uid, name)
+		if input.Name != nil {
+			user, err = r.Srv.UpdateUserName(ctx, uid, *input.Name)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if user.Avatar != avatar {
-			user, err = r.Srv.UpdateUserAvatar(ctx, uid, avatar)
+		if input.Avatar != nil {
+			user, err = r.Srv.UpdateUserAvatar(ctx, uid, *input.Avatar)
 			if err != nil {
 				return nil, err
 			}
