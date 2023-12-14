@@ -1,57 +1,39 @@
-query User{
+query User {
   id
+  name
+  avatar {
+    id
     name
-    avatar {
+    displayName
+    description
+    category {
       id
       name
       displayName
-      description
-      category {
-        id
-        name
-        displayName
-        achievements {
-          id
-          name
-          displayName
-          description
-        }
-      }
-    }
-    chills {
-      id
-      traces {
-        id
-        timestamp
-        coordinate {
-          latitude
-          longitude
-        }
-      }
-      photos {
-        id
-        url
-        timestamp
-      }
-      newAchievements {
+      achievements {
         id
         name
         displayName
         description
-        category {
-          id
-          name
-          displayName
-          achievements {
-            id
-            name
-            displayName
-            description
-          }
-        }
       }
     }
-    achievements {
+  }
+  chills {
+    id
+    traces {
+      id
+      timestamp
+      coordinate {
+        latitude
+        longitude
+      }
+    }
+    photos {
+      id
+      url
+      timestamp
+    }
+    newAchievements {
       id
       name
       displayName
@@ -68,9 +50,7 @@ query User{
         }
       }
     }
-}
-
-query Achievements{
+  }
   achievements {
     id
     name
@@ -90,7 +70,27 @@ query Achievements{
   }
 }
 
-query AchievementCategories{
+query Achievements {
+  achievements {
+    id
+    name
+    displayName
+    description
+    category {
+      id
+      name
+      displayName
+      achievements {
+        id
+        name
+        displayName
+        description
+      }
+    }
+  }
+}
+
+query AchievementCategories {
   achievementCategories {
     id
     name
@@ -104,9 +104,7 @@ query AchievementCategories{
   }
 }
 
-mutation registerUser(
-  $input: RegisterUserInput!
-  ) {
+mutation registerUser($input: RegisterUserInput!) {
   registerUser(input: $input) {
     id
     name
@@ -180,60 +178,54 @@ mutation registerUser(
   }
 }
 
-mutation startChill(
-  $input: StartChillInput!
-  ) {
+mutation startChill($input: StartChillInput!) {
   startChill(input: $input) {
     id
-      traces {
-        id
-        timestamp
-        coordinate {
-          latitude
-          longitude
-        }
-      }
-      photos {
-        id
-        url
-        timestamp
-      }
-      newAchievements {
-        id
-        name
-        displayName
-        description
-        category {
-          id
-          name
-          displayName
-          achievements {
-            id
-            name
-            displayName
-            description
-          }
-        }
-      }
-  }
-}
-
-mutation addTracePoints(
-  $input: TracePointsInput!
-  ) {
-  addTracePoints(input: $input) {
-    id
+    traces {
+      id
       timestamp
       coordinate {
         latitude
         longitude
       }
+    }
+    photos {
+      id
+      url
+      timestamp
+    }
+    newAchievements {
+      id
+      name
+      displayName
+      description
+      category {
+        id
+        name
+        displayName
+        achievements {
+          id
+          name
+          displayName
+          description
+        }
+      }
+    }
   }
 }
 
-mutation addPhotos(
-  $input: PhotosInput!
-  ) {
+mutation addTracePoints($input: TracePointsInput!) {
+  addTracePoints(input: $input) {
+    id
+    timestamp
+    coordinate {
+      latitude
+      longitude
+    }
+  }
+}
+
+mutation addPhotos($input: PhotosInput!) {
   addPhotos(input: $input) {
     id
     url
@@ -241,40 +233,38 @@ mutation addPhotos(
   }
 }
 
-mutation endChill(
-  $input: EndChillInput!
-  ) {
+mutation endChill($input: EndChillInput!) {
   endChill(input: $input) {
     id
-      traces {
-        id
-        timestamp
-        coordinate {
-          latitude
-          longitude
-        }
+    traces {
+      id
+      timestamp
+      coordinate {
+        latitude
+        longitude
       }
-      photos {
-        id
-        url
-        timestamp
-      }
-      newAchievements {
+    }
+    photos {
+      id
+      url
+      timestamp
+    }
+    newAchievements {
+      id
+      name
+      displayName
+      description
+      category {
         id
         name
         displayName
-        description
-        category {
+        achievements {
           id
           name
           displayName
-          achievements {
-            id
-            name
-            displayName
-            description
-          }
+          description
         }
       }
+    }
   }
 }
