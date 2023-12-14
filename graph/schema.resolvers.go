@@ -125,7 +125,12 @@ func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement,
 
 // AchievementCategories is the resolver for the achievementCategories field.
 func (r *queryResolver) AchievementCategories(ctx context.Context) ([]*model.AchievementCategory, error) {
-	panic(fmt.Errorf("not implemented: AchievementCategories - achievementCategories"))
+	achievementCategories, err := r.Srv.GetAchievementCategories(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return achievementCategories, nil
 }
 
 // Mutation returns MutationResolver implementation.

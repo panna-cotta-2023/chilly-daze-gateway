@@ -80,6 +80,13 @@ type AchievementService interface {
 	GetAchievements(
 		ctx context.Context,
 	) ([]*model.Achievement, error)
+	GetAchievementCategories(
+		ctx context.Context,
+	) ([]*model.AchievementCategory, error)
+	// GetAchievementsByCategoryId(
+	// 	ctx context.Context,
+	// 	category_id string,
+	// ) ([]*model.Achievement, error)
 }
 
 type Services interface {
