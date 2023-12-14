@@ -24,16 +24,12 @@ func (u *ChillService) StartChill(
 		ID:     uuid.New().String(),
 		Traces: []*model.TracePoint{},
 	}
-
-	log.Println("startChill.Timestamp", startChill.Timestamp)
-
+	
 	createTimeStamp, err := lib.ParseTimestamp(startChill.Timestamp)
 	if err != nil {
 		log.Println("lib.ParseTimestamp error:", err)
 		return nil, err
 	}
-
-	log.Println("createTimeStamp", createTimeStamp)
 
 	result.Traces = append(result.Traces, &model.TracePoint{
 		ID:        uuid.New().String(),
