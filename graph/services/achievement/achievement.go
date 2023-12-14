@@ -35,9 +35,9 @@ func (u *AchievementService) GetAchievementsByUserId(
 		result = append(result, &model.Achievement{
 			ID:          db_achievement.ID,
 			Name:        db_achievement.Name,
-			Description: db_achievement.Description.String,
-			// Category:    db_achievement.Category,
-			// Image: 		 db_achievement.Image,
+			Description: db_achievement.Description,
+			Category:    db_achievement.Category,
+			Image: 		 db_achievement.ImageURL,
 		})
 	}
 
@@ -60,9 +60,9 @@ func (u *AchievementService) GetAchievements(
 		result = append(result, &model.Achievement{
 			ID:          db_achievement.ID,
 			Name:        db_achievement.Name,
-			Description: db_achievement.Description.String,
-			// Category:    db_achievement.Category,
-			// Image: 		 db_achievement.Image,
+			Description: db_achievement.Description,
+			Category:    db_achievement.Category,
+			Image: 		 db_achievement.ImageURL,
 		})
 	}
 
