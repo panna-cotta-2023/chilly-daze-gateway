@@ -3,11 +3,18 @@
 package model
 
 type Achievement struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Category    string `json:"category"`
-	Image       string `json:"image"`
+	ID          string               `json:"id"`
+	Name        string               `json:"name"`
+	DisplayName string               `json:"displayName"`
+	Description string               `json:"description"`
+	Category    *AchievementCategory `json:"category"`
+}
+
+type AchievementCategory struct {
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	DisplayName  string         `json:"displayName"`
+	Achievements []*Achievement `json:"achievements"`
 }
 
 type Chill struct {
@@ -79,7 +86,7 @@ type TracePointsInput struct {
 type User struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
-	Avatar       string         `json:"avatar"`
+	Avatar       *Achievement   `json:"avatar,omitempty"`
 	Chills       []*Chill       `json:"chills"`
 	Achievements []*Achievement `json:"achievements"`
 }

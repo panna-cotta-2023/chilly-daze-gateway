@@ -52,6 +52,7 @@ type User {
 type Query {
     user: User! @isAuthenticated                    # Get current user
     achievements: [Achievement!]! @isAuthenticated  # Get all achievements
+    achievementCategories: [AchievementCategory!]!  # Get all achievement categories
 }
 
 input RegisterUserInput {

@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -39,6 +40,7 @@ func main() {
 			Srv: services,
 		},
 		Directives: graph.Directive,
+		Complexity: graph.Complexity,
 	}))
 
 	http.Handle("/", auth.AuthMiddleware(srv))

@@ -32,12 +32,22 @@ func (u *AchievementService) GetAchievementsByUserId(
 			return nil, err
 		}
 
+		db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
+		if err != nil {
+			log.Println("db_achievement_category.Select error:", err)
+			return nil, err
+		}
+
 		result = append(result, &model.Achievement{
 			ID:          db_achievement.ID,
 			Name:        db_achievement.Name,
 			Description: db_achievement.Description,
-			Category:    db_achievement.Category,
-			Image: 		 db_achievement.ImageURL,
+			DisplayName: db_achievement_category.DisplayName,
+			Category: 	&model.AchievementCategory{
+				ID: db_achievement_category.ID,
+				Name: db_achievement_category.Name,
+				DisplayName: db_achievement_category.DisplayName,
+			},
 		})
 	}
 
