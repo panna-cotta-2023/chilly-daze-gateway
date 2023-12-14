@@ -51,6 +51,13 @@ entity "UserChills" {
   * chill_id: UUID <<FK>>
 }
 
+entity "ChillAchievements" {
+  * id: UUID
+  --
+  * chill_id: UUID <<FK>>
+  * achievement_id: UUID <<FK>>
+}
+
 entity "TracePoints" {
   * id: UUID
   --
@@ -76,6 +83,7 @@ Chills ||--o{ TracePoints
 Chills ||--o{ Photos
 AchievementCategories ||--o{ Achievements
 Users }--|| Achievements
-
+Achievements }o--|| ChillAchievements
+Chills }o--|| ChillAchievements
 
 @enduml
