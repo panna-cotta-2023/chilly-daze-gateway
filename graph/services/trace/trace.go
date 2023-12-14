@@ -6,7 +6,6 @@ import (
 	"chilly_daze_gateway/graph/services/lib"
 	"context"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -25,11 +24,9 @@ func (u *TraceService) AddTracePoints(
 	result := []*model.TracePoint{}
 
 	for _, tracePoint := range tracePoints {
-		timestampString := lib.CovertTimestampString(tracePoint.Timestamp)
-
-		timestamp, err := time.Parse(time.RFC3339, timestampString)
+		timestamp, err := lib.ParseTimestamp(tracePoint.Timestamp)
 		if err != nil {
-			log.Println("time.Parse error:", err)
+			log.Println("lib.ParseTimestamp error:", err)
 			return nil, err
 		}
 

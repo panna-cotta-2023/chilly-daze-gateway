@@ -6,7 +6,6 @@ import (
 	"chilly_daze_gateway/graph/services/lib"
 	"context"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
@@ -26,17 +25,19 @@ func (u *ChillService) StartChill(
 		Traces: []*model.TracePoint{},
 	}
 
-	createTimeStampString := lib.CovertTimestampString(startChill.Timestamp)
+	log.Println("startChill.Timestamp", startChill.Timestamp)
 
-	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
+	createTimeStamp, err := lib.ParseTimestamp(startChill.Timestamp)
 	if err != nil {
-		log.Println("time.Parse error:", err)
+		log.Println("lib.ParseTimestamp error:", err)
 		return nil, err
 	}
 
+	log.Println("createTimeStamp", createTimeStamp)
+
 	result.Traces = append(result.Traces, &model.TracePoint{
 		ID:        uuid.New().String(),
-		Timestamp: createTimeStampString,
+		Timestamp: createTimeStamp.Format("2006-01-02T15:04:05+09:00"),
 		Coordinate: &model.Coordinate{
 			Latitude:  startChill.Coordinate.Latitude,
 			Longitude: startChill.Coordinate.Longitude,
@@ -81,11 +82,9 @@ func (u *ChillService) EndChill(
 	}
 
 	for _, tracePoint := range endChill.TracePoints {
-		timestampString := lib.CovertTimestampString(tracePoint.Timestamp)
-
-		timestamp, err := time.Parse(time.RFC3339, timestampString)
+		timestamp, err := lib.ParseTimestamp(tracePoint.Timestamp)
 		if err != nil {
-			log.Println("time.Parse error:", err)
+			log.Println("lib.ParseTimestamp error:", err)
 			return nil, err
 		}
 
@@ -114,11 +113,9 @@ func (u *ChillService) EndChill(
 	}
 
 	for _, photo := range endChill.Photos {
-		timestampString := lib.CovertTimestampString(photo.Timestamp)
-
-		timestamp, err := time.Parse(time.RFC3339, timestampString)
+		timestamp, err := lib.ParseTimestamp(photo.Timestamp)
 		if err != nil {
-			log.Println("time.Parse error:", err)
+			log.Println("lib.ParseTimestamp error:", err)
 			return nil, err
 		}
 
@@ -142,23 +139,13 @@ func (u *ChillService) EndChill(
 		})
 	}
 
-	
-
-	createTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
-
-	createTimeStamp, err := time.Parse(time.RFC3339, createTimeStampString)
+	createTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
 	if err != nil {
-		log.Println("time.Parse error:", err)
+		log.Println("lib.ParseTimestamp error:", err)
 		return nil, err
 	}
 
-	endTimeStampString := lib.CovertTimestampString(endChill.Timestamp)
-
-	endTimeStamp, err := time.Parse(time.RFC3339, endTimeStampString)
-	if err != nil {
-		log.Println("time.Parse error:", err)
-		return nil, err
-	}
+	endTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
 
 	db_chill := &db.Chill{
 		ID:        result.ID,
@@ -257,9 +244,9 @@ func (u *ChillService) GetChillsByUserId(
 		}
 
 		result = append(result, &model.Chill{
-			ID:        db_chill.ID,
-			Traces:    traces,
-			Photos:    photos,
+			ID:     db_chill.ID,
+			Traces: traces,
+			Photos: photos,
 		})
 	}
 
