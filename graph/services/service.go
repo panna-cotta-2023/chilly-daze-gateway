@@ -87,6 +87,9 @@ type AchievementService interface {
 		ctx context.Context,
 		user_id string,
 	) ([]*model.Achievement, error)
+	GetAchievements(
+		ctx context.Context,
+	) ([]*model.Achievement, error)
 }
 
 type Services interface {

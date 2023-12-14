@@ -134,7 +134,12 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 
 // Achievements is the resolver for the achievements field.
 func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+	achievements, err := r.Srv.GetAchievements(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return achievements, nil
 }
 
 // Mutation returns MutationResolver implementation.
