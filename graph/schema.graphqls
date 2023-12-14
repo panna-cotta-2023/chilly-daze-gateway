@@ -57,7 +57,7 @@ type Query {
 
 input RegisterUserInput {
     name: String    # Username
-    avatar: String  # URL to avatar
+    avatar: String  # Achievement name
 }
 
 input CoordinateInput {

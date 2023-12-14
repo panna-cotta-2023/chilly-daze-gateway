@@ -10,12 +10,6 @@ query User {
       id
       name
       displayName
-      achievements {
-        id
-        name
-        displayName
-        description
-      }
     }
   }
   chills {
@@ -42,12 +36,6 @@ query User {
         id
         name
         displayName
-        achievements {
-          id
-          name
-          displayName
-          description
-        }
       }
     }
   }
@@ -60,12 +48,6 @@ query User {
       id
       name
       displayName
-      achievements {
-        id
-        name
-        displayName
-        description
-      }
     }
   }
 }
@@ -80,12 +62,6 @@ query Achievements {
       id
       name
       displayName
-      achievements {
-        id
-        name
-        displayName
-        description
-      }
     }
   }
 }
@@ -117,12 +93,6 @@ mutation registerUser($input: RegisterUserInput!) {
         id
         name
         displayName
-        achievements {
-          id
-          name
-          displayName
-          description
-        }
       }
     }
     chills {
@@ -140,23 +110,6 @@ mutation registerUser($input: RegisterUserInput!) {
         url
         timestamp
       }
-      newAchievements {
-        id
-        name
-        displayName
-        description
-        category {
-          id
-          name
-          displayName
-          achievements {
-            id
-            name
-            displayName
-            description
-          }
-        }
-      }
     }
     achievements {
       id
@@ -167,12 +120,6 @@ mutation registerUser($input: RegisterUserInput!) {
         id
         name
         displayName
-        achievements {
-          id
-          name
-          displayName
-          description
-        }
       }
     }
   }
@@ -203,12 +150,6 @@ mutation startChill($input: StartChillInput!) {
         id
         name
         displayName
-        achievements {
-          id
-          name
-          displayName
-          description
-        }
       }
     }
   }
@@ -258,12 +199,6 @@ mutation endChill($input: EndChillInput!) {
         id
         name
         displayName
-        achievements {
-          id
-          name
-          displayName
-          description
-        }
       }
     }
   }

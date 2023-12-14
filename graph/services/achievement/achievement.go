@@ -86,21 +86,6 @@ func (u *AchievementService) GetAchievements(
 			DisplayName: db_achievement_category.DisplayName,
 		}
 
-		db_achievements_achievement_category, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(db_achievement_category.ID)).All(ctx, u.Exec)
-		if err != nil {
-			log.Println("db_achievements_category.Select error:", err)
-			return nil, err
-		}
-
-		for _, db_achievement_achievement_category := range db_achievements_achievement_category {
-			achievement.Category.Achievements = append(achievement.Category.Achievements, &model.Achievement{
-				ID:          db_achievement_achievement_category.ID,
-				Name:        db_achievement_achievement_category.Name,
-				DisplayName: db_achievement_achievement_category.DisplayName,
-				Description: db_achievement_achievement_category.Description,
-			})
-		}
-
 		result = append(result, achievement)
 	}
 
