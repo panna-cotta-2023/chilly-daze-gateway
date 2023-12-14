@@ -10,17 +10,24 @@ entity "Users" {
   * id: string
   --
   * name: string
-  * avatar_url: string
+  avatar: UUID <<FK>>
   * created_at: timestamp
+}
+
+entity "AchievementsCategories" {
+  * id: UUID
+  --
+  * name: string
+  * display_name: string
 }
 
 entity "Achievements" {
   * id: UUID
   --
-  * name: string
-  * description: string
-  * category: string
-  * image_url: string
+  *name: string
+  *display_name: string
+  *description: string
+  *category_id: UUID <<FK>>
 }
 
 entity "UserAchievements" {
@@ -67,6 +74,8 @@ Users ||--o{ UserChills
 Chills ||--o{ UserChills
 Chills ||--o{ TracePoints
 Chills ||--o{ Photos
+AchievementsCategories ||--o{ Achievements
+Users }--|| Achievements
 
 
 @enduml

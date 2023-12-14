@@ -99,11 +99,11 @@ var TracePointWhere = struct {
 	Longitude whereHelperfloat64
 	Timestamp whereHelpertime_Time
 }{
-	ID:        whereHelperstring{field: "\"trace_points\".\"id\""},
-	ChillID:   whereHelperstring{field: "\"trace_points\".\"chill_id\""},
-	Latitude:  whereHelperfloat64{field: "\"trace_points\".\"latitude\""},
-	Longitude: whereHelperfloat64{field: "\"trace_points\".\"longitude\""},
-	Timestamp: whereHelpertime_Time{field: "\"trace_points\".\"timestamp\""},
+	ID:        whereHelperstring{field: "\"chilly_daze\".\"trace_points\".\"id\""},
+	ChillID:   whereHelperstring{field: "\"chilly_daze\".\"trace_points\".\"chill_id\""},
+	Latitude:  whereHelperfloat64{field: "\"chilly_daze\".\"trace_points\".\"latitude\""},
+	Longitude: whereHelperfloat64{field: "\"chilly_daze\".\"trace_points\".\"longitude\""},
+	Timestamp: whereHelpertime_Time{field: "\"chilly_daze\".\"trace_points\".\"timestamp\""},
 }
 
 // TracePointRels is where relationship names are stored.
@@ -488,8 +488,8 @@ func (tracePointL) LoadChill(ctx context.Context, e boil.ContextExecutor, singul
 	}
 
 	query := NewQuery(
-		qm.From(`chills`),
-		qm.WhereIn(`chills.id in ?`, args...),
+		qm.From(`chilly_daze.chills`),
+		qm.WhereIn(`chilly_daze.chills.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -562,7 +562,7 @@ func (o *TracePoint) SetChill(ctx context.Context, exec boil.ContextExecutor, in
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"trace_points\" SET %s WHERE %s",
+		"UPDATE \"chilly_daze\".\"trace_points\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
 		strmangle.WhereClause("\"", "\"", 2, tracePointPrimaryKeyColumns),
 	)
@@ -599,10 +599,10 @@ func (o *TracePoint) SetChill(ctx context.Context, exec boil.ContextExecutor, in
 
 // TracePoints retrieves all the records using an executor.
 func TracePoints(mods ...qm.QueryMod) tracePointQuery {
-	mods = append(mods, qm.From("\"trace_points\""))
+	mods = append(mods, qm.From("\"chilly_daze\".\"trace_points\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"trace_points\".*"})
+		queries.SetSelect(q, []string{"\"chilly_daze\".\"trace_points\".*"})
 	}
 
 	return tracePointQuery{q}
@@ -618,7 +618,7 @@ func FindTracePoint(ctx context.Context, exec boil.ContextExecutor, iD string, s
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"trace_points\" where \"id\"=$1", sel,
+		"select %s from \"chilly_daze\".\"trace_points\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -675,9 +675,9 @@ func (o *TracePoint) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"trace_points\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"chilly_daze\".\"trace_points\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"trace_points\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"chilly_daze\".\"trace_points\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -743,7 +743,7 @@ func (o *TracePoint) Update(ctx context.Context, exec boil.ContextExecutor, colu
 			return 0, errors.New("db: unable to update trace_points, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"trace_points\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"chilly_daze\".\"trace_points\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, tracePointPrimaryKeyColumns),
 		)
@@ -824,7 +824,7 @@ func (o TracePointSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"trace_points\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"chilly_daze\".\"trace_points\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, tracePointPrimaryKeyColumns, len(o)))
 
@@ -914,7 +914,7 @@ func (o *TracePoint) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 			conflict = make([]string, len(tracePointPrimaryKeyColumns))
 			copy(conflict, tracePointPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"trace_points\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"chilly_daze\".\"trace_points\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(tracePointType, tracePointMapping, insert)
 		if err != nil {
@@ -973,7 +973,7 @@ func (o *TracePoint) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), tracePointPrimaryKeyMapping)
-	sql := "DELETE FROM \"trace_points\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"chilly_daze\".\"trace_points\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1038,7 +1038,7 @@ func (o TracePointSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"trace_points\" WHERE " +
+	sql := "DELETE FROM \"chilly_daze\".\"trace_points\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, tracePointPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1093,7 +1093,7 @@ func (o *TracePointSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"trace_points\".* FROM \"trace_points\" WHERE " +
+	sql := "SELECT \"chilly_daze\".\"trace_points\".* FROM \"chilly_daze\".\"trace_points\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, tracePointPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1111,7 +1111,7 @@ func (o *TracePointSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 // TracePointExists checks if the TracePoint row exists.
 func TracePointExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"trace_points\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"chilly_daze\".\"trace_points\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

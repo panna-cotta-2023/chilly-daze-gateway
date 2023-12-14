@@ -4,19 +4,21 @@
 package db
 
 var TableNames = struct {
-	Achievements     string
-	Chills           string
-	Photos           string
-	TracePoints      string
-	UserAchievements string
-	UserChills       string
-	Users            string
+	AchievementCategories string
+	Achievements          string
+	Chills                string
+	Photos                string
+	TracePoints           string
+	UserAchievements      string
+	UserChills            string
+	Users                 string
 }{
-	Achievements:     "achievements",
-	Chills:           "chills",
-	Photos:           "photos",
-	TracePoints:      "trace_points",
-	UserAchievements: "user_achievements",
-	UserChills:       "user_chills",
-	Users:            "users",
+	AchievementCategories: "achievement_categories",
+	Achievements:          "achievements",
+	Chills:                "chills",
+	Photos:                "photos",
+	TracePoints:           "trace_points",
+	UserAchievements:      "user_achievements",
+	UserChills:            "user_chills",
+	Users:                 "users",
 }

@@ -104,9 +104,9 @@ var ChillWhere = struct {
 	CreatedAt whereHelpertime_Time
 	EndedAt   whereHelpernull_Time
 }{
-	ID:        whereHelperstring{field: "\"chills\".\"id\""},
-	CreatedAt: whereHelpertime_Time{field: "\"chills\".\"created_at\""},
-	EndedAt:   whereHelpernull_Time{field: "\"chills\".\"ended_at\""},
+	ID:        whereHelperstring{field: "\"chilly_daze\".\"chills\".\"id\""},
+	CreatedAt: whereHelpertime_Time{field: "\"chilly_daze\".\"chills\".\"created_at\""},
+	EndedAt:   whereHelpernull_Time{field: "\"chilly_daze\".\"chills\".\"ended_at\""},
 }
 
 // ChillRels is where relationship names are stored.
@@ -450,7 +450,7 @@ func (o *Chill) Photos(mods ...qm.QueryMod) photoQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"photos\".\"chill_id\"=?", o.ID),
+		qm.Where("\"chilly_daze\".\"photos\".\"chill_id\"=?", o.ID),
 	)
 
 	return Photos(queryMods...)
@@ -464,7 +464,7 @@ func (o *Chill) TracePoints(mods ...qm.QueryMod) tracePointQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"trace_points\".\"chill_id\"=?", o.ID),
+		qm.Where("\"chilly_daze\".\"trace_points\".\"chill_id\"=?", o.ID),
 	)
 
 	return TracePoints(queryMods...)
@@ -478,7 +478,7 @@ func (o *Chill) UserChills(mods ...qm.QueryMod) userChillQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"user_chills\".\"chill_id\"=?", o.ID),
+		qm.Where("\"chilly_daze\".\"user_chills\".\"chill_id\"=?", o.ID),
 	)
 
 	return UserChills(queryMods...)
@@ -540,8 +540,8 @@ func (chillL) LoadPhotos(ctx context.Context, e boil.ContextExecutor, singular b
 	}
 
 	query := NewQuery(
-		qm.From(`photos`),
-		qm.WhereIn(`photos.chill_id in ?`, args...),
+		qm.From(`chilly_daze.photos`),
+		qm.WhereIn(`chilly_daze.photos.chill_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -654,8 +654,8 @@ func (chillL) LoadTracePoints(ctx context.Context, e boil.ContextExecutor, singu
 	}
 
 	query := NewQuery(
-		qm.From(`trace_points`),
-		qm.WhereIn(`trace_points.chill_id in ?`, args...),
+		qm.From(`chilly_daze.trace_points`),
+		qm.WhereIn(`chilly_daze.trace_points.chill_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -768,8 +768,8 @@ func (chillL) LoadUserChills(ctx context.Context, e boil.ContextExecutor, singul
 	}
 
 	query := NewQuery(
-		qm.From(`user_chills`),
-		qm.WhereIn(`user_chills.chill_id in ?`, args...),
+		qm.From(`chilly_daze.user_chills`),
+		qm.WhereIn(`chilly_daze.user_chills.chill_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -840,7 +840,7 @@ func (o *Chill) AddPhotos(ctx context.Context, exec boil.ContextExecutor, insert
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"photos\" SET %s WHERE %s",
+				"UPDATE \"chilly_daze\".\"photos\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
 				strmangle.WhereClause("\"", "\"", 2, photoPrimaryKeyColumns),
 			)
@@ -893,7 +893,7 @@ func (o *Chill) AddTracePoints(ctx context.Context, exec boil.ContextExecutor, i
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"trace_points\" SET %s WHERE %s",
+				"UPDATE \"chilly_daze\".\"trace_points\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
 				strmangle.WhereClause("\"", "\"", 2, tracePointPrimaryKeyColumns),
 			)
@@ -946,7 +946,7 @@ func (o *Chill) AddUserChills(ctx context.Context, exec boil.ContextExecutor, in
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"user_chills\" SET %s WHERE %s",
+				"UPDATE \"chilly_daze\".\"user_chills\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
 				strmangle.WhereClause("\"", "\"", 2, userChillPrimaryKeyColumns),
 			)
@@ -987,10 +987,10 @@ func (o *Chill) AddUserChills(ctx context.Context, exec boil.ContextExecutor, in
 
 // Chills retrieves all the records using an executor.
 func Chills(mods ...qm.QueryMod) chillQuery {
-	mods = append(mods, qm.From("\"chills\""))
+	mods = append(mods, qm.From("\"chilly_daze\".\"chills\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"chills\".*"})
+		queries.SetSelect(q, []string{"\"chilly_daze\".\"chills\".*"})
 	}
 
 	return chillQuery{q}
@@ -1006,7 +1006,7 @@ func FindChill(ctx context.Context, exec boil.ContextExecutor, iD string, select
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"chills\" where \"id\"=$1", sel,
+		"select %s from \"chilly_daze\".\"chills\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -1070,9 +1070,9 @@ func (o *Chill) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"chills\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"chilly_daze\".\"chills\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"chills\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"chilly_daze\".\"chills\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -1138,7 +1138,7 @@ func (o *Chill) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 			return 0, errors.New("db: unable to update chills, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"chills\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"chilly_daze\".\"chills\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, chillPrimaryKeyColumns),
 		)
@@ -1219,7 +1219,7 @@ func (o ChillSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"chills\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"chilly_daze\".\"chills\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, chillPrimaryKeyColumns, len(o)))
 
@@ -1316,7 +1316,7 @@ func (o *Chill) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 			conflict = make([]string, len(chillPrimaryKeyColumns))
 			copy(conflict, chillPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"chills\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"chilly_daze\".\"chills\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(chillType, chillMapping, insert)
 		if err != nil {
@@ -1375,7 +1375,7 @@ func (o *Chill) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), chillPrimaryKeyMapping)
-	sql := "DELETE FROM \"chills\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"chilly_daze\".\"chills\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1440,7 +1440,7 @@ func (o ChillSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"chills\" WHERE " +
+	sql := "DELETE FROM \"chilly_daze\".\"chills\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, chillPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1495,7 +1495,7 @@ func (o *ChillSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"chills\".* FROM \"chills\" WHERE " +
+	sql := "SELECT \"chilly_daze\".\"chills\".* FROM \"chilly_daze\".\"chills\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, chillPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1513,7 +1513,7 @@ func (o *ChillSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 // ChillExists checks if the Chill row exists.
 func ChillExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"chills\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"chilly_daze\".\"chills\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
