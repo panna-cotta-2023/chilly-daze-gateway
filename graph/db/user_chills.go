@@ -65,15 +65,36 @@ var UserChillWhere = struct {
 
 // UserChillRels is where relationship names are stored.
 var UserChillRels = struct {
-}{}
+	Chill string
+	User  string
+}{
+	Chill: "Chill",
+	User:  "User",
+}
 
 // userChillR is where relationships are stored.
 type userChillR struct {
+	Chill *Chill `boil:"Chill" json:"Chill" toml:"Chill" yaml:"Chill"`
+	User  *User  `boil:"User" json:"User" toml:"User" yaml:"User"`
 }
 
 // NewStruct creates a new relationship struct
 func (*userChillR) NewStruct() *userChillR {
 	return &userChillR{}
+}
+
+func (r *userChillR) GetChill() *Chill {
+	if r == nil {
+		return nil
+	}
+	return r.Chill
+}
+
+func (r *userChillR) GetUser() *User {
+	if r == nil {
+		return nil
+	}
+	return r.User
 }
 
 // userChillL is where Load methods for each relationship are stored.
@@ -363,6 +384,362 @@ func (q userChillQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (
 	}
 
 	return count > 0, nil
+}
+
+// Chill pointed to by the foreign key.
+func (o *UserChill) Chill(mods ...qm.QueryMod) chillQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.ChillID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Chills(queryMods...)
+}
+
+// User pointed to by the foreign key.
+func (o *UserChill) User(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.UserID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
+// LoadChill allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (userChillL) LoadChill(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserChill interface{}, mods queries.Applicator) error {
+	var slice []*UserChill
+	var object *UserChill
+
+	if singular {
+		var ok bool
+		object, ok = maybeUserChill.(*UserChill)
+		if !ok {
+			object = new(UserChill)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserChill)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserChill))
+			}
+		}
+	} else {
+		s, ok := maybeUserChill.(*[]*UserChill)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserChill)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserChill))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userChillR{}
+		}
+		args = append(args, object.ChillID)
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userChillR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ChillID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ChillID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`chills`),
+		qm.WhereIn(`chills.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Chill")
+	}
+
+	var resultSlice []*Chill
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Chill")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for chills")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for chills")
+	}
+
+	if len(chillAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Chill = foreign
+		if foreign.R == nil {
+			foreign.R = &chillR{}
+		}
+		foreign.R.UserChills = append(foreign.R.UserChills, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ChillID == foreign.ID {
+				local.R.Chill = foreign
+				if foreign.R == nil {
+					foreign.R = &chillR{}
+				}
+				foreign.R.UserChills = append(foreign.R.UserChills, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (userChillL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserChill interface{}, mods queries.Applicator) error {
+	var slice []*UserChill
+	var object *UserChill
+
+	if singular {
+		var ok bool
+		object, ok = maybeUserChill.(*UserChill)
+		if !ok {
+			object = new(UserChill)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserChill)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserChill))
+			}
+		}
+	} else {
+		s, ok := maybeUserChill.(*[]*UserChill)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserChill)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserChill))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userChillR{}
+		}
+		args = append(args, object.UserID)
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userChillR{}
+			}
+
+			for _, a := range args {
+				if a == obj.UserID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.UserID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.User = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.UserChills = append(foreign.R.UserChills, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.UserID == foreign.ID {
+				local.R.User = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.UserChills = append(foreign.R.UserChills, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetChill of the userChill to the related item.
+// Sets o.R.Chill to related.
+// Adds o to related.R.UserChills.
+func (o *UserChill) SetChill(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Chill) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"user_chills\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
+		strmangle.WhereClause("\"", "\"", 2, userChillPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.ChillID = related.ID
+	if o.R == nil {
+		o.R = &userChillR{
+			Chill: related,
+		}
+	} else {
+		o.R.Chill = related
+	}
+
+	if related.R == nil {
+		related.R = &chillR{
+			UserChills: UserChillSlice{o},
+		}
+	} else {
+		related.R.UserChills = append(related.R.UserChills, o)
+	}
+
+	return nil
+}
+
+// SetUser of the userChill to the related item.
+// Sets o.R.User to related.
+// Adds o to related.R.UserChills.
+func (o *UserChill) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"user_chills\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+		strmangle.WhereClause("\"", "\"", 2, userChillPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.UserID = related.ID
+	if o.R == nil {
+		o.R = &userChillR{
+			User: related,
+		}
+	} else {
+		o.R.User = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			UserChills: UserChillSlice{o},
+		}
+	} else {
+		related.R.UserChills = append(related.R.UserChills, o)
+	}
+
+	return nil
 }
 
 // UserChills retrieves all the records using an executor.

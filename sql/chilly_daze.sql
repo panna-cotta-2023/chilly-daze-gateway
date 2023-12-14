@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS achievements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  description TEXT
+  description TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  category TEXT NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS users (
