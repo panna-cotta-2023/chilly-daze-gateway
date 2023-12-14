@@ -14,7 +14,7 @@ entity "Users" {
   * created_at: timestamp
 }
 
-entity "AchievementsCategories" {
+entity "AchievementCategories" {
   * id: UUID
   --
   * name: string
@@ -74,7 +74,7 @@ Users ||--o{ UserChills
 Chills ||--o{ UserChills
 Chills ||--o{ TracePoints
 Chills ||--o{ Photos
-AchievementsCategories ||--o{ Achievements
+AchievementCategories ||--o{ Achievements
 Users }--|| Achievements
 
 

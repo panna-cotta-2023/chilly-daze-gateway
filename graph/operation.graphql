@@ -1,8 +1,23 @@
 query User{
-  user {
-    id
+  id
     name
-    avatar
+    avatar {
+      id
+      name
+      displayName
+      description
+      category {
+        id
+        name
+        displayName
+        achievements {
+          id
+          name
+          displayName
+          description
+        }
+      }
+    }
     chills {
       id
       traces {
@@ -18,22 +33,74 @@ query User{
         url
         timestamp
       }
+      newAchievements {
+        id
+        name
+        displayName
+        description
+        category {
+          id
+          name
+          displayName
+          achievements {
+            id
+            name
+            displayName
+            description
+          }
+        }
+      }
     }
     achievements {
       id
       name
+      displayName
       description
-      image
+      category {
+        id
+        name
+        displayName
+        achievements {
+          id
+          name
+          displayName
+          description
+        }
+      }
     }
-  }
 }
 
 query Achievements{
   achievements {
     id
     name
+    displayName
     description
-    image
+    category {
+      id
+      name
+      displayName
+      achievements {
+        id
+        name
+        displayName
+        description
+      }
+    }
+  }
+}
+
+query AchievementCategories{
+  achievementCategories {
+    id
+    name
+    displayName
+    achievements {
+      id
+      name
+      displayName
+      description
+    }
   }
 }
 
@@ -43,7 +110,23 @@ mutation registerUser(
   registerUser(input: $input) {
     id
     name
-    avatar
+    avatar {
+      id
+      name
+      displayName
+      description
+      category {
+        id
+        name
+        displayName
+        achievements {
+          id
+          name
+          displayName
+          description
+        }
+      }
+    }
     chills {
       id
       traces {
@@ -59,12 +142,40 @@ mutation registerUser(
         url
         timestamp
       }
+      newAchievements {
+        id
+        name
+        displayName
+        description
+        category {
+          id
+          name
+          displayName
+          achievements {
+            id
+            name
+            displayName
+            description
+          }
+        }
+      }
     }
     achievements {
       id
       name
+      displayName
       description
-      image
+      category {
+        id
+        name
+        displayName
+        achievements {
+          id
+          name
+          displayName
+          description
+        }
+      }
     }
   }
 }
@@ -74,19 +185,36 @@ mutation startChill(
   ) {
   startChill(input: $input) {
     id
-    traces {
-      id
-      timestamp
-      coordinate {
-        latitude
-        longitude
+      traces {
+        id
+        timestamp
+        coordinate {
+          latitude
+          longitude
+        }
       }
-    }
-    photos {
-      id
-      url
-      timestamp
-    }
+      photos {
+        id
+        url
+        timestamp
+      }
+      newAchievements {
+        id
+        name
+        displayName
+        description
+        category {
+          id
+          name
+          displayName
+          achievements {
+            id
+            name
+            displayName
+            description
+          }
+        }
+      }
   }
 }
 
@@ -118,18 +246,35 @@ mutation endChill(
   ) {
   endChill(input: $input) {
     id
-    traces {
-      id
-      timestamp
-      coordinate {
-        latitude
-        longitude
+      traces {
+        id
+        timestamp
+        coordinate {
+          latitude
+          longitude
+        }
       }
-    }
-    photos {
-      id
-      url
-      timestamp
-    }
+      photos {
+        id
+        url
+        timestamp
+      }
+      newAchievements {
+        id
+        name
+        displayName
+        description
+        category {
+          id
+          name
+          displayName
+          achievements {
+            id
+            name
+            displayName
+            description
+          }
+        }
+      }
   }
 }
