@@ -42,7 +42,7 @@ func main() {
 	}))
 
 	http.Handle("/", auth.AuthMiddleware(srv))
-	
+
 	if boil.DebugMode {
 		http.Handle("/playground", playground.Handler("GraphQL playground", "/"))
 	}

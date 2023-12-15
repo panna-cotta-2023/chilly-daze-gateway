@@ -37,8 +37,9 @@ type Photo {
 type Chill {
     id: ID!
     traces: [TracePoint!]!
-    photos: [Photo!]!
+    photo: Photo
     newAchievements: [Achievement!]!
+    distanceMeters: Float!
 }
 
 type User {
@@ -52,11 +53,16 @@ type User {
 type Query {
     user: User! @isAuthenticated                    # Get current user
     achievements: [Achievement!]! @isAuthenticated  # Get all achievements
+    achievementCategories: [AchievementCategory!]!  # Get all achievement categories
 }
 
 input RegisterUserInput {
+    name: String!    # Username
+}
+
+input UpdateUserInput {
     name: String    # Username
-    avatar: String  # URL to avatar
+    avatar: String  # Achievement name
 }
 
 input CoordinateInput {
@@ -74,32 +80,22 @@ input TracePointInput {
     coordinate: CoordinateInput!
 }
 
-input TracePointsInput {
-    id: ID!                             # Chill id
-    tracePoints: [TracePointInput!]!
-}
-
 input PhotoInput {
     url: String!
     timestamp: DateTime!
 }
 
-input PhotosInput {
-    id: ID!                 # Chill id
-    photos: [PhotoInput!]!
-}
-
 input EndChillInput {
     id: ID!                 # Chill id
     tracePoints: [TracePointInput!]!
-    photos: [PhotoInput!]!
+    photo: PhotoInput
     timestamp: DateTime!
+    distanceMeters: Float!
 }
 
 type Mutation {
-    registerUser(input: RegisterUserInput!): User! @isAuthenticated  # Other information can derive from the token
+    registerUser(input: RegisterUserInput!): User! @isAuthenticated
+    updateUser(input: UpdateUserInput!): User! @isAuthenticated
     startChill(input: StartChillInput!): Chill! @isAuthenticated
-    addTracePoints(input: TracePointsInput!): [TracePoint!]! @isAuthenticated
-    addPhotos(input: PhotosInput!): [Photo!]! @isAuthenticated
     endChill(input: EndChillInput!): Chill! @isAuthenticated
 }

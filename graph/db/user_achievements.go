@@ -58,9 +58,9 @@ var UserAchievementWhere = struct {
 	UserID        whereHelperstring
 	AchievementID whereHelperstring
 }{
-	ID:            whereHelperstring{field: "\"user_achievements\".\"id\""},
-	UserID:        whereHelperstring{field: "\"user_achievements\".\"user_id\""},
-	AchievementID: whereHelperstring{field: "\"user_achievements\".\"achievement_id\""},
+	ID:            whereHelperstring{field: "\"chilly_daze\".\"user_achievements\".\"id\""},
+	UserID:        whereHelperstring{field: "\"chilly_daze\".\"user_achievements\".\"user_id\""},
+	AchievementID: whereHelperstring{field: "\"chilly_daze\".\"user_achievements\".\"achievement_id\""},
 }
 
 // UserAchievementRels is where relationship names are stored.
@@ -466,8 +466,8 @@ func (userAchievementL) LoadAchievement(ctx context.Context, e boil.ContextExecu
 	}
 
 	query := NewQuery(
-		qm.From(`achievements`),
-		qm.WhereIn(`achievements.id in ?`, args...),
+		qm.From(`chilly_daze.achievements`),
+		qm.WhereIn(`chilly_daze.achievements.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -586,8 +586,8 @@ func (userAchievementL) LoadUser(ctx context.Context, e boil.ContextExecutor, si
 	}
 
 	query := NewQuery(
-		qm.From(`users`),
-		qm.WhereIn(`users.id in ?`, args...),
+		qm.From(`chilly_daze.users`),
+		qm.WhereIn(`chilly_daze.users.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -660,7 +660,7 @@ func (o *UserAchievement) SetAchievement(ctx context.Context, exec boil.ContextE
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_achievements\" SET %s WHERE %s",
+		"UPDATE \"chilly_daze\".\"user_achievements\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"achievement_id"}),
 		strmangle.WhereClause("\"", "\"", 2, userAchievementPrimaryKeyColumns),
 	)
@@ -707,7 +707,7 @@ func (o *UserAchievement) SetUser(ctx context.Context, exec boil.ContextExecutor
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_achievements\" SET %s WHERE %s",
+		"UPDATE \"chilly_daze\".\"user_achievements\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
 		strmangle.WhereClause("\"", "\"", 2, userAchievementPrimaryKeyColumns),
 	)
@@ -744,10 +744,10 @@ func (o *UserAchievement) SetUser(ctx context.Context, exec boil.ContextExecutor
 
 // UserAchievements retrieves all the records using an executor.
 func UserAchievements(mods ...qm.QueryMod) userAchievementQuery {
-	mods = append(mods, qm.From("\"user_achievements\""))
+	mods = append(mods, qm.From("\"chilly_daze\".\"user_achievements\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"user_achievements\".*"})
+		queries.SetSelect(q, []string{"\"chilly_daze\".\"user_achievements\".*"})
 	}
 
 	return userAchievementQuery{q}
@@ -763,7 +763,7 @@ func FindUserAchievement(ctx context.Context, exec boil.ContextExecutor, iD stri
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"user_achievements\" where \"id\"=$1", sel,
+		"select %s from \"chilly_daze\".\"user_achievements\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -820,9 +820,9 @@ func (o *UserAchievement) Insert(ctx context.Context, exec boil.ContextExecutor,
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"user_achievements\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"chilly_daze\".\"user_achievements\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"user_achievements\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"chilly_daze\".\"user_achievements\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -888,7 +888,7 @@ func (o *UserAchievement) Update(ctx context.Context, exec boil.ContextExecutor,
 			return 0, errors.New("db: unable to update user_achievements, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"user_achievements\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"chilly_daze\".\"user_achievements\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, userAchievementPrimaryKeyColumns),
 		)
@@ -969,7 +969,7 @@ func (o UserAchievementSlice) UpdateAll(ctx context.Context, exec boil.ContextEx
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"user_achievements\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"chilly_daze\".\"user_achievements\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, userAchievementPrimaryKeyColumns, len(o)))
 
@@ -1059,7 +1059,7 @@ func (o *UserAchievement) Upsert(ctx context.Context, exec boil.ContextExecutor,
 			conflict = make([]string, len(userAchievementPrimaryKeyColumns))
 			copy(conflict, userAchievementPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"user_achievements\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"chilly_daze\".\"user_achievements\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(userAchievementType, userAchievementMapping, insert)
 		if err != nil {
@@ -1118,7 +1118,7 @@ func (o *UserAchievement) Delete(ctx context.Context, exec boil.ContextExecutor)
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userAchievementPrimaryKeyMapping)
-	sql := "DELETE FROM \"user_achievements\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"chilly_daze\".\"user_achievements\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1183,7 +1183,7 @@ func (o UserAchievementSlice) DeleteAll(ctx context.Context, exec boil.ContextEx
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"user_achievements\" WHERE " +
+	sql := "DELETE FROM \"chilly_daze\".\"user_achievements\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userAchievementPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1238,7 +1238,7 @@ func (o *UserAchievementSlice) ReloadAll(ctx context.Context, exec boil.ContextE
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"user_achievements\".* FROM \"user_achievements\" WHERE " +
+	sql := "SELECT \"chilly_daze\".\"user_achievements\".* FROM \"chilly_daze\".\"user_achievements\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userAchievementPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1256,7 +1256,7 @@ func (o *UserAchievementSlice) ReloadAll(ctx context.Context, exec boil.ContextE
 // UserAchievementExists checks if the UserAchievement row exists.
 func UserAchievementExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"user_achievements\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"chilly_daze\".\"user_achievements\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

@@ -85,3 +85,28 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  Achievement:
+    fields:
+      category:
+        resolver: true
+  AchievementCategory:
+    fields:
+      achievements:
+        resolver: true
+  User:
+    fields:
+      avatar:
+        resolver: true
+      chills:
+        resolver: true
+      achievements:
+        resolver: true
+  Chill:
+    fields:
+      traces:
+        resolver: true
+      photo:
+        resolver: true
+      newAchievements:
+        resolver: true
+        

@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -19,29 +20,19 @@ func (u *UserService) CreateUser(
 	input model.RegisterUserInput,
 	uid string,
 ) (*model.User, error) {
-	name := ""
-	avatar := ""
 
-	if input.Name != nil {
-		name = *input.Name
-	}
+	name := input.Name
 
-	if input.Avatar != nil {
-		avatar = *input.Avatar
-	}
-
-	result := &model.User{
-		ID:     uid,
-		Name:   name,
-		Avatar: avatar,
-	}
+	result := &model.User{}
 
 	db_user := &db.User{
-		ID:        result.ID,
-		Name:      result.Name,
-		AvatarURL: result.Avatar,
+		ID:        uid,
+		Name:      name,
 		CreatedAt: time.Now(),
 	}
+
+	result.ID = uid
+	result.Name = name
 
 	err := db_user.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
@@ -56,60 +47,67 @@ func (u *UserService) GetUser(
 	ctx context.Context,
 	uid string,
 ) (*model.User, bool) {
-	result := &model.User{}
-
 	db_user, err := db.Users(db.UserWhere.ID.EQ(uid)).One(ctx, u.Exec)
 	if err != nil {
 		log.Println("db_user.Select error:", err)
 		return nil, false
 	}
 
-	result.ID = db_user.ID
-	result.Name = db_user.Name
-	result.Avatar = db_user.AvatarURL
+	result := &model.User{
+		ID:   db_user.ID,
+		Name: db_user.Name,
+		Avatar: &model.Achievement{
+			ID: db_user.Avatar.String,
+		},
+	}
 
 	return result, true
 }
 
 func (u *UserService) UpdateUser(
 	ctx context.Context,
-	user model.User,
-	nameStr *string,
-	avatarStr *string,
+	userId string,
+	input model.UpdateUserInput,
 ) (*model.User, error) {
 	result := &model.User{}
-
-	name := ""
-	avatar := ""
-
-	if nameStr != nil {
-		name = *nameStr
-	} else {
-		name = user.Name
+	db_user, err := db.Users(db.UserWhere.ID.EQ(userId)).One(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_user.Select error:", err)
+		return nil, err
 	}
 
-	if avatarStr != nil {
-		avatar = *avatarStr
-	} else {
-		avatar = user.Avatar
+	if input.Name != nil {
+		result.Name = *input.Name
+		db_user.Name = *input.Name
 	}
 
-	db_user := &db.User{
-		ID:        user.ID,
-		Name:      name,
-		AvatarURL: avatar,
+	if input.Avatar != nil {
+		dbUserAchievements, err := db.UserAchievements(db.UserAchievementWhere.UserID.EQ(userId)).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.UserAchievements error:", err)
+			return nil, err
+		}
+
+		for _, dbUserAchievement := range dbUserAchievements {
+			dbAchievement, err := db.Achievements(db.AchievementWhere.ID.EQ(dbUserAchievement.AchievementID)).One(ctx, u.Exec)
+			if err != nil {
+				log.Println("db.Achievements error:", err)
+				return nil, err
+			}
+			if dbAchievement.Name == db_user.Avatar.String {
+				db_user.Avatar = null.StringFrom(dbAchievement.Name)
+			}
+		}
 	}
 
-	_, err := db_user.Update(ctx, u.Exec, boil.Infer())
+	result.ID = db_user.ID
+
+	_, err = db_user.Update(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		log.Println("db_user.Update error:", err)
 		return nil, err
 	}
 
-	result.ID = db_user.ID
-	result.Name = db_user.Name
-	result.Avatar = db_user.AvatarURL
-
 	return result, nil
-	
+
 }

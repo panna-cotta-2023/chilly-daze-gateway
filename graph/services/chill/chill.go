@@ -24,7 +24,7 @@ func (u *ChillService) StartChill(
 		ID:     uuid.New().String(),
 		Traces: []*model.TracePoint{},
 	}
-	
+
 	createTimeStamp, err := lib.ParseTimestamp(startChill.Timestamp)
 	if err != nil {
 		log.Println("lib.ParseTimestamp error:", err)
@@ -71,10 +71,12 @@ func (u *ChillService) StartChill(
 func (u *ChillService) EndChill(
 	ctx context.Context,
 	endChill model.EndChillInput,
+	userId string,
 ) (*model.Chill, error) {
 	result := &model.Chill{
 		ID:     endChill.ID,
 		Traces: []*model.TracePoint{},
+		DistanceMeters: endChill.DistanceMeters,
 	}
 
 	for _, tracePoint := range endChill.TracePoints {
@@ -97,18 +99,11 @@ func (u *ChillService) EndChill(
 			log.Println("db_tracePoint.Insert error:", err)
 			return nil, err
 		}
-
-		result.Traces = append(result.Traces, &model.TracePoint{
-			ID:        db_tracePoint.ID,
-			Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-			Coordinate: &model.Coordinate{
-				Latitude:  db_tracePoint.Latitude,
-				Longitude: db_tracePoint.Longitude,
-			},
-		})
 	}
+	
+	if endChill.Photo != nil {
+		photo := endChill.Photo
 
-	for _, photo := range endChill.Photos {
 		timestamp, err := lib.ParseTimestamp(photo.Timestamp)
 		if err != nil {
 			log.Println("lib.ParseTimestamp error:", err)
@@ -122,18 +117,19 @@ func (u *ChillService) EndChill(
 			URL:       photo.URL,
 		}
 
+		result.Photo = &model.Photo{
+			ID:        db_photo.ChillID,
+			Timestamp: timestamp.Format("2006-01-02T15:04:05+09:00"),
+			URL:       db_photo.URL,
+		}
+
 		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
 		if err != nil {
 			log.Println("db_photo.Insert error:", err)
 			return nil, err
 		}
-
-		result.Photos = append(result.Photos, &model.Photo{
-			ID:        db_photo.ID,
-			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-			URL:       db_photo.URL,
-		})
 	}
+	
 
 	createTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
 	if err != nil {
@@ -142,6 +138,10 @@ func (u *ChillService) EndChill(
 	}
 
 	endTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
+	if err != nil {
+		log.Println("lib.ParseTimestamp error:", err)
+		return nil, err
+	}
 
 	db_chill := &db.Chill{
 		ID:        result.ID,
@@ -229,23 +229,23 @@ func (u *ChillService) GetChillsByUserId(
 			return nil, err
 		}
 
-		photos := []*model.Photo{}
+		photo := &model.Photo{}
 
 		for _, db_photo := range db_photos {
-			photos = append(photos, &model.Photo{
+			photo = &model.Photo{
 				ID:        db_photo.ID,
 				Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
 				URL:       db_photo.URL,
-			})
+			}
 		}
 
 		result = append(result, &model.Chill{
 			ID:     db_chill.ID,
 			Traces: traces,
-			Photos: photos,
+			Photo: photo,
 		})
 	}
 
 	return result, nil
-
 }
+

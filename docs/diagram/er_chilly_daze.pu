@@ -10,17 +10,24 @@ entity "Users" {
   * id: string
   --
   * name: string
-  * avatar_url: string
+  avatar: UUID <<FK>>
   * created_at: timestamp
+}
+
+entity "AchievementCategories" {
+  * id: UUID
+  --
+  * name: string
+  * display_name: string
 }
 
 entity "Achievements" {
   * id: UUID
   --
-  * name: string
-  * description: string
-  * category: string
-  * image_url: string
+  *name: string
+  *display_name: string
+  *description: string
+  *category_id: UUID <<FK>>
 }
 
 entity "UserAchievements" {
@@ -34,7 +41,8 @@ entity "Chills" {
   * id: UUID
   --
   * created_at: timestamp
-  * ended_at: timestamp
+  ended_at: timestamp
+  * distance: float
 }
 
 entity "UserChills" {
@@ -42,6 +50,13 @@ entity "UserChills" {
   --
   * user_id: string <<FK>>
   * chill_id: UUID <<FK>>
+}
+
+entity "ChillAchievements" {
+  * id: UUID
+  --
+  * chill_id: UUID <<FK>>
+  * achievement_id: UUID <<FK>>
 }
 
 entity "TracePoints" {
@@ -67,6 +82,9 @@ Users ||--o{ UserChills
 Chills ||--o{ UserChills
 Chills ||--o{ TracePoints
 Chills ||--o{ Photos
-
+AchievementCategories ||--o{ Achievements
+Users }--|| Achievements
+Achievements }o--|| ChillAchievements
+Chills }o--|| ChillAchievements
 
 @enduml

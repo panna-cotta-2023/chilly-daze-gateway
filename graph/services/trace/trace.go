@@ -15,55 +15,54 @@ type TraceService struct {
 	Exec boil.ContextExecutor
 }
 
-func (u *TraceService) AddTracePoints(
+func (u *TraceService) AddTracePoint(
 	ctx context.Context,
-	input model.TracePointsInput,
-) ([]*model.TracePoint, error) {
-	tracePoints := input.TracePoints
+	input model.TracePointInput,
+	chillId string,
+) (*model.TracePoint, error) {
 
-	result := []*model.TracePoint{}
+	result := &model.TracePoint{}
 
-	for _, tracePoint := range tracePoints {
-		timestamp, err := lib.ParseTimestamp(tracePoint.Timestamp)
-		if err != nil {
-			log.Println("lib.ParseTimestamp error:", err)
-			return nil, err
-		}
+	tracePoint := input
 
-		db_tracePoint := &db.TracePoint{
-			ID:        uuid.New().String(),
-			ChillID:   input.ID,
-			Latitude:  tracePoint.Coordinate.Latitude,
-			Longitude: tracePoint.Coordinate.Longitude,
-			Timestamp: timestamp,
-		}
+	timestamp, err := lib.ParseTimestamp(tracePoint.Timestamp)
+	if err != nil {
+		log.Println("lib.ParseTimestamp error:", err)
+		return nil, err
+	}
 
-		result = append(result, &model.TracePoint{
-			ID:        db_tracePoint.ChillID,
-			Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-			Coordinate: &model.Coordinate{
-				Latitude:  db_tracePoint.Latitude,
-				Longitude: db_tracePoint.Longitude,
-			},
-		})
+	db_tracePoint := &db.TracePoint{
+		ID:        uuid.New().String(),
+		ChillID:   chillId,
+		Latitude:  tracePoint.Coordinate.Latitude,
+		Longitude: tracePoint.Coordinate.Longitude,
+		Timestamp: timestamp,
+	}
 
-		err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
-		if err != nil {
-			log.Println("db_tracePoint.Insert error:", err)
-			return nil, err
-		}
+	result = &model.TracePoint{
+		ID:        db_tracePoint.ChillID,
+		Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+		Coordinate: &model.Coordinate{
+			Latitude:  db_tracePoint.Latitude,
+			Longitude: db_tracePoint.Longitude,
+		},
+	}
+
+	err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
+	if err != nil {
+		log.Println("db_tracePoint.Insert error:", err)
+		return nil, err
 	}
 
 	return result, nil
 }
 
-func (u *TraceService) GetTracesByChillId(
+func (u *TraceService) GetTracePointsByChill(
 	ctx context.Context,
-	chillId string,
+	chill *model.Chill,
 ) ([]*model.TracePoint, error) {
-
 	db_traces, err := db.TracePoints(
-		db.TracePointWhere.ChillID.EQ(chillId),
+		db.TracePointWhere.ChillID.EQ(chill.ID),
 	).All(ctx, u.Exec)
 	if err != nil {
 		log.Println("db.TracePoints error:", err)
