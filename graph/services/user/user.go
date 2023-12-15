@@ -25,7 +25,7 @@ func (u *UserService) CreateUser(
 
 	result := &model.User{}
 
-	db_user := &db.User{
+	dbUser := &db.User{
 		ID:        uid,
 		Name:      name,
 		CreatedAt: time.Now(),
@@ -34,9 +34,9 @@ func (u *UserService) CreateUser(
 	result.ID = uid
 	result.Name = name
 
-	err := db_user.Insert(ctx, u.Exec, boil.Infer())
+	err := dbUser.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
-		log.Println("db_user.Insert error:", err)
+		log.Println("dbUser.Insert error:", err)
 		return nil, err
 	}
 
@@ -47,17 +47,17 @@ func (u *UserService) GetUser(
 	ctx context.Context,
 	uid string,
 ) (*model.User, bool) {
-	db_user, err := db.Users(db.UserWhere.ID.EQ(uid)).One(ctx, u.Exec)
+	dbUser, err := db.Users(db.UserWhere.ID.EQ(uid)).One(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_user.Select error:", err)
+		log.Println("dbUser.Select error:", err)
 		return nil, false
 	}
 
 	result := &model.User{
-		ID:   db_user.ID,
-		Name: db_user.Name,
+		ID:   dbUser.ID,
+		Name: dbUser.Name,
 		Avatar: &model.Achievement{
-			ID: db_user.Avatar.String,
+			ID: dbUser.Avatar.String,
 		},
 	}
 
@@ -70,15 +70,15 @@ func (u *UserService) UpdateUser(
 	input model.UpdateUserInput,
 ) (*model.User, error) {
 	result := &model.User{}
-	db_user, err := db.Users(db.UserWhere.ID.EQ(userId)).One(ctx, u.Exec)
+	dbUser, err := db.Users(db.UserWhere.ID.EQ(userId)).One(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_user.Select error:", err)
+		log.Println("dbUser.Select error:", err)
 		return nil, err
 	}
 
 	if input.Name != nil {
 		result.Name = *input.Name
-		db_user.Name = *input.Name
+		dbUser.Name = *input.Name
 	}
 
 	if input.Avatar != nil {
@@ -94,17 +94,17 @@ func (u *UserService) UpdateUser(
 				log.Println("db.Achievements error:", err)
 				return nil, err
 			}
-			if dbAchievement.Name == db_user.Avatar.String {
-				db_user.Avatar = null.StringFrom(dbAchievement.Name)
+			if dbAchievement.Name == dbUser.Avatar.String {
+				dbUser.Avatar = null.StringFrom(dbAchievement.Name)
 			}
 		}
 	}
 
-	result.ID = db_user.ID
+	result.ID = dbUser.ID
 
-	_, err = db_user.Update(ctx, u.Exec, boil.Infer())
+	_, err = dbUser.Update(ctx, u.Exec, boil.Infer())
 	if err != nil {
-		log.Println("db_user.Update error:", err)
+		log.Println("dbUser.Update error:", err)
 		return nil, err
 	}
 

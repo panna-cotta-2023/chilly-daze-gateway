@@ -32,14 +32,14 @@ func (r *chillResolver) Photo(ctx context.Context, obj *model.Chill) (*model.Pho
 
 // NewAchievements is the resolver for the newAchievements field.
 func (r *chillResolver) NewAchievements(ctx context.Context, obj *model.Chill) ([]*model.Achievement, error) {
-	uid := GetAuthToken(ctx)
-	return r.Srv.GetNewAchievements(ctx, obj, uid)
+	userId := GetAuthToken(ctx)
+	return r.Srv.GetNewAchievements(ctx, obj, userId)
 }
 
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error) {
-	uid := GetAuthToken(ctx)
-	return r.Srv.CreateUser(ctx, input, uid)
+	userId := GetAuthToken(ctx)
+	return r.Srv.CreateUser(ctx, input, userId)
 }
 
 // UpdateUser is the resolver for the updateUser field.
@@ -55,8 +55,8 @@ func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChil
 		return nil, err
 	}
 
-	uid := GetAuthToken(ctx)
-	err = r.Srv.AddUserChill(ctx, uid, chill.ID)
+	userId := GetAuthToken(ctx)
+	err = r.Srv.AddUserChill(ctx, userId, chill.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -72,24 +72,11 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
-	uid := GetAuthToken(ctx)
-	user, ok := r.Srv.GetUser(ctx, uid)
+	userId := GetAuthToken(ctx)
+	user, ok := r.Srv.GetUser(ctx, userId)
 	if !ok {
 		return nil, fmt.Errorf("user not found")
 	}
-
-	userChills, err := r.Srv.GetChillsByUserId(ctx, uid)
-	if err != nil {
-		return nil, err
-	}
-
-	userAchivements, err := r.Srv.GetAchievementsByUserId(ctx, uid)
-	if err != nil {
-		return nil, err
-	}
-
-	user.Chills = userChills
-	user.Achievements = userAchivements
 	return user, nil
 }
 
