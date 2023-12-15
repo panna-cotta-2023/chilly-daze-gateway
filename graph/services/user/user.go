@@ -66,9 +66,11 @@ func (u *UserService) GetUser(
 
 func (u *UserService) UpdateUser(
 	ctx context.Context,
-	user model.User,
+	userId string,
 	input model.UpdateUserInput,
 ) (*model.User, error) {
+	user, _ := u.GetUser(ctx, userId)
+	
 	result := &model.User{}
 
 	name := ""

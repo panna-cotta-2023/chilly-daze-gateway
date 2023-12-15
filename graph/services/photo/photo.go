@@ -15,36 +15,43 @@ type PhotoService struct {
 	Exec boil.ContextExecutor
 }
 
-func (u *PhotoService) AddPhotos(
+func (u *PhotoService) AddPhoto(
 	ctx context.Context,
-	input model.PhotosInput,
-) ([]*model.Photo, error) {
-	photos := input.Photos
+	input *model.PhotoInput,
+	chillId string,
+) (*model.Photo, error) {
 
-	result := []*model.Photo{}
+	if input == nil {
+		return &model.Photo{}, nil
+	}
 
-	for _, photo := range photos {
+	result := &model.Photo{}
 
-		timestamp, err := lib.ParseTimestamp(photo.Timestamp)
+	photo := input
 
-		db_photo := &db.Photo{
-			ID:        uuid.New().String(),
-			ChillID:   input.ID,
-			Timestamp: timestamp,
-			URL:       photo.URL,
-		}
+	timestamp, err := lib.ParseTimestamp(photo.Timestamp)
+	if err != nil {
+		log.Println("lib.ParseTimestamp error:", err)
+		return nil, err
+	}
 
-		result = append(result, &model.Photo{
-			ID:        db_photo.ChillID,
-			Timestamp: timestamp.Format("2006-01-02T15:04:05+09:00"),
-			URL:       db_photo.URL,
-		})
+	db_photo := &db.Photo{
+		ID:        uuid.New().String(),
+		ChillID:   chillId,
+		Timestamp: timestamp,
+		URL:       photo.URL,
+	}
 
-		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
-		if err != nil {
-			log.Println("db_photo.Insert error:", err)
-			return nil, err
-		}
+	result = &model.Photo{
+		ID:        db_photo.ChillID,
+		Timestamp: timestamp.Format("2006-01-02T15:04:05+09:00"),
+		URL:       db_photo.URL,
+	}
+
+	err = db_photo.Insert(ctx, u.Exec, boil.Infer())
+	if err != nil {
+		log.Println("db_photo.Insert error:", err)
+		return nil, err
 	}
 
 	return result, nil

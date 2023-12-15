@@ -33,8 +33,8 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input model.Registe
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
-	uid := GetAuthToken(ctx)
-	return r.Srv.UpdateUser(ctx, input, uid)
+	userId := GetAuthToken(ctx)
+	return r.Srv.UpdateUser(ctx, userId, input)
 }
 
 // StartChill is the resolver for the startChill field.

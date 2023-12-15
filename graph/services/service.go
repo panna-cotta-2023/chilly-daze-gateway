@@ -24,17 +24,17 @@ type UserService interface {
 	) (*model.User, bool)
 	UpdateUser(
 		ctx context.Context,
-		user model.User,
-		nameStr *string,
-		avatarStr *string,
+		userId string,
+		input model.UpdateUserInput,
 	) (*model.User, error)
 }
 
 type TraceService interface {
-	AddTracePoints(
+	AddTracePoint(
 		ctx context.Context,
-		input model.TracePointsInput,
-	) ([]*model.TracePoint, error)
+		input model.TracePointInput,
+		chillId string,
+	) (*model.TracePoint, error)
 	GetTracePointsByChill(
 		ctx context.Context,
 		chill *model.Chill,
@@ -42,10 +42,11 @@ type TraceService interface {
 }
 
 type PhotoService interface {
-	AddPhotos(
+	AddPhoto(
 		ctx context.Context,
-		input model.PhotosInput,
-	) ([]*model.Photo, error)
+		input *model.PhotoInput,
+		chillId string,
+	) (*model.Photo, error)
 	GetPhotosByChill(
 		ctx context.Context,
 		chill *model.Chill,

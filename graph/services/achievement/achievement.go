@@ -3,6 +3,7 @@ package achievement
 import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
+
 	"context"
 	"log"
 
@@ -194,13 +195,13 @@ func (u *AchievementService) GetAvatarByUser(
 	ctx context.Context,
 	user *model.User,
 ) (*model.Achievement, error) {
-	if user.Avatar == nil || user.Avatar.ID == ""{
+	if user.Avatar == nil || user.Avatar.ID == "" {
 		return &model.Achievement{}, nil
 	}
 
 	db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(user.Avatar.ID)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("1111db_achievement.Select error:", err)
+		log.Println("db_achievement.Select error:", err)
 		return &model.Achievement{}, err
 	}
 
