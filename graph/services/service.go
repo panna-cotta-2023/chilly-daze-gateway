@@ -89,6 +89,10 @@ type AchievementService interface {
 		chill_id string,
 		achievement_id []string,
 	) error
+	GetAvatarByUser(
+		ctx context.Context,
+		user model.User,
+	) (*model.Achievement, error)
 }
 
 type Services interface {

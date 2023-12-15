@@ -151,7 +151,12 @@ func (r *queryResolver) AchievementCategories(ctx context.Context) ([]*model.Ach
 
 // Avatar is the resolver for the avatar field.
 func (r *userResolver) Avatar(ctx context.Context, obj *model.User) (*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Avatar - avatar"))
+	avatar, err := r.Srv.GetAvatarByUser(ctx, *obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return avatar, nil
 }
 
 // Chills is the resolver for the chills field.

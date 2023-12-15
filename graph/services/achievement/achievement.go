@@ -182,9 +182,29 @@ func (u *AchievementService) AddChillAchievement(
 				return err
 			}
 		}
-
-		
 	}
 
 	return nil
+}
+
+func (u *AchievementService) GetAvatarByUser(
+	ctx context.Context,
+	user *model.User,
+) (*model.Achievement, error) {
+	if user == nil {
+		return &model.Achievement{}, nil
+	}
+	
+	db_achievement, err := db.Achievements(db.AchievementWhere.Name.EQ("avatar")).One(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_achievement.Select error:", err)
+		return &model.Achievement{}, err
+	}
+
+	return &model.Achievement{
+		ID:          db_achievement.ID,
+		Name:        db_achievement.Name,
+		DisplayName: db_achievement.DisplayName,
+		Description: db_achievement.Description,
+	}, nil
 }
