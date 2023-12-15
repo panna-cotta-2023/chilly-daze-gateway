@@ -41,7 +41,7 @@ entity "Chills" {
   * id: UUID
   --
   * created_at: timestamp
-  * ended_at: timestamp
+  ended_at: timestamp
 }
 
 entity "UserChills" {
