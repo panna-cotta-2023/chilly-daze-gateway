@@ -40,16 +40,10 @@ entity "UserAchievements" {
 entity "Chills" {
   * id: UUID
   --
+  * user_id: string <<FK>>
   * created_at: timestamp
   ended_at: timestamp
   * distance: float
-}
-
-entity "UserChills" {
-  * id: UUID
-  --
-  * user_id: string <<FK>>
-  * chill_id: UUID <<FK>>
 }
 
 entity "ChillAchievements" {
@@ -78,13 +72,12 @@ entity "Photos" {
 
 Users ||--o{ UserAchievements
 Achievements ||--o{ UserAchievements
-Users ||--o{ UserChills
-Chills ||--o{ UserChills
+Users ||--o{ Chills
 Chills ||--o{ TracePoints
-Chills ||--o{ Photos
+Chills ||--o| Photos
 AchievementCategories ||--o{ Achievements
 Users }--|| Achievements
 Achievements }o--|| ChillAchievements
 Chills }o--|| ChillAchievements
 
-@enduml
+@endumlhttps://file+.vscode-resource.vscode-cdn.net/Users/takeru/p2hacks/panna-cotta-gateway/docs/diagram/er_diagram.png?version%3D1702643610596

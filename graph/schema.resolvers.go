@@ -50,18 +50,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
-	chill, err := r.Srv.StartChill(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-
 	userId := GetAuthToken(ctx)
-	err = r.Srv.AddUserChill(ctx, userId, chill.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return chill, nil
+	return r.Srv.StartChill(ctx, userId, input)
 }
 
 // EndChill is the resolver for the endChill field.
