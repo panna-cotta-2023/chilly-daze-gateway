@@ -57,11 +57,11 @@ func (u *PhotoService) AddPhoto(
 	return result, nil
 }
 
-func (u *PhotoService) GetPhotosByChill(
+func (u *PhotoService) GetPhotoByChill(
 	ctx context.Context,
 	chill *model.Chill,
-) ([]*model.Photo, error) {
-	result := []*model.Photo{}
+) (*model.Photo, error) {
+	result := &model.Photo{}
 
 	db_photos, err := db.Photos(db.PhotoWhere.ChillID.EQ(chill.ID)).All(ctx, u.Exec)
 	if err != nil {
@@ -70,14 +70,11 @@ func (u *PhotoService) GetPhotosByChill(
 	}
 
 	for _, db_photo := range db_photos {
-
-		photo := &model.Photo{
+		result = &model.Photo{
 			ID:        db_photo.ID,
 			URL:       db_photo.URL,
 			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
 		}
-
-		result = append(result, photo)
 	}
 
 	return result, nil

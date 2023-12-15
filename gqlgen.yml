@@ -105,5 +105,8 @@ models:
     fields:
       traces:
         resolver: true
-      photos:
+      photo:
         resolver: true
+      newAchievements:
+        resolver: true
+        

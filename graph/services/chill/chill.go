@@ -76,6 +76,7 @@ func (u *ChillService) EndChill(
 	result := &model.Chill{
 		ID:     endChill.ID,
 		Traces: []*model.TracePoint{},
+		DistanceMeters: endChill.DistanceMeters,
 	}
 
 	for _, tracePoint := range endChill.TracePoints {
@@ -100,25 +101,33 @@ func (u *ChillService) EndChill(
 		}
 	}
 	
-	photo := endChill.Photo
+	if endChill.Photo != nil {
+		photo := endChill.Photo
 
-	timestamp, err := lib.ParseTimestamp(photo.Timestamp)
-	if err != nil {
-		log.Println("lib.ParseTimestamp error:", err)
-		return nil, err
-	}
+		timestamp, err := lib.ParseTimestamp(photo.Timestamp)
+		if err != nil {
+			log.Println("lib.ParseTimestamp error:", err)
+			return nil, err
+		}
 
-	db_photo := &db.Photo{
-		ID:        uuid.New().String(),
-		ChillID:   endChill.ID,
-		Timestamp: timestamp,
-		URL:       photo.URL,
-	}
+		db_photo := &db.Photo{
+			ID:        uuid.New().String(),
+			ChillID:   endChill.ID,
+			Timestamp: timestamp,
+			URL:       photo.URL,
+		}
 
-	err = db_photo.Insert(ctx, u.Exec, boil.Infer())
-	if err != nil {
-		log.Println("db_photo.Insert error:", err)
-		return nil, err
+		result.Photo = &model.Photo{
+			ID:        db_photo.ChillID,
+			Timestamp: timestamp.Format("2006-01-02T15:04:05+09:00"),
+			URL:       db_photo.URL,
+		}
+
+		err = db_photo.Insert(ctx, u.Exec, boil.Infer())
+		if err != nil {
+			log.Println("db_photo.Insert error:", err)
+			return nil, err
+		}
 	}
 	
 
@@ -239,3 +248,4 @@ func (u *ChillService) GetChillsByUserId(
 
 	return result, nil
 }
+

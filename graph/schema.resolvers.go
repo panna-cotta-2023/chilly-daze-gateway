@@ -25,6 +25,17 @@ func (r *chillResolver) Traces(ctx context.Context, obj *model.Chill) ([]*model.
 	return r.Srv.GetTracePointsByChill(ctx, obj)
 }
 
+// Photo is the resolver for the photo field.
+func (r *chillResolver) Photo(ctx context.Context, obj *model.Chill) (*model.Photo, error) {
+	return r.Srv.GetPhotoByChill(ctx, obj)
+}
+
+// NewAchievements is the resolver for the newAchievements field.
+func (r *chillResolver) NewAchievements(ctx context.Context, obj *model.Chill) ([]*model.Achievement, error) {
+	uid := GetAuthToken(ctx)
+	return r.Srv.GetNewAchievements(ctx, obj, uid)
+}
+
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)

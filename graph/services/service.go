@@ -47,10 +47,10 @@ type PhotoService interface {
 		input *model.PhotoInput,
 		chillId string,
 	) (*model.Photo, error)
-	GetPhotosByChill(
+	GetPhotoByChill(
 		ctx context.Context,
 		chill *model.Chill,
-	) ([]*model.Photo, error)
+	) (*model.Photo, error)
 }
 
 type ChillService interface {
@@ -85,12 +85,6 @@ type AchievementService interface {
 	GetAchievementCategories(
 		ctx context.Context,
 	) ([]*model.AchievementCategory, error)
-	AddChillAchievement(
-		ctx context.Context,
-		user_id string,
-		chill_id string,
-		achievement_id []string,
-	) error
 	GetAvatarByUser(
 		ctx context.Context,
 		user *model.User,
@@ -102,6 +96,11 @@ type AchievementService interface {
 	GetAchievementsByAchievementCategory(
 		ctx context.Context,
 		achievementCategory *model.AchievementCategory,
+	) ([]*model.Achievement, error)
+	GetNewAchievements(
+		ctx context.Context,
+		chill *model.Chill,
+		userId string,
 	) ([]*model.Achievement, error)
 }
 
@@ -122,10 +121,10 @@ type services struct {
 
 func New(exec boil.ContextExecutor) Services {
 	return &services{
-		UserService:  &user.UserService{Exec: exec},
-		TraceService: &trace.TraceService{Exec: exec},
-		PhotoService: &photo.PhotoService{Exec: exec},
-		ChillService: &chill.ChillService{Exec: exec},
+		UserService:        &user.UserService{Exec: exec},
+		TraceService:       &trace.TraceService{Exec: exec},
+		PhotoService:       &photo.PhotoService{Exec: exec},
+		ChillService:       &chill.ChillService{Exec: exec},
 		AchievementService: &achievement.AchievementService{Exec: exec},
 	}
 }

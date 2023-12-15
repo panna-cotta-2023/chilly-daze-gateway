@@ -69,28 +69,40 @@ func (u *UserService) UpdateUser(
 	userId string,
 	input model.UpdateUserInput,
 ) (*model.User, error) {
-	user, _ := u.GetUser(ctx, userId)
-	
 	result := &model.User{}
-
-	name := ""
-
-	if input.Name != nil {
-		name = *input.Name
-	} else {
-		name = user.Name
+	db_user, err := db.Users(db.UserWhere.ID.EQ(userId)).One(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_user.Select error:", err)
+		return nil, err
 	}
 
-	db_user := &db.User{
-		ID:     user.ID,
-		Name:   name,
-		Avatar: null.StringFromPtr(input.Avatar),
+	if input.Name != nil {
+		result.Name = *input.Name
+		db_user.Name = *input.Name
+	}
+
+	if input.Avatar != nil {
+		dbUserAchievements, err := db.UserAchievements(db.UserAchievementWhere.UserID.EQ(userId)).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.UserAchievements error:", err)
+			return nil, err
+		}
+
+		for _, dbUserAchievement := range dbUserAchievements {
+			dbAchievement, err := db.Achievements(db.AchievementWhere.ID.EQ(dbUserAchievement.AchievementID)).One(ctx, u.Exec)
+			if err != nil {
+				log.Println("db.Achievements error:", err)
+				return nil, err
+			}
+			if dbAchievement.Name == db_user.Avatar.String {
+				db_user.Avatar = null.StringFrom(dbAchievement.Name)
+			}
+		}
 	}
 
 	result.ID = db_user.ID
-	result.Name = db_user.Name
 
-	_, err := db_user.Update(ctx, u.Exec, boil.Infer())
+	_, err = db_user.Update(ctx, u.Exec, boil.Infer())
 	if err != nil {
 		log.Println("db_user.Update error:", err)
 		return nil, err
