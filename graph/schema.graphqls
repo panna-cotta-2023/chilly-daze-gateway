@@ -56,6 +56,10 @@ type Query {
 }
 
 input RegisterUserInput {
+    name: String!    # Username
+}
+
+input UpdateUserInput {
     name: String    # Username
     avatar: String  # Achievement name
 }

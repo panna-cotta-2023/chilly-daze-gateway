@@ -35,9 +35,9 @@ type TraceService interface {
 		ctx context.Context,
 		input model.TracePointsInput,
 	) ([]*model.TracePoint, error)
-	GetTracesByChillId(
+	GetTracePointsByChill(
 		ctx context.Context,
-		chillId string,
+		chill *model.Chill,
 	) ([]*model.TracePoint, error)
 }
 
@@ -46,9 +46,9 @@ type PhotoService interface {
 		ctx context.Context,
 		input model.PhotosInput,
 	) ([]*model.Photo, error)
-	GetPhotosByChillId(
+	GetPhotosByChill(
 		ctx context.Context,
-		chillId string,
+		chill *model.Chill,
 	) ([]*model.Photo, error)
 }
 
@@ -60,6 +60,7 @@ type ChillService interface {
 	EndChill(
 		ctx context.Context,
 		endChill model.EndChillInput,
+		userId string,
 	) (*model.Chill, error)
 	AddUserChill(
 		ctx context.Context,
@@ -97,6 +98,10 @@ type AchievementService interface {
 		ctx context.Context,
 		achievement *model.Achievement,
 	) (*model.AchievementCategory, error)
+	GetAchievementsByAchievementCategory(
+		ctx context.Context,
+		achievementCategory *model.AchievementCategory,
+	) ([]*model.Achievement, error)
 }
 
 type Services interface {

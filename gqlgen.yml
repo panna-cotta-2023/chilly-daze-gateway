@@ -101,3 +101,9 @@ models:
         resolver: true
       achievements:
         resolver: true
+  Chill:
+    fields:
+      traces:
+        resolver: true
+      photos:
+        resolver: true

@@ -57,13 +57,12 @@ func (u *TraceService) AddTracePoints(
 	return result, nil
 }
 
-func (u *TraceService) GetTracesByChillId(
+func (u *TraceService) GetTracePointsByChill(
 	ctx context.Context,
-	chillId string,
+	chill *model.Chill,
 ) ([]*model.TracePoint, error) {
-
 	db_traces, err := db.TracePoints(
-		db.TracePointWhere.ChillID.EQ(chillId),
+		db.TracePointWhere.ChillID.EQ(chill.ID),
 	).All(ctx, u.Exec)
 	if err != nil {
 		log.Println("db.TracePoints error:", err)

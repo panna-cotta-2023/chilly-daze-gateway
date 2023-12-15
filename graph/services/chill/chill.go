@@ -71,6 +71,7 @@ func (u *ChillService) StartChill(
 func (u *ChillService) EndChill(
 	ctx context.Context,
 	endChill model.EndChillInput,
+	userId string,
 ) (*model.Chill, error) {
 	result := &model.Chill{
 		ID:     endChill.ID,

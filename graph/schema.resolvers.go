@@ -12,12 +12,22 @@ import (
 
 // Category is the resolver for the category field.
 func (r *achievementResolver) Category(ctx context.Context, obj *model.Achievement) (*model.AchievementCategory, error) {
-	panic(fmt.Errorf("not implemented: Category - category"))
+	return r.Srv.GetAchievementCategoryByAchievement(ctx, obj)
 }
 
 // Achievements is the resolver for the achievements field.
 func (r *achievementCategoryResolver) Achievements(ctx context.Context, obj *model.AchievementCategory) ([]*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+	return r.Srv.GetAchievementsByAchievementCategory(ctx, obj)
+}
+
+// Traces is the resolver for the traces field.
+func (r *chillResolver) Traces(ctx context.Context, obj *model.Chill) ([]*model.TracePoint, error) {
+	return r.Srv.GetTracePointsByChill(ctx, obj)
+}
+
+// Photos is the resolver for the photos field.
+func (r *chillResolver) Photos(ctx context.Context, obj *model.Chill) ([]*model.Photo, error) {
+	return r.Srv.GetPhotosByChill(ctx, obj)
 }
 
 // RegisterUser is the resolver for the registerUser field.
@@ -77,33 +87,8 @@ func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInpu
 
 // EndChill is the resolver for the endChill field.
 func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
-	uid := GetAuthToken(ctx)
-	chill, err := r.Srv.EndChill(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-
-	traces, err := r.Srv.GetTracesByChillId(ctx, chill.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	photos, err := r.Srv.GetPhotosByChillId(ctx, chill.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	chill.Traces = append(chill.Traces, traces...)
-	chill.Photos = append(chill.Photos, photos...)
-
-	// TODO: Check achievement
-	achievementIds := []string{}
-	err = r.Srv.AddChillAchievement(ctx, uid, chill.ID, achievementIds)
-	if err != nil {
-		return nil, err
-	}
-
-	return chill, nil
+	userId := GetAuthToken(ctx)
+	return r.Srv.EndChill(ctx, input, userId)
 }
 
 // User is the resolver for the user field.
@@ -131,52 +116,27 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 
 // Achievements is the resolver for the achievements field.
 func (r *queryResolver) Achievements(ctx context.Context) ([]*model.Achievement, error) {
-	achievements, err := r.Srv.GetAchievements(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return achievements, nil
+	return r.Srv.GetAchievements(ctx)
 }
 
 // AchievementCategories is the resolver for the achievementCategories field.
 func (r *queryResolver) AchievementCategories(ctx context.Context) ([]*model.AchievementCategory, error) {
-	achievementCategories, err := r.Srv.GetAchievementCategories(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return achievementCategories, nil
+	return r.Srv.GetAchievementCategories(ctx)
 }
 
 // Avatar is the resolver for the avatar field.
 func (r *userResolver) Avatar(ctx context.Context, obj *model.User) (*model.Achievement, error) {
-	avatar, err := r.Srv.GetAvatarByUser(ctx, obj)
-	if err != nil {
-		return nil, err
-	}
-
-	return avatar, nil
+	return r.Srv.GetAvatarByUser(ctx, obj)
 }
 
 // Chills is the resolver for the chills field.
 func (r *userResolver) Chills(ctx context.Context, obj *model.User) ([]*model.Chill, error) {
-	chills, err := r.Srv.GetChillsByUserId(ctx, obj.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return chills, nil
+	return r.Srv.GetChillsByUserId(ctx, obj.ID)
 }
 
 // Achievements is the resolver for the achievements field.
 func (r *userResolver) Achievements(ctx context.Context, obj *model.User) ([]*model.Achievement, error) {
-	achievements, err := r.Srv.GetAchievementsByUserId(ctx, obj.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return achievements, nil
+	return r.Srv.GetAchievementsByUserId(ctx, obj.ID)
 }
 
 // Achievement returns AchievementResolver implementation.
@@ -186,6 +146,9 @@ func (r *Resolver) Achievement() AchievementResolver { return &achievementResolv
 func (r *Resolver) AchievementCategory() AchievementCategoryResolver {
 	return &achievementCategoryResolver{r}
 }
+
+// Chill returns ChillResolver implementation.
+func (r *Resolver) Chill() ChillResolver { return &chillResolver{r} }
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
@@ -198,6 +161,7 @@ func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 type achievementResolver struct{ *Resolver }
 type achievementCategoryResolver struct{ *Resolver }
+type chillResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
