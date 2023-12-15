@@ -18,36 +18,45 @@ type UserService struct {
 func (u *UserService) CreateUser(
 	ctx context.Context,
 	input model.RegisterUserInput,
-	uid string,
+	userId string,
 ) (*model.User, error) {
-
+	result := &model.User{}
 	name := input.Name
 
-	result := &model.User{}
+	_, ok := u.GetUser(ctx, userId)
+	if !ok {
+		dbUser := &db.User{
+			ID:        userId,
+			Name:      name,
+			CreatedAt: time.Now(),
+		}
 
-	dbUser := &db.User{
-		ID:        uid,
-		Name:      name,
-		CreatedAt: time.Now(),
+		err := dbUser.Insert(ctx, u.Exec, boil.Infer())
+		if err != nil {
+			log.Println("dbUser.Insert error:", err)
+			return nil, err
+		}
+	} else {
+		_, err := u.UpdateUser(ctx, userId, model.UpdateUserInput{
+			Name: &name,
+		})
+		if err != nil {
+			log.Println("u.UpdateUser error:", err)
+			return nil, err
+		}
 	}
 
-	result.ID = uid
+	result.ID = userId
 	result.Name = name
-
-	err := dbUser.Insert(ctx, u.Exec, boil.Infer())
-	if err != nil {
-		log.Println("dbUser.Insert error:", err)
-		return nil, err
-	}
 
 	return result, nil
 }
 
 func (u *UserService) GetUser(
 	ctx context.Context,
-	uid string,
+	userId string,
 ) (*model.User, bool) {
-	dbUser, err := db.Users(db.UserWhere.ID.EQ(uid)).One(ctx, u.Exec)
+	dbUser, err := db.Users(db.UserWhere.ID.EQ(userId)).One(ctx, u.Exec)
 	if err != nil {
 		log.Println("dbUser.Select error:", err)
 		return nil, false
