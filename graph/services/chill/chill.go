@@ -18,6 +18,7 @@ type ChillService struct {
 
 func (u *ChillService) StartChill(
 	ctx context.Context,
+	userId string,
 	startChill model.StartChillInput,
 ) (*model.Chill, error) {
 	result := &model.Chill{
@@ -42,6 +43,7 @@ func (u *ChillService) StartChill(
 
 	dbChill := &db.Chill{
 		ID:        result.ID,
+		UserID:    userId,
 		CreatedAt: createTimeStamp,
 	}
 
@@ -145,6 +147,7 @@ func (u *ChillService) EndChill(
 
 	dbChill := &db.Chill{
 		ID:        result.ID,
+		UserID:    userId,
 		CreatedAt: createTimeStamp,
 		EndedAt:   null.TimeFrom(endTimeStamp),
 	}
@@ -158,94 +161,23 @@ func (u *ChillService) EndChill(
 	return result, nil
 }
 
-func (u *ChillService) AddUserChill(
-	ctx context.Context,
-	userID string,
-	chillID string,
-) error {
-	dbUserChill := &db.UserChill{
-		UserID:  userID,
-		ChillID: chillID,
-	}
-
-	err := dbUserChill.Insert(ctx, u.Exec, boil.Infer())
-	if err != nil {
-		log.Println("dbUserChill.Insert error:", err)
-		return err
-	}
-
-	return nil
-}
-
 func (u *ChillService) GetChillsByUserId(
 	ctx context.Context,
 	userID string,
 ) ([]*model.Chill, error) {
-	dbUserChills, err := db.UserChills(
-		db.UserChillWhere.UserID.EQ(userID),
-	).All(ctx, u.Exec)
+	dbUserChills, err := db.Chills(db.ChillWhere.UserID.EQ(userID)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db.UserChills error:", err)
+		log.Println("dbUserChills.Select error:", err)
 		return nil, err
 	}
 
 	result := []*model.Chill{}
 
 	for _, dbUserChill := range dbUserChills {
-		dbChill, err := db.Chills(
-			db.ChillWhere.ID.EQ(dbUserChill.ChillID),
-		).One(ctx, u.Exec)
-		if err != nil {
-			log.Println("db.Chills error:", err)
-			return nil, err
-		}
-
-		dbTracePoints, err := db.TracePoints(
-			db.TracePointWhere.ChillID.EQ(dbChill.ID),
-		).All(ctx, u.Exec)
-		if err != nil {
-			log.Println("db.TracePoints error:", err)
-			return nil, err
-		}
-
-		traces := []*model.TracePoint{}
-
-		for _, dbTracePoint := range dbTracePoints {
-			traces = append(traces, &model.TracePoint{
-				ID:        dbTracePoint.ID,
-				Timestamp: dbTracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-				Coordinate: &model.Coordinate{
-					Latitude:  dbTracePoint.Latitude,
-					Longitude: dbTracePoint.Longitude,
-				},
-			})
-		}
-
-		dbPhotos, err := db.Photos(
-			db.PhotoWhere.ChillID.EQ(dbChill.ID),
-		).All(ctx, u.Exec)
-		if err != nil {
-			log.Println("db.Photos error:", err)
-			return nil, err
-		}
-
-		photo := &model.Photo{}
-
-		for _, dbPhoto := range dbPhotos {
-			photo = &model.Photo{
-				ID:        dbPhoto.ID,
-				Timestamp: dbPhoto.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-				URL:       dbPhoto.URL,
-			}
-		}
-
 		result = append(result, &model.Chill{
-			ID:     dbChill.ID,
-			Traces: traces,
-			Photo: photo,
+			ID: dbUserChill.ID,
 		})
 	}
 
 	return result, nil
 }
-

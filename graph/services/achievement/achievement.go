@@ -217,7 +217,7 @@ func (u *AchievementService) GetNewAchievements(
 	userId string,
 ) ([]*model.Achievement, error) {
 	// ToDo: check achievement
-	achievementIds := []string{}
+	achievementIds := []string{"43d07cb1-d23d-42a9-b95a-28ac81aa8426", "dd4e3147-c6aa-4ed0-89fc-e9a62846554e", "423a969b-76bd-4848-88bf-9f6bf494fdc7"}
 
 	result := []*model.Achievement{}
 

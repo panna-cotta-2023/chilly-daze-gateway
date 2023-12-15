@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS chilly_daze.user_achievements (
 
 CREATE TABLE IF NOT EXISTS chilly_daze.chills (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id VARCHAR(255) NOT NULL REFERENCES chilly_daze.users(id) ON UPDATE CASCADE ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   ended_at TIMESTAMP WITH TIME ZONE,
   distance DOUBLE PRECISION NOT NULL
@@ -38,12 +39,6 @@ CREATE TABLE IF NOT EXISTS chilly_daze.chill_achievements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   chill_id UUID NOT NULL REFERENCES chilly_daze.chills(id) ON UPDATE CASCADE ON DELETE CASCADE,
   achievement_id UUID NOT NULL REFERENCES chilly_daze.achievements(id) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS chilly_daze.user_chills (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id VARCHAR(255) NOT NULL REFERENCES chilly_daze.users(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  chill_id UUID NOT NULL REFERENCES chilly_daze.chills(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS chilly_daze.trace_points (

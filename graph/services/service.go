@@ -46,6 +46,7 @@ type PhotoService interface {
 type ChillService interface {
 	StartChill(
 		ctx context.Context,
+		userId string,
 		startChill model.StartChillInput,
 	) (*model.Chill, error)
 	EndChill(
@@ -53,11 +54,6 @@ type ChillService interface {
 		endChill model.EndChillInput,
 		userId string,
 	) (*model.Chill, error)
-	AddUserChill(
-		ctx context.Context,
-		userID string,
-		chillID string,
-	) error
 	GetChillsByUserId(
 		ctx context.Context,
 		userID string,
