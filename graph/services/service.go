@@ -89,10 +89,6 @@ type AchievementService interface {
 		chill_id string,
 		achievement_id []string,
 	) error
-	// GetAchievementsByCategoryId(
-	// 	ctx context.Context,
-	// 	category_id string,
-	// ) ([]*model.Achievement, error)
 }
 
 type Services interface {
