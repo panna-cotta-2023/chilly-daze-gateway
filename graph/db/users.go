@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,10 +24,10 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	AvatarURL string    `boil:"avatar_url" json:"avatar_url" toml:"avatar_url" yaml:"avatar_url"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID        string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name      string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Avatar    null.String `boil:"avatar" json:"avatar,omitempty" toml:"avatar" yaml:"avatar,omitempty"`
+	CreatedAt time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -35,59 +36,119 @@ type User struct {
 var UserColumns = struct {
 	ID        string
 	Name      string
-	AvatarURL string
+	Avatar    string
 	CreatedAt string
 }{
 	ID:        "id",
 	Name:      "name",
-	AvatarURL: "avatar_url",
+	Avatar:    "avatar",
 	CreatedAt: "created_at",
 }
 
 var UserTableColumns = struct {
 	ID        string
 	Name      string
-	AvatarURL string
+	Avatar    string
 	CreatedAt string
 }{
 	ID:        "users.id",
 	Name:      "users.name",
-	AvatarURL: "users.avatar_url",
+	Avatar:    "users.avatar",
 	CreatedAt: "users.created_at",
 }
 
 // Generated where
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" LIKE ?", x)
+}
+func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT LIKE ?", x)
+}
+func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" ILIKE ?", x)
+}
+func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT ILIKE ?", x)
+}
+func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var UserWhere = struct {
 	ID        whereHelperstring
 	Name      whereHelperstring
-	AvatarURL whereHelperstring
+	Avatar    whereHelpernull_String
 	CreatedAt whereHelpertime_Time
 }{
-	ID:        whereHelperstring{field: "\"users\".\"id\""},
-	Name:      whereHelperstring{field: "\"users\".\"name\""},
-	AvatarURL: whereHelperstring{field: "\"users\".\"avatar_url\""},
-	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
+	ID:        whereHelperstring{field: "\"chilly_daze\".\"users\".\"id\""},
+	Name:      whereHelperstring{field: "\"chilly_daze\".\"users\".\"name\""},
+	Avatar:    whereHelpernull_String{field: "\"chilly_daze\".\"users\".\"avatar\""},
+	CreatedAt: whereHelpertime_Time{field: "\"chilly_daze\".\"users\".\"created_at\""},
 }
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	UserAchievements string
-	UserChills       string
+	AvatarAchievement string
+	UserAchievements  string
+	UserChills        string
 }{
-	UserAchievements: "UserAchievements",
-	UserChills:       "UserChills",
+	AvatarAchievement: "AvatarAchievement",
+	UserAchievements:  "UserAchievements",
+	UserChills:        "UserChills",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	UserAchievements UserAchievementSlice `boil:"UserAchievements" json:"UserAchievements" toml:"UserAchievements" yaml:"UserAchievements"`
-	UserChills       UserChillSlice       `boil:"UserChills" json:"UserChills" toml:"UserChills" yaml:"UserChills"`
+	AvatarAchievement *Achievement         `boil:"AvatarAchievement" json:"AvatarAchievement" toml:"AvatarAchievement" yaml:"AvatarAchievement"`
+	UserAchievements  UserAchievementSlice `boil:"UserAchievements" json:"UserAchievements" toml:"UserAchievements" yaml:"UserAchievements"`
+	UserChills        UserChillSlice       `boil:"UserChills" json:"UserChills" toml:"UserChills" yaml:"UserChills"`
 }
 
 // NewStruct creates a new relationship struct
 func (*userR) NewStruct() *userR {
 	return &userR{}
+}
+
+func (r *userR) GetAvatarAchievement() *Achievement {
+	if r == nil {
+		return nil
+	}
+	return r.AvatarAchievement
 }
 
 func (r *userR) GetUserAchievements() UserAchievementSlice {
@@ -108,9 +169,9 @@ func (r *userR) GetUserChills() UserChillSlice {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "name", "avatar_url", "created_at"}
-	userColumnsWithoutDefault = []string{"id", "name", "avatar_url"}
-	userColumnsWithDefault    = []string{"created_at"}
+	userAllColumns            = []string{"id", "name", "avatar", "created_at"}
+	userColumnsWithoutDefault = []string{"id", "name"}
+	userColumnsWithDefault    = []string{"avatar", "created_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}
 )
@@ -393,6 +454,17 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
+// AvatarAchievement pointed to by the foreign key.
+func (o *User) AvatarAchievement(mods ...qm.QueryMod) achievementQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.Avatar),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Achievements(queryMods...)
+}
+
 // UserAchievements retrieves all the user_achievement's UserAchievements with an executor.
 func (o *User) UserAchievements(mods ...qm.QueryMod) userAchievementQuery {
 	var queryMods []qm.QueryMod
@@ -401,7 +473,7 @@ func (o *User) UserAchievements(mods ...qm.QueryMod) userAchievementQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"user_achievements\".\"user_id\"=?", o.ID),
+		qm.Where("\"chilly_daze\".\"user_achievements\".\"user_id\"=?", o.ID),
 	)
 
 	return UserAchievements(queryMods...)
@@ -415,10 +487,134 @@ func (o *User) UserChills(mods ...qm.QueryMod) userChillQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"user_chills\".\"user_id\"=?", o.ID),
+		qm.Where("\"chilly_daze\".\"user_chills\".\"user_id\"=?", o.ID),
 	)
 
 	return UserChills(queryMods...)
+}
+
+// LoadAvatarAchievement allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (userL) LoadAvatarAchievement(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		if !queries.IsNil(object.Avatar) {
+			args = append(args, object.Avatar)
+		}
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.Avatar) {
+					continue Outer
+				}
+			}
+
+			if !queries.IsNil(obj.Avatar) {
+				args = append(args, obj.Avatar)
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`chilly_daze.achievements`),
+		qm.WhereIn(`chilly_daze.achievements.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Achievement")
+	}
+
+	var resultSlice []*Achievement
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Achievement")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for achievements")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for achievements")
+	}
+
+	if len(achievementAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.AvatarAchievement = foreign
+		if foreign.R == nil {
+			foreign.R = &achievementR{}
+		}
+		foreign.R.AvatarUsers = append(foreign.R.AvatarUsers, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.Avatar, foreign.ID) {
+				local.R.AvatarAchievement = foreign
+				if foreign.R == nil {
+					foreign.R = &achievementR{}
+				}
+				foreign.R.AvatarUsers = append(foreign.R.AvatarUsers, local)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadUserAchievements allows an eager lookup of values, cached into the
@@ -477,8 +673,8 @@ func (userL) LoadUserAchievements(ctx context.Context, e boil.ContextExecutor, s
 	}
 
 	query := NewQuery(
-		qm.From(`user_achievements`),
-		qm.WhereIn(`user_achievements.user_id in ?`, args...),
+		qm.From(`chilly_daze.user_achievements`),
+		qm.WhereIn(`chilly_daze.user_achievements.user_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -591,8 +787,8 @@ func (userL) LoadUserChills(ctx context.Context, e boil.ContextExecutor, singula
 	}
 
 	query := NewQuery(
-		qm.From(`user_chills`),
-		qm.WhereIn(`user_chills.user_id in ?`, args...),
+		qm.From(`chilly_daze.user_chills`),
+		qm.WhereIn(`chilly_daze.user_chills.user_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -649,6 +845,86 @@ func (userL) LoadUserChills(ctx context.Context, e boil.ContextExecutor, singula
 	return nil
 }
 
+// SetAvatarAchievement of the user to the related item.
+// Sets o.R.AvatarAchievement to related.
+// Adds o to related.R.AvatarUsers.
+func (o *User) SetAvatarAchievement(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Achievement) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"chilly_daze\".\"users\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"avatar"}),
+		strmangle.WhereClause("\"", "\"", 2, userPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.Avatar, related.ID)
+	if o.R == nil {
+		o.R = &userR{
+			AvatarAchievement: related,
+		}
+	} else {
+		o.R.AvatarAchievement = related
+	}
+
+	if related.R == nil {
+		related.R = &achievementR{
+			AvatarUsers: UserSlice{o},
+		}
+	} else {
+		related.R.AvatarUsers = append(related.R.AvatarUsers, o)
+	}
+
+	return nil
+}
+
+// RemoveAvatarAchievement relationship.
+// Sets o.R.AvatarAchievement to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *User) RemoveAvatarAchievement(ctx context.Context, exec boil.ContextExecutor, related *Achievement) error {
+	var err error
+
+	queries.SetScanner(&o.Avatar, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("avatar")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.AvatarAchievement = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.AvatarUsers {
+		if queries.Equal(o.Avatar, ri.Avatar) {
+			continue
+		}
+
+		ln := len(related.R.AvatarUsers)
+		if ln > 1 && i < ln-1 {
+			related.R.AvatarUsers[i] = related.R.AvatarUsers[ln-1]
+		}
+		related.R.AvatarUsers = related.R.AvatarUsers[:ln-1]
+		break
+	}
+	return nil
+}
+
 // AddUserAchievements adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
 // Appends related to o.R.UserAchievements.
@@ -663,7 +939,7 @@ func (o *User) AddUserAchievements(ctx context.Context, exec boil.ContextExecuto
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"user_achievements\" SET %s WHERE %s",
+				"UPDATE \"chilly_daze\".\"user_achievements\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
 				strmangle.WhereClause("\"", "\"", 2, userAchievementPrimaryKeyColumns),
 			)
@@ -716,7 +992,7 @@ func (o *User) AddUserChills(ctx context.Context, exec boil.ContextExecutor, ins
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"user_chills\" SET %s WHERE %s",
+				"UPDATE \"chilly_daze\".\"user_chills\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
 				strmangle.WhereClause("\"", "\"", 2, userChillPrimaryKeyColumns),
 			)
@@ -757,10 +1033,10 @@ func (o *User) AddUserChills(ctx context.Context, exec boil.ContextExecutor, ins
 
 // Users retrieves all the records using an executor.
 func Users(mods ...qm.QueryMod) userQuery {
-	mods = append(mods, qm.From("\"users\""))
+	mods = append(mods, qm.From("\"chilly_daze\".\"users\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"users\".*"})
+		queries.SetSelect(q, []string{"\"chilly_daze\".\"users\".*"})
 	}
 
 	return userQuery{q}
@@ -776,7 +1052,7 @@ func FindUser(ctx context.Context, exec boil.ContextExecutor, iD string, selectC
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"users\" where \"id\"=$1", sel,
+		"select %s from \"chilly_daze\".\"users\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -840,9 +1116,9 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"users\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"chilly_daze\".\"users\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"users\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"chilly_daze\".\"users\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -908,7 +1184,7 @@ func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 			return 0, errors.New("db: unable to update users, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"users\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"chilly_daze\".\"users\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, userPrimaryKeyColumns),
 		)
@@ -989,7 +1265,7 @@ func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"users\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"chilly_daze\".\"users\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, userPrimaryKeyColumns, len(o)))
 
@@ -1086,7 +1362,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 			conflict = make([]string, len(userPrimaryKeyColumns))
 			copy(conflict, userPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"users\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"chilly_daze\".\"users\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(userType, userMapping, insert)
 		if err != nil {
@@ -1145,7 +1421,7 @@ func (o *User) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userPrimaryKeyMapping)
-	sql := "DELETE FROM \"users\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"chilly_daze\".\"users\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1210,7 +1486,7 @@ func (o UserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"users\" WHERE " +
+	sql := "DELETE FROM \"chilly_daze\".\"users\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1265,7 +1541,7 @@ func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"users\".* FROM \"users\" WHERE " +
+	sql := "SELECT \"chilly_daze\".\"users\".* FROM \"chilly_daze\".\"users\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1283,7 +1559,7 @@ func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 // UserExists checks if the User row exists.
 func UserExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"users\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"chilly_daze\".\"users\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

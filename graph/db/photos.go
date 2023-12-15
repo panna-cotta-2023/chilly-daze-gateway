@@ -64,10 +64,10 @@ var PhotoWhere = struct {
 	Timestamp whereHelpertime_Time
 	URL       whereHelperstring
 }{
-	ID:        whereHelperstring{field: "\"photos\".\"id\""},
-	ChillID:   whereHelperstring{field: "\"photos\".\"chill_id\""},
-	Timestamp: whereHelpertime_Time{field: "\"photos\".\"timestamp\""},
-	URL:       whereHelperstring{field: "\"photos\".\"url\""},
+	ID:        whereHelperstring{field: "\"chilly_daze\".\"photos\".\"id\""},
+	ChillID:   whereHelperstring{field: "\"chilly_daze\".\"photos\".\"chill_id\""},
+	Timestamp: whereHelpertime_Time{field: "\"chilly_daze\".\"photos\".\"timestamp\""},
+	URL:       whereHelperstring{field: "\"chilly_daze\".\"photos\".\"url\""},
 }
 
 // PhotoRels is where relationship names are stored.
@@ -452,8 +452,8 @@ func (photoL) LoadChill(ctx context.Context, e boil.ContextExecutor, singular bo
 	}
 
 	query := NewQuery(
-		qm.From(`chills`),
-		qm.WhereIn(`chills.id in ?`, args...),
+		qm.From(`chilly_daze.chills`),
+		qm.WhereIn(`chilly_daze.chills.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -526,7 +526,7 @@ func (o *Photo) SetChill(ctx context.Context, exec boil.ContextExecutor, insert 
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"photos\" SET %s WHERE %s",
+		"UPDATE \"chilly_daze\".\"photos\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
 		strmangle.WhereClause("\"", "\"", 2, photoPrimaryKeyColumns),
 	)
@@ -563,10 +563,10 @@ func (o *Photo) SetChill(ctx context.Context, exec boil.ContextExecutor, insert 
 
 // Photos retrieves all the records using an executor.
 func Photos(mods ...qm.QueryMod) photoQuery {
-	mods = append(mods, qm.From("\"photos\""))
+	mods = append(mods, qm.From("\"chilly_daze\".\"photos\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"photos\".*"})
+		queries.SetSelect(q, []string{"\"chilly_daze\".\"photos\".*"})
 	}
 
 	return photoQuery{q}
@@ -582,7 +582,7 @@ func FindPhoto(ctx context.Context, exec boil.ContextExecutor, iD string, select
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"photos\" where \"id\"=$1", sel,
+		"select %s from \"chilly_daze\".\"photos\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -639,9 +639,9 @@ func (o *Photo) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"photos\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"chilly_daze\".\"photos\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"photos\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"chilly_daze\".\"photos\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -707,7 +707,7 @@ func (o *Photo) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 			return 0, errors.New("db: unable to update photos, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"photos\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"chilly_daze\".\"photos\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, photoPrimaryKeyColumns),
 		)
@@ -788,7 +788,7 @@ func (o PhotoSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"photos\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"chilly_daze\".\"photos\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, photoPrimaryKeyColumns, len(o)))
 
@@ -878,7 +878,7 @@ func (o *Photo) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 			conflict = make([]string, len(photoPrimaryKeyColumns))
 			copy(conflict, photoPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"photos\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"chilly_daze\".\"photos\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(photoType, photoMapping, insert)
 		if err != nil {
@@ -937,7 +937,7 @@ func (o *Photo) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), photoPrimaryKeyMapping)
-	sql := "DELETE FROM \"photos\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"chilly_daze\".\"photos\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1002,7 +1002,7 @@ func (o PhotoSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"photos\" WHERE " +
+	sql := "DELETE FROM \"chilly_daze\".\"photos\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, photoPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1057,7 +1057,7 @@ func (o *PhotoSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"photos\".* FROM \"photos\" WHERE " +
+	sql := "SELECT \"chilly_daze\".\"photos\".* FROM \"chilly_daze\".\"photos\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, photoPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1075,7 +1075,7 @@ func (o *PhotoSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 // PhotoExists checks if the Photo row exists.
 func PhotoExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"photos\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"chilly_daze\".\"photos\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

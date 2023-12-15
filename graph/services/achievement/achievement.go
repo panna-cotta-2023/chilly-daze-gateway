@@ -3,6 +3,7 @@ package achievement
 import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
+
 	"context"
 	"log"
 
@@ -26,19 +27,33 @@ func (u *AchievementService) GetAchievementsByUserId(
 	}
 
 	for _, db_user_achievement := range db_user_achievements {
-		db_achievement, err := db.Achievements(db.AchievementWhere.ID.EQ(db_user_achievement.AchievementID)).One(ctx, u.Exec)
+		log.Println("db_user_achievement: ", db_user_achievement)
+		db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(db_user_achievement.AchievementID)).All(ctx, u.Exec)
 		if err != nil {
 			log.Println("db_achievement.Select error:", err)
 			return nil, err
 		}
 
-		result = append(result, &model.Achievement{
-			ID:          db_achievement.ID,
-			Name:        db_achievement.Name,
-			Description: db_achievement.Description,
-			Category:    db_achievement.Category,
-			Image: 		 db_achievement.ImageURL,
-		})
+		for _, db_achievement := range db_achievements {
+			db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
+			if err != nil {
+				log.Println("db_achievement_category.Select error:", err)
+				return nil, err
+			}
+
+			result = append(result, &model.Achievement{
+				ID:          db_achievement.ID,
+				Name:        db_achievement.Name,
+				Description: db_achievement.Description,
+				DisplayName: db_achievement_category.DisplayName,
+				Category: &model.AchievementCategory{
+					ID:          db_achievement_category.ID,
+					Name:        db_achievement_category.Name,
+					DisplayName: db_achievement_category.DisplayName,
+				},
+			})
+		}
+
 	}
 
 	return result, nil
@@ -47,7 +62,7 @@ func (u *AchievementService) GetAchievementsByUserId(
 func (u *AchievementService) GetAchievements(
 	ctx context.Context,
 ) ([]*model.Achievement, error) {
-	
+
 	result := []*model.Achievement{}
 
 	db_achievements, err := db.Achievements().All(ctx, u.Exec)
@@ -57,13 +72,216 @@ func (u *AchievementService) GetAchievements(
 	}
 
 	for _, db_achievement := range db_achievements {
-		result = append(result, &model.Achievement{
+		achievement := &model.Achievement{
+			ID:          db_achievement.ID,
+			Name:        db_achievement.Name,
+			DisplayName: db_achievement.DisplayName,
+			Description: db_achievement.Description,
+		}
+
+		db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
+		if err != nil {
+			log.Println("db_achievement_category.Select error:", err)
+			return nil, err
+		}
+
+		achievement.Category = &model.AchievementCategory{
+			ID:          db_achievement_category.ID,
+			Name:        db_achievement_category.Name,
+			DisplayName: db_achievement_category.DisplayName,
+		}
+
+		result = append(result, achievement)
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) GetAchievementCategories(
+	ctx context.Context,
+) ([]*model.AchievementCategory, error) {
+
+	result := []*model.AchievementCategory{}
+
+	db_achievement_categories, err := db.AchievementCategories().All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_achievement_categories.Select error:", err)
+		return nil, err
+	}
+
+	for _, db_achievement_category := range db_achievement_categories {
+		achievement_category := &model.AchievementCategory{
+			ID:          db_achievement_category.ID,
+			Name:        db_achievement_category.Name,
+			DisplayName: db_achievement_category.DisplayName,
+		}
+
+		db_achievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(db_achievement_category.ID)).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db_achievements.Select error:", err)
+			return nil, err
+		}
+
+		for _, db_achievement := range db_achievements {
+			achievement_category.Achievements = append(achievement_category.Achievements, &model.Achievement{
+				ID:          db_achievement.ID,
+				Name:        db_achievement.Name,
+				DisplayName: db_achievement.DisplayName,
+				Description: db_achievement.Description,
+			})
+		}
+
+		result = append(result, achievement_category)
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) GetAvatarByUser(
+	ctx context.Context,
+	user *model.User,
+) (*model.Achievement, error) {
+	if user.Avatar == nil || user.Avatar.ID == "" {
+		return &model.Achievement{}, nil
+	}
+
+	db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(user.Avatar.ID)).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_achievement.Select error:", err)
+		return &model.Achievement{}, err
+	}
+
+	for _, db_achievement := range db_achievements {
+		return &model.Achievement{
 			ID:          db_achievement.ID,
 			Name:        db_achievement.Name,
 			Description: db_achievement.Description,
-			Category:    db_achievement.Category,
-			Image: 		 db_achievement.ImageURL,
+		}, nil
+	}
+	return &model.Achievement{}, nil
+}
+
+func (u *AchievementService) GetAchievementCategoryByAchievement(
+	ctx context.Context,
+	achievement *model.Achievement,
+) (*model.AchievementCategory, error) {
+	if achievement == nil || achievement.Category == nil {
+		return &model.AchievementCategory{}, nil
+	}
+
+	db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(achievement.Category.ID)).One(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_achievement_category.Select error:", err)
+		return &model.AchievementCategory{}, err
+	}
+
+	return &model.AchievementCategory{
+		ID:          db_achievement_category.ID,
+		Name:        db_achievement_category.Name,
+		DisplayName: db_achievement_category.DisplayName,
+	}, nil
+}
+
+func (u *AchievementService) GetAchievementsByAchievementCategory(
+	ctx context.Context,
+	achievementCategory *model.AchievementCategory,
+) ([]*model.Achievement, error) {
+	if achievementCategory == nil {
+		return []*model.Achievement{}, nil
+	}
+
+	result := []*model.Achievement{}
+
+	db_achievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(achievementCategory.ID)).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_achievements.Select error:", err)
+		return nil, err
+	}
+
+	for _, db_achievement := range db_achievements {
+		achievement := &model.Achievement{
+			ID:          db_achievement.ID,
+			Name:        db_achievement.Name,
+			DisplayName: db_achievement.DisplayName,
+			Description: db_achievement.Description,
+		}
+
+		result = append(result, achievement)
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) GetNewAchievements(
+	ctx context.Context,
+	chill *model.Chill,
+	userId string,
+) ([]*model.Achievement, error) {
+	// ToDo: check achievement
+	achievementIds := []string{}
+
+	result := []*model.Achievement{}
+
+	userAchievements, err := db.UserAchievements(
+		db.UserAchievementWhere.UserID.EQ(userId),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.UserAchievements error:", err)
+		return nil, err
+	}
+
+	newAchievementIds := []string{}
+
+	for _, achievementId := range achievementIds {
+		flag := false
+		for _, userAchievement := range userAchievements {
+			if userAchievement.AchievementID == achievementId {
+				flag = true
+			}
+		}
+		if !flag {
+			newAchievementIds = append(newAchievementIds, achievementId)
+		}
+	}
+
+	dbNewAchievements, err := db.Achievements(
+		db.AchievementWhere.ID.IN(newAchievementIds),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Achievements error:", err)
+		return nil, err
+	}
+
+	for _, dbNewAchievement := range dbNewAchievements {
+		result = append(result, &model.Achievement{
+			ID:          dbNewAchievement.ID,
+			Name:        dbNewAchievement.Name,
+			Description: dbNewAchievement.Description,
+			DisplayName: dbNewAchievement.DisplayName,
+			Category: &model.AchievementCategory{
+				ID: dbNewAchievement.CategoryID,
+			},
 		})
+
+		dbChillAchievement := &db.ChillAchievement{
+			ChillID:       chill.ID,
+			AchievementID: dbNewAchievement.ID,
+		}
+
+		if err = dbChillAchievement.Insert(ctx, u.Exec, boil.Infer()); err != nil {
+			log.Println("dbChillAchievement.Insert error:", err)
+			return nil, err
+		}
+
+		dbUserAchievement := &db.UserAchievement{
+			UserID:        userId,
+			AchievementID: dbNewAchievement.ID,
+		}
+
+		if err = dbUserAchievement.Insert(ctx, u.Exec, boil.Infer()); err != nil {
+			log.Println("db_user_achievement.Insert error:", err)
+			return nil, err
+		}
 	}
 
 	return result, nil

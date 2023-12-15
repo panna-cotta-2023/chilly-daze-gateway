@@ -22,38 +22,35 @@ type UserService interface {
 		ctx context.Context,
 		uid string,
 	) (*model.User, bool)
-	UpdateUserName(
+	UpdateUser(
 		ctx context.Context,
-		uid string,
-		name string,
-	) (*model.User, error)
-	UpdateUserAvatar(
-		ctx context.Context,
-		uid string,
-		avatar string,
+		userId string,
+		input model.UpdateUserInput,
 	) (*model.User, error)
 }
 
 type TraceService interface {
-	AddTracePoints(
+	AddTracePoint(
 		ctx context.Context,
-		input model.TracePointsInput,
-	) ([]*model.TracePoint, error)
-	GetTracesByChillId(
-		ctx context.Context,
+		input model.TracePointInput,
 		chillId string,
+	) (*model.TracePoint, error)
+	GetTracePointsByChill(
+		ctx context.Context,
+		chill *model.Chill,
 	) ([]*model.TracePoint, error)
 }
 
 type PhotoService interface {
-	AddPhotos(
+	AddPhoto(
 		ctx context.Context,
-		input model.PhotosInput,
-	) ([]*model.Photo, error)
-	GetPhotosByChillId(
-		ctx context.Context,
+		input *model.PhotoInput,
 		chillId string,
-	) ([]*model.Photo, error)
+	) (*model.Photo, error)
+	GetPhotoByChill(
+		ctx context.Context,
+		chill *model.Chill,
+	) (*model.Photo, error)
 }
 
 type ChillService interface {
@@ -64,6 +61,7 @@ type ChillService interface {
 	EndChill(
 		ctx context.Context,
 		endChill model.EndChillInput,
+		userId string,
 	) (*model.Chill, error)
 	AddUserChill(
 		ctx context.Context,
@@ -72,7 +70,7 @@ type ChillService interface {
 	) error
 	GetChillsByUserId(
 		ctx context.Context,
-		user_id string,
+		userID string,
 	) ([]*model.Chill, error)
 }
 
@@ -83,6 +81,26 @@ type AchievementService interface {
 	) ([]*model.Achievement, error)
 	GetAchievements(
 		ctx context.Context,
+	) ([]*model.Achievement, error)
+	GetAchievementCategories(
+		ctx context.Context,
+	) ([]*model.AchievementCategory, error)
+	GetAvatarByUser(
+		ctx context.Context,
+		user *model.User,
+	) (*model.Achievement, error)
+	GetAchievementCategoryByAchievement(
+		ctx context.Context,
+		achievement *model.Achievement,
+	) (*model.AchievementCategory, error)
+	GetAchievementsByAchievementCategory(
+		ctx context.Context,
+		achievementCategory *model.AchievementCategory,
+	) ([]*model.Achievement, error)
+	GetNewAchievements(
+		ctx context.Context,
+		chill *model.Chill,
+		userId string,
 	) ([]*model.Achievement, error)
 }
 
@@ -103,10 +121,10 @@ type services struct {
 
 func New(exec boil.ContextExecutor) Services {
 	return &services{
-		UserService:  &user.UserService{Exec: exec},
-		TraceService: &trace.TraceService{Exec: exec},
-		PhotoService: &photo.PhotoService{Exec: exec},
-		ChillService: &chill.ChillService{Exec: exec},
+		UserService:        &user.UserService{Exec: exec},
+		TraceService:       &trace.TraceService{Exec: exec},
+		PhotoService:       &photo.PhotoService{Exec: exec},
+		ChillService:       &chill.ChillService{Exec: exec},
 		AchievementService: &achievement.AchievementService{Exec: exec},
 	}
 }

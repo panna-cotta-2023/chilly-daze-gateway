@@ -1,8 +1,18 @@
-query User{
+query User {
   user {
     id
     name
-    avatar
+    avatar {
+      id
+      name
+      displayName
+      description
+      category {
+        id
+        name
+        displayName
+      }
+    }
     chills {
       id
       traces {
@@ -18,32 +28,75 @@ query User{
         url
         timestamp
       }
+      newAchievements {
+        id
+        name
+        displayName
+        description
+        category {
+          id
+          name
+          displayName
+        }
+      }
     }
     achievements {
       id
       name
+      displayName
       description
-      image
+      category {
+        id
+        name
+        displayName
+      }
     }
   }
 }
 
-query Achievements{
+query Achievements {
   achievements {
     id
     name
+    displayName
     description
-    image
+    category {
+      id
+      name
+      displayName
+    }
   }
 }
 
-mutation registerUser(
-  $input: RegisterUserInput!
-  ) {
+query AchievementCategories {
+  achievementCategories {
+    id
+    name
+    displayName
+    achievements {
+      id
+      name
+      displayName
+      description
+    }
+  }
+}
+
+mutation registerUser($input: RegisterUserInput!) {
   registerUser(input: $input) {
     id
     name
-    avatar
+    avatar {
+      id
+      name
+      displayName
+      description
+      category {
+        id
+        name
+        displayName
+      }
+    }
     chills {
       id
       traces {
@@ -63,15 +116,18 @@ mutation registerUser(
     achievements {
       id
       name
+      displayName
       description
-      image
+      category {
+        id
+        name
+        displayName
+      }
     }
   }
 }
 
-mutation startChill(
-  $input: StartChillInput!
-  ) {
+mutation startChill($input: StartChillInput!) {
   startChill(input: $input) {
     id
     traces {
@@ -90,22 +146,18 @@ mutation startChill(
   }
 }
 
-mutation addTracePoints(
-  $input: TracePointsInput!
-  ) {
+mutation addTracePoints($input: TracePointsInput!) {
   addTracePoints(input: $input) {
     id
-      timestamp
-      coordinate {
-        latitude
-        longitude
-      }
+    timestamp
+    coordinate {
+      latitude
+      longitude
+    }
   }
 }
 
-mutation addPhotos(
-  $input: PhotosInput!
-  ) {
+mutation addPhotos($input: PhotosInput!) {
   addPhotos(input: $input) {
     id
     url
@@ -113,9 +165,7 @@ mutation addPhotos(
   }
 }
 
-mutation endChill(
-  $input: EndChillInput!
-  ) {
+mutation endChill($input: EndChillInput!) {
   endChill(input: $input) {
     id
     traces {
@@ -130,6 +180,17 @@ mutation endChill(
       id
       url
       timestamp
+    }
+    newAchievements {
+      id
+      name
+      displayName
+      description
+      category {
+        id
+        name
+        displayName
+      }
     }
   }
 }

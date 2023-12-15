@@ -58,9 +58,9 @@ var UserChillWhere = struct {
 	UserID  whereHelperstring
 	ChillID whereHelperstring
 }{
-	ID:      whereHelperstring{field: "\"user_chills\".\"id\""},
-	UserID:  whereHelperstring{field: "\"user_chills\".\"user_id\""},
-	ChillID: whereHelperstring{field: "\"user_chills\".\"chill_id\""},
+	ID:      whereHelperstring{field: "\"chilly_daze\".\"user_chills\".\"id\""},
+	UserID:  whereHelperstring{field: "\"chilly_daze\".\"user_chills\".\"user_id\""},
+	ChillID: whereHelperstring{field: "\"chilly_daze\".\"user_chills\".\"chill_id\""},
 }
 
 // UserChillRels is where relationship names are stored.
@@ -466,8 +466,8 @@ func (userChillL) LoadChill(ctx context.Context, e boil.ContextExecutor, singula
 	}
 
 	query := NewQuery(
-		qm.From(`chills`),
-		qm.WhereIn(`chills.id in ?`, args...),
+		qm.From(`chilly_daze.chills`),
+		qm.WhereIn(`chilly_daze.chills.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -586,8 +586,8 @@ func (userChillL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular
 	}
 
 	query := NewQuery(
-		qm.From(`users`),
-		qm.WhereIn(`users.id in ?`, args...),
+		qm.From(`chilly_daze.users`),
+		qm.WhereIn(`chilly_daze.users.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -660,7 +660,7 @@ func (o *UserChill) SetChill(ctx context.Context, exec boil.ContextExecutor, ins
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_chills\" SET %s WHERE %s",
+		"UPDATE \"chilly_daze\".\"user_chills\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"chill_id"}),
 		strmangle.WhereClause("\"", "\"", 2, userChillPrimaryKeyColumns),
 	)
@@ -707,7 +707,7 @@ func (o *UserChill) SetUser(ctx context.Context, exec boil.ContextExecutor, inse
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_chills\" SET %s WHERE %s",
+		"UPDATE \"chilly_daze\".\"user_chills\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
 		strmangle.WhereClause("\"", "\"", 2, userChillPrimaryKeyColumns),
 	)
@@ -744,10 +744,10 @@ func (o *UserChill) SetUser(ctx context.Context, exec boil.ContextExecutor, inse
 
 // UserChills retrieves all the records using an executor.
 func UserChills(mods ...qm.QueryMod) userChillQuery {
-	mods = append(mods, qm.From("\"user_chills\""))
+	mods = append(mods, qm.From("\"chilly_daze\".\"user_chills\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"user_chills\".*"})
+		queries.SetSelect(q, []string{"\"chilly_daze\".\"user_chills\".*"})
 	}
 
 	return userChillQuery{q}
@@ -763,7 +763,7 @@ func FindUserChill(ctx context.Context, exec boil.ContextExecutor, iD string, se
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"user_chills\" where \"id\"=$1", sel,
+		"select %s from \"chilly_daze\".\"user_chills\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -820,9 +820,9 @@ func (o *UserChill) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"user_chills\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"chilly_daze\".\"user_chills\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"user_chills\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"chilly_daze\".\"user_chills\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -888,7 +888,7 @@ func (o *UserChill) Update(ctx context.Context, exec boil.ContextExecutor, colum
 			return 0, errors.New("db: unable to update user_chills, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"user_chills\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"chilly_daze\".\"user_chills\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, userChillPrimaryKeyColumns),
 		)
@@ -969,7 +969,7 @@ func (o UserChillSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"user_chills\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"chilly_daze\".\"user_chills\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, userChillPrimaryKeyColumns, len(o)))
 
@@ -1059,7 +1059,7 @@ func (o *UserChill) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 			conflict = make([]string, len(userChillPrimaryKeyColumns))
 			copy(conflict, userChillPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"user_chills\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"chilly_daze\".\"user_chills\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(userChillType, userChillMapping, insert)
 		if err != nil {
@@ -1118,7 +1118,7 @@ func (o *UserChill) Delete(ctx context.Context, exec boil.ContextExecutor) (int6
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userChillPrimaryKeyMapping)
-	sql := "DELETE FROM \"user_chills\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"chilly_daze\".\"user_chills\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1183,7 +1183,7 @@ func (o UserChillSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"user_chills\" WHERE " +
+	sql := "DELETE FROM \"chilly_daze\".\"user_chills\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userChillPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1238,7 +1238,7 @@ func (o *UserChillSlice) ReloadAll(ctx context.Context, exec boil.ContextExecuto
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"user_chills\".* FROM \"user_chills\" WHERE " +
+	sql := "SELECT \"chilly_daze\".\"user_chills\".* FROM \"chilly_daze\".\"user_chills\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userChillPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1256,7 +1256,7 @@ func (o *UserChillSlice) ReloadAll(ctx context.Context, exec boil.ContextExecuto
 // UserChillExists checks if the UserChill row exists.
 func UserChillExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"user_chills\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"chilly_daze\".\"user_chills\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

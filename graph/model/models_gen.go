@@ -3,18 +3,26 @@
 package model
 
 type Achievement struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Category    string `json:"category"`
-	Image       string `json:"image"`
+	ID          string               `json:"id"`
+	Name        string               `json:"name"`
+	DisplayName string               `json:"displayName"`
+	Description string               `json:"description"`
+	Category    *AchievementCategory `json:"category"`
+}
+
+type AchievementCategory struct {
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	DisplayName  string         `json:"displayName"`
+	Achievements []*Achievement `json:"achievements"`
 }
 
 type Chill struct {
 	ID              string         `json:"id"`
 	Traces          []*TracePoint  `json:"traces"`
-	Photos          []*Photo       `json:"photos"`
+	Photo           *Photo         `json:"photo,omitempty"`
 	NewAchievements []*Achievement `json:"newAchievements"`
+	DistanceMeters  float64        `json:"distanceMeters"`
 }
 
 type Coordinate struct {
@@ -28,10 +36,11 @@ type CoordinateInput struct {
 }
 
 type EndChillInput struct {
-	ID          string             `json:"id"`
-	TracePoints []*TracePointInput `json:"tracePoints"`
-	Photos      []*PhotoInput      `json:"photos"`
-	Timestamp   string             `json:"timestamp"`
+	ID             string             `json:"id"`
+	TracePoints    []*TracePointInput `json:"tracePoints"`
+	Photo          *PhotoInput        `json:"photo,omitempty"`
+	Timestamp      string             `json:"timestamp"`
+	DistanceMeters float64            `json:"distanceMeters"`
 }
 
 type Photo struct {
@@ -45,14 +54,8 @@ type PhotoInput struct {
 	Timestamp string `json:"timestamp"`
 }
 
-type PhotosInput struct {
-	ID     string        `json:"id"`
-	Photos []*PhotoInput `json:"photos"`
-}
-
 type RegisterUserInput struct {
-	Name   *string `json:"name,omitempty"`
-	Avatar *string `json:"avatar,omitempty"`
+	Name string `json:"name"`
 }
 
 type StartChillInput struct {
@@ -71,15 +74,15 @@ type TracePointInput struct {
 	Coordinate *CoordinateInput `json:"coordinate"`
 }
 
-type TracePointsInput struct {
-	ID          string             `json:"id"`
-	TracePoints []*TracePointInput `json:"tracePoints"`
+type UpdateUserInput struct {
+	Name   *string `json:"name,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
 }
 
 type User struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
-	Avatar       string         `json:"avatar"`
+	Avatar       *Achievement   `json:"avatar,omitempty"`
 	Chills       []*Chill       `json:"chills"`
 	Achievements []*Achievement `json:"achievements"`
 }
