@@ -10,6 +10,16 @@ import (
 	"fmt"
 )
 
+// Category is the resolver for the category field.
+func (r *achievementResolver) Category(ctx context.Context, obj *model.Achievement) (*model.AchievementCategory, error) {
+	panic(fmt.Errorf("not implemented: Category - category"))
+}
+
+// Achievements is the resolver for the achievements field.
+func (r *achievementCategoryResolver) Achievements(ctx context.Context, obj *model.AchievementCategory) ([]*model.Achievement, error) {
+	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+}
+
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
@@ -67,7 +77,6 @@ func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInpu
 
 // EndChill is the resolver for the endChill field.
 func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error) {
-
 	uid := GetAuthToken(ctx)
 	chill, err := r.Srv.EndChill(ctx, input)
 	if err != nil {
@@ -89,7 +98,7 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 
 	// TODO: Check achievement
 	achievementIds := []string{}
-	err = r.Srv.AddChillAchievement(ctx,uid, chill.ID, achievementIds)
+	err = r.Srv.AddChillAchievement(ctx, uid, chill.ID, achievementIds)
 	if err != nil {
 		return nil, err
 	}
@@ -140,11 +149,40 @@ func (r *queryResolver) AchievementCategories(ctx context.Context) ([]*model.Ach
 	return achievementCategories, nil
 }
 
+// Avatar is the resolver for the avatar field.
+func (r *userResolver) Avatar(ctx context.Context, obj *model.User) (*model.Achievement, error) {
+	panic(fmt.Errorf("not implemented: Avatar - avatar"))
+}
+
+// Chills is the resolver for the chills field.
+func (r *userResolver) Chills(ctx context.Context, obj *model.User) ([]*model.Chill, error) {
+	panic(fmt.Errorf("not implemented: Chills - chills"))
+}
+
+// Achievements is the resolver for the achievements field.
+func (r *userResolver) Achievements(ctx context.Context, obj *model.User) ([]*model.Achievement, error) {
+	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+}
+
+// Achievement returns AchievementResolver implementation.
+func (r *Resolver) Achievement() AchievementResolver { return &achievementResolver{r} }
+
+// AchievementCategory returns AchievementCategoryResolver implementation.
+func (r *Resolver) AchievementCategory() AchievementCategoryResolver {
+	return &achievementCategoryResolver{r}
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
+
+type achievementResolver struct{ *Resolver }
+type achievementCategoryResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }
