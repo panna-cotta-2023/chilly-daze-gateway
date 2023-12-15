@@ -68,7 +68,7 @@ type ChillService interface {
 	) error
 	GetChillsByUserId(
 		ctx context.Context,
-		user_id string,
+		userID string,
 	) ([]*model.Chill, error)
 }
 
@@ -91,7 +91,7 @@ type AchievementService interface {
 	) error
 	GetAvatarByUser(
 		ctx context.Context,
-		user model.User,
+		user *model.User,
 	) (*model.Achievement, error)
 }
 

@@ -151,7 +151,7 @@ func (r *queryResolver) AchievementCategories(ctx context.Context) ([]*model.Ach
 
 // Avatar is the resolver for the avatar field.
 func (r *userResolver) Avatar(ctx context.Context, obj *model.User) (*model.Achievement, error) {
-	avatar, err := r.Srv.GetAvatarByUser(ctx, *obj)
+	avatar, err := r.Srv.GetAvatarByUser(ctx, obj)
 	if err != nil {
 		return nil, err
 	}
@@ -161,12 +161,22 @@ func (r *userResolver) Avatar(ctx context.Context, obj *model.User) (*model.Achi
 
 // Chills is the resolver for the chills field.
 func (r *userResolver) Chills(ctx context.Context, obj *model.User) ([]*model.Chill, error) {
-	panic(fmt.Errorf("not implemented: Chills - chills"))
+	chills, err := r.Srv.GetChillsByUserId(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return chills, nil
 }
 
 // Achievements is the resolver for the achievements field.
 func (r *userResolver) Achievements(ctx context.Context, obj *model.User) ([]*model.Achievement, error) {
-	panic(fmt.Errorf("not implemented: Achievements - achievements"))
+	achievements, err := r.Srv.GetAchievementsByUserId(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return achievements, nil
 }
 
 // Achievement returns AchievementResolver implementation.

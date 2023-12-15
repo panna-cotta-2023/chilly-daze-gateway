@@ -247,5 +247,4 @@ func (u *ChillService) GetChillsByUserId(
 	}
 
 	return result, nil
-
 }
