@@ -16,40 +16,39 @@ type AchievementService struct {
 
 func (u *AchievementService) GetAchievementsByUserId(
 	ctx context.Context,
-	user_id string,
+	userId string,
 ) ([]*model.Achievement, error) {
 	result := []*model.Achievement{}
 
-	db_user_achievements, err := db.UserAchievements(db.UserAchievementWhere.UserID.EQ(user_id)).All(ctx, u.Exec)
+	dbUserAchievements, err := db.UserAchievements(db.UserAchievementWhere.UserID.EQ(userId)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_user_achievements.Select error:", err)
+		log.Println("dbUserAchievements.Select error:", err)
 		return nil, err
 	}
 
-	for _, db_user_achievement := range db_user_achievements {
-		log.Println("db_user_achievement: ", db_user_achievement)
-		db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(db_user_achievement.AchievementID)).All(ctx, u.Exec)
+	for _, dbUserAchievement := range dbUserAchievements {
+		dbAchievements, err := db.Achievements(db.AchievementWhere.ID.EQ(dbUserAchievement.AchievementID)).All(ctx, u.Exec)
 		if err != nil {
-			log.Println("db_achievement.Select error:", err)
+			log.Println("dbAchievement.Select error:", err)
 			return nil, err
 		}
 
-		for _, db_achievement := range db_achievements {
-			db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
+		for _, dbAchievement := range dbAchievements {
+			dbAchievementCategory, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(dbAchievement.CategoryID)).One(ctx, u.Exec)
 			if err != nil {
-				log.Println("db_achievement_category.Select error:", err)
+				log.Println("dbAchievementCategory.Select error:", err)
 				return nil, err
 			}
 
 			result = append(result, &model.Achievement{
-				ID:          db_achievement.ID,
-				Name:        db_achievement.Name,
-				Description: db_achievement.Description,
-				DisplayName: db_achievement_category.DisplayName,
+				ID:          dbAchievement.ID,
+				Name:        dbAchievement.Name,
+				Description: dbAchievement.Description,
+				DisplayName: dbAchievementCategory.DisplayName,
 				Category: &model.AchievementCategory{
-					ID:          db_achievement_category.ID,
-					Name:        db_achievement_category.Name,
-					DisplayName: db_achievement_category.DisplayName,
+					ID:          dbAchievementCategory.ID,
+					Name:        dbAchievementCategory.Name,
+					DisplayName: dbAchievementCategory.DisplayName,
 				},
 			})
 		}
@@ -65,30 +64,30 @@ func (u *AchievementService) GetAchievements(
 
 	result := []*model.Achievement{}
 
-	db_achievements, err := db.Achievements().All(ctx, u.Exec)
+	dbAchievements, err := db.Achievements().All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_achievements.Select error:", err)
+		log.Println("dbAchievements.Select error:", err)
 		return nil, err
 	}
 
-	for _, db_achievement := range db_achievements {
+	for _, dbAchievement := range dbAchievements {
 		achievement := &model.Achievement{
-			ID:          db_achievement.ID,
-			Name:        db_achievement.Name,
-			DisplayName: db_achievement.DisplayName,
-			Description: db_achievement.Description,
+			ID:          dbAchievement.ID,
+			Name:        dbAchievement.Name,
+			DisplayName: dbAchievement.DisplayName,
+			Description: dbAchievement.Description,
 		}
 
-		db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
+		dbAchievementCategory, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(dbAchievement.CategoryID)).One(ctx, u.Exec)
 		if err != nil {
-			log.Println("db_achievement_category.Select error:", err)
+			log.Println("dbAchievementCategory.Select error:", err)
 			return nil, err
 		}
 
 		achievement.Category = &model.AchievementCategory{
-			ID:          db_achievement_category.ID,
-			Name:        db_achievement_category.Name,
-			DisplayName: db_achievement_category.DisplayName,
+			ID:          dbAchievementCategory.ID,
+			Name:        dbAchievementCategory.Name,
+			DisplayName: dbAchievementCategory.DisplayName,
 		}
 
 		result = append(result, achievement)
@@ -103,35 +102,35 @@ func (u *AchievementService) GetAchievementCategories(
 
 	result := []*model.AchievementCategory{}
 
-	db_achievement_categories, err := db.AchievementCategories().All(ctx, u.Exec)
+	dbAchievementCategories, err := db.AchievementCategories().All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_achievement_categories.Select error:", err)
+		log.Println("dbAchievementCategories.Select error:", err)
 		return nil, err
 	}
 
-	for _, db_achievement_category := range db_achievement_categories {
-		achievement_category := &model.AchievementCategory{
-			ID:          db_achievement_category.ID,
-			Name:        db_achievement_category.Name,
-			DisplayName: db_achievement_category.DisplayName,
+	for _, dbAchievementCategory := range dbAchievementCategories {
+		achievementCategory := &model.AchievementCategory{
+			ID:          dbAchievementCategory.ID,
+			Name:        dbAchievementCategory.Name,
+			DisplayName: dbAchievementCategory.DisplayName,
 		}
 
-		db_achievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(db_achievement_category.ID)).All(ctx, u.Exec)
+		dbAchievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(dbAchievementCategory.ID)).All(ctx, u.Exec)
 		if err != nil {
-			log.Println("db_achievements.Select error:", err)
+			log.Println("dbAchievements.Select error:", err)
 			return nil, err
 		}
 
-		for _, db_achievement := range db_achievements {
-			achievement_category.Achievements = append(achievement_category.Achievements, &model.Achievement{
-				ID:          db_achievement.ID,
-				Name:        db_achievement.Name,
-				DisplayName: db_achievement.DisplayName,
-				Description: db_achievement.Description,
+		for _, dbAchievement := range dbAchievements {
+			achievementCategory.Achievements = append(achievementCategory.Achievements, &model.Achievement{
+				ID:          dbAchievement.ID,
+				Name:        dbAchievement.Name,
+				DisplayName: dbAchievement.DisplayName,
+				Description: dbAchievement.Description,
 			})
 		}
 
-		result = append(result, achievement_category)
+		result = append(result, achievementCategory)
 	}
 
 	return result, nil
@@ -145,17 +144,17 @@ func (u *AchievementService) GetAvatarByUser(
 		return &model.Achievement{}, nil
 	}
 
-	db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(user.Avatar.ID)).All(ctx, u.Exec)
+	dbAchievements, err := db.Achievements(db.AchievementWhere.ID.EQ(user.Avatar.ID)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_achievement.Select error:", err)
+		log.Println("dbAchievement.Select error:", err)
 		return &model.Achievement{}, err
 	}
 
-	for _, db_achievement := range db_achievements {
+	for _, dbAchievement := range dbAchievements {
 		return &model.Achievement{
-			ID:          db_achievement.ID,
-			Name:        db_achievement.Name,
-			Description: db_achievement.Description,
+			ID:          dbAchievement.ID,
+			Name:        dbAchievement.Name,
+			Description: dbAchievement.Description,
 		}, nil
 	}
 	return &model.Achievement{}, nil
@@ -169,16 +168,16 @@ func (u *AchievementService) GetAchievementCategoryByAchievement(
 		return &model.AchievementCategory{}, nil
 	}
 
-	db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(achievement.Category.ID)).One(ctx, u.Exec)
+	dbAchievementCategory, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(achievement.Category.ID)).One(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_achievement_category.Select error:", err)
+		log.Println("dbAchievementCategory.Select error:", err)
 		return &model.AchievementCategory{}, err
 	}
 
 	return &model.AchievementCategory{
-		ID:          db_achievement_category.ID,
-		Name:        db_achievement_category.Name,
-		DisplayName: db_achievement_category.DisplayName,
+		ID:          dbAchievementCategory.ID,
+		Name:        dbAchievementCategory.Name,
+		DisplayName: dbAchievementCategory.DisplayName,
 	}, nil
 }
 
@@ -192,18 +191,18 @@ func (u *AchievementService) GetAchievementsByAchievementCategory(
 
 	result := []*model.Achievement{}
 
-	db_achievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(achievementCategory.ID)).All(ctx, u.Exec)
+	dbAchievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(achievementCategory.ID)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_achievements.Select error:", err)
+		log.Println("dbAchievements.Select error:", err)
 		return nil, err
 	}
 
-	for _, db_achievement := range db_achievements {
+	for _, dbAchievement := range dbAchievements {
 		achievement := &model.Achievement{
-			ID:          db_achievement.ID,
-			Name:        db_achievement.Name,
-			DisplayName: db_achievement.DisplayName,
-			Description: db_achievement.Description,
+			ID:          dbAchievement.ID,
+			Name:        dbAchievement.Name,
+			DisplayName: dbAchievement.DisplayName,
+			Description: dbAchievement.Description,
 		}
 
 		result = append(result, achievement)

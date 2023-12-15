@@ -16,11 +16,11 @@ type UserService interface {
 	CreateUser(
 		ctx context.Context,
 		input model.RegisterUserInput,
-		uid string,
+		userId string,
 	) (*model.User, error)
 	GetUser(
 		ctx context.Context,
-		uid string,
+		userId string,
 	) (*model.User, bool)
 	UpdateUser(
 		ctx context.Context,
@@ -30,11 +30,6 @@ type UserService interface {
 }
 
 type TraceService interface {
-	AddTracePoint(
-		ctx context.Context,
-		input model.TracePointInput,
-		chillId string,
-	) (*model.TracePoint, error)
 	GetTracePointsByChill(
 		ctx context.Context,
 		chill *model.Chill,
@@ -42,11 +37,6 @@ type TraceService interface {
 }
 
 type PhotoService interface {
-	AddPhoto(
-		ctx context.Context,
-		input *model.PhotoInput,
-		chillId string,
-	) (*model.Photo, error)
 	GetPhotoByChill(
 		ctx context.Context,
 		chill *model.Chill,
@@ -77,7 +67,7 @@ type ChillService interface {
 type AchievementService interface {
 	GetAchievementsByUserId(
 		ctx context.Context,
-		user_id string,
+		userId string,
 	) ([]*model.Achievement, error)
 	GetAchievements(
 		ctx context.Context,
