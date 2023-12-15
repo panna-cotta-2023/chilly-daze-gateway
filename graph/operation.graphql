@@ -86,44 +86,6 @@ mutation registerUser($input: RegisterUserInput!) {
   registerUser(input: $input) {
     id
     name
-    avatar {
-      id
-      name
-      displayName
-      description
-      category {
-        id
-        name
-        displayName
-      }
-    }
-    chills {
-      id
-      traces {
-        id
-        timestamp
-        coordinate {
-          latitude
-          longitude
-        }
-      }
-      photos {
-        id
-        url
-        timestamp
-      }
-    }
-    achievements {
-      id
-      name
-      displayName
-      description
-      category {
-        id
-        name
-        displayName
-      }
-    }
   }
 }
 
@@ -138,30 +100,6 @@ mutation startChill($input: StartChillInput!) {
         longitude
       }
     }
-    photos {
-      id
-      url
-      timestamp
-    }
-  }
-}
-
-mutation addTracePoints($input: TracePointsInput!) {
-  addTracePoints(input: $input) {
-    id
-    timestamp
-    coordinate {
-      latitude
-      longitude
-    }
-  }
-}
-
-mutation addPhotos($input: PhotosInput!) {
-  addPhotos(input: $input) {
-    id
-    url
-    timestamp
   }
 }
 

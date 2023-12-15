@@ -35,7 +35,7 @@ func (u *PhotoService) AddPhoto(
 		return nil, err
 	}
 
-	db_photo := &db.Photo{
+	dbPhoto := &db.Photo{
 		ID:        uuid.New().String(),
 		ChillID:   chillId,
 		Timestamp: timestamp,
@@ -43,14 +43,14 @@ func (u *PhotoService) AddPhoto(
 	}
 
 	result = &model.Photo{
-		ID:        db_photo.ChillID,
+		ID:        dbPhoto.ChillID,
 		Timestamp: timestamp.Format("2006-01-02T15:04:05+09:00"),
-		URL:       db_photo.URL,
+		URL:       dbPhoto.URL,
 	}
 
-	err = db_photo.Insert(ctx, u.Exec, boil.Infer())
+	err = dbPhoto.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
-		log.Println("db_photo.Insert error:", err)
+		log.Println("dbPhoto.Insert error:", err)
 		return nil, err
 	}
 
@@ -63,17 +63,17 @@ func (u *PhotoService) GetPhotoByChill(
 ) (*model.Photo, error) {
 	result := &model.Photo{}
 
-	db_photos, err := db.Photos(db.PhotoWhere.ChillID.EQ(chill.ID)).All(ctx, u.Exec)
+	dbPhotos, err := db.Photos(db.PhotoWhere.ChillID.EQ(chill.ID)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_photos.Select error:", err)
+		log.Println("dbPhotos.Select error:", err)
 		return nil, err
 	}
 
-	for _, db_photo := range db_photos {
+	for _, dbPhoto := range dbPhotos {
 		result = &model.Photo{
-			ID:        db_photo.ID,
-			URL:       db_photo.URL,
-			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+			ID:        dbPhoto.ID,
+			URL:       dbPhoto.URL,
+			Timestamp: dbPhoto.Timestamp.Format("2006-01-02T15:04:05+09:00"),
 		}
 	}
 

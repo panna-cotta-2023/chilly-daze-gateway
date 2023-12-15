@@ -31,7 +31,7 @@ func (u *TraceService) AddTracePoint(
 		return nil, err
 	}
 
-	db_tracePoint := &db.TracePoint{
+	dbTracePoint := &db.TracePoint{
 		ID:        uuid.New().String(),
 		ChillID:   chillId,
 		Latitude:  tracePoint.Coordinate.Latitude,
@@ -40,17 +40,17 @@ func (u *TraceService) AddTracePoint(
 	}
 
 	result = &model.TracePoint{
-		ID:        db_tracePoint.ChillID,
-		Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+		ID:        dbTracePoint.ChillID,
+		Timestamp: dbTracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
 		Coordinate: &model.Coordinate{
-			Latitude:  db_tracePoint.Latitude,
-			Longitude: db_tracePoint.Longitude,
+			Latitude:  dbTracePoint.Latitude,
+			Longitude: dbTracePoint.Longitude,
 		},
 	}
 
-	err = db_tracePoint.Insert(ctx, u.Exec, boil.Infer())
+	err = dbTracePoint.Insert(ctx, u.Exec, boil.Infer())
 	if err != nil {
-		log.Println("db_tracePoint.Insert error:", err)
+		log.Println("dbTracePoint.Insert error:", err)
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (u *TraceService) GetTracePointsByChill(
 	ctx context.Context,
 	chill *model.Chill,
 ) ([]*model.TracePoint, error) {
-	db_traces, err := db.TracePoints(
+	dbTraces, err := db.TracePoints(
 		db.TracePointWhere.ChillID.EQ(chill.ID),
 	).All(ctx, u.Exec)
 	if err != nil {
@@ -71,13 +71,13 @@ func (u *TraceService) GetTracePointsByChill(
 
 	result := []*model.TracePoint{}
 
-	for _, db_trace := range db_traces {
+	for _, dbTrace := range dbTraces {
 		result = append(result, &model.TracePoint{
-			ID:        db_trace.ID,
-			Timestamp: db_trace.Timestamp.Format("2006-01-02T15:04:05+09:00"),
+			ID:        dbTrace.ID,
+			Timestamp: dbTrace.Timestamp.Format("2006-01-02T15:04:05+09:00"),
 			Coordinate: &model.Coordinate{
-				Latitude:  db_trace.Latitude,
-				Longitude: db_trace.Longitude,
+				Latitude:  dbTrace.Latitude,
+				Longitude: dbTrace.Longitude,
 			},
 		})
 	}
