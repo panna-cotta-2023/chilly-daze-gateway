@@ -83,6 +83,12 @@ type AchievementService interface {
 	GetAchievementCategories(
 		ctx context.Context,
 	) ([]*model.AchievementCategory, error)
+	AddChillAchievement(
+		ctx context.Context,
+		user_id string,
+		chill_id string,
+		achievement_id []string,
+	) error
 	// GetAchievementsByCategoryId(
 	// 	ctx context.Context,
 	// 	category_id string,

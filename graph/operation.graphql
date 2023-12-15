@@ -143,17 +143,6 @@ mutation startChill($input: StartChillInput!) {
       url
       timestamp
     }
-    newAchievements {
-      id
-      name
-      displayName
-      description
-      category {
-        id
-        name
-        displayName
-      }
-    }
   }
 }
 

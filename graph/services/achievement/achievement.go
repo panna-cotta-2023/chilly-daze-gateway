@@ -132,6 +132,63 @@ func (u *AchievementService) GetAchievementCategories(
 	return result, nil
 }
 
+func (u *AchievementService) AddChillAchievement(
+	ctx context.Context,
+	user_id string,
+	chill_id string,
+	achievement_id []string,
+) error {
+
+	have_achievements, err := db.UserAchievements(db.UserAchievementWhere.UserID.EQ(user_id)).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_user_achievements.Select error:", err)
+		return err
+	}
+	
+	is_have_list := map[string]bool{}
+
+	for _, id := range achievement_id {
+		is_have_list[id] = false
+		for _, have_achievement := range have_achievements {
+			if have_achievement.AchievementID == id {
+				is_have_list[id] = true
+				break
+			}
+		}
+	}
+
+
+	for _, id := range achievement_id {
+		if !is_have_list[id] {
+			db_chill_achievement := &db.ChillAchievement{
+				ChillID: chill_id,
+				AchievementID: id,
+			}
+		
+			err := db_chill_achievement.Insert(ctx, u.Exec, boil.Infer())
+			if err != nil {
+				log.Println("db_chill_achievement.Insert error:", err)
+				return err
+			}
+
+			db_user_achievement := &db.UserAchievement{
+				UserID: user_id,
+				AchievementID: id,
+			}
+	
+			err = db_user_achievement.Insert(ctx, u.Exec, boil.Infer())
+			if err != nil {
+				log.Println("db_user_achievement.Insert error:", err)
+				return err
+			}
+		}
+
+		
+	}
+
+	return nil
+}
+
 // func (u *AchievementService) GetAchievementsByCategoryId(
 // 	ctx context.Context,
 // 	category_id string,
