@@ -42,6 +42,7 @@ entity "Chills" {
   --
   * created_at: timestamp
   ended_at: timestamp
+  * distance: float
 }
 
 entity "UserChills" {

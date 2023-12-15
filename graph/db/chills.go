@@ -27,6 +27,7 @@ type Chill struct {
 	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	EndedAt   null.Time `boil:"ended_at" json:"ended_at,omitempty" toml:"ended_at" yaml:"ended_at,omitempty"`
+	Distance  float64   `boil:"distance" json:"distance" toml:"distance" yaml:"distance"`
 
 	R *chillR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L chillL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -36,20 +37,24 @@ var ChillColumns = struct {
 	ID        string
 	CreatedAt string
 	EndedAt   string
+	Distance  string
 }{
 	ID:        "id",
 	CreatedAt: "created_at",
 	EndedAt:   "ended_at",
+	Distance:  "distance",
 }
 
 var ChillTableColumns = struct {
 	ID        string
 	CreatedAt string
 	EndedAt   string
+	Distance  string
 }{
 	ID:        "chills.id",
 	CreatedAt: "chills.created_at",
 	EndedAt:   "chills.ended_at",
+	Distance:  "chills.distance",
 }
 
 // Generated where
@@ -99,14 +104,45 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
+type whereHelperfloat64 struct{ field string }
+
+func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelperfloat64) IN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var ChillWhere = struct {
 	ID        whereHelperstring
 	CreatedAt whereHelpertime_Time
 	EndedAt   whereHelpernull_Time
+	Distance  whereHelperfloat64
 }{
 	ID:        whereHelperstring{field: "\"chilly_daze\".\"chills\".\"id\""},
 	CreatedAt: whereHelpertime_Time{field: "\"chilly_daze\".\"chills\".\"created_at\""},
 	EndedAt:   whereHelpernull_Time{field: "\"chilly_daze\".\"chills\".\"ended_at\""},
+	Distance:  whereHelperfloat64{field: "\"chilly_daze\".\"chills\".\"distance\""},
 }
 
 // ChillRels is where relationship names are stored.
@@ -167,8 +203,8 @@ func (r *chillR) GetUserChills() UserChillSlice {
 type chillL struct{}
 
 var (
-	chillAllColumns            = []string{"id", "created_at", "ended_at"}
-	chillColumnsWithoutDefault = []string{}
+	chillAllColumns            = []string{"id", "created_at", "ended_at", "distance"}
+	chillColumnsWithoutDefault = []string{"distance"}
 	chillColumnsWithDefault    = []string{"id", "created_at", "ended_at"}
 	chillPrimaryKeyColumns     = []string{"id"}
 	chillGeneratedColumns      = []string{}

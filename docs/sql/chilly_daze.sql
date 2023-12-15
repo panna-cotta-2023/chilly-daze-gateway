@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS chilly_daze.user_achievements (
 CREATE TABLE IF NOT EXISTS chilly_daze.chills (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  ended_at TIMESTAMP WITH TIME ZONE
+  ended_at TIMESTAMP WITH TIME ZONE,
+  distance DOUBLE PRECISION NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chilly_daze.chill_achievements (
