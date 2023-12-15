@@ -26,29 +26,33 @@ func (u *AchievementService) GetAchievementsByUserId(
 	}
 
 	for _, db_user_achievement := range db_user_achievements {
-		db_achievement, err := db.Achievements(db.AchievementWhere.ID.EQ(db_user_achievement.AchievementID)).One(ctx, u.Exec)
+		log.Println("555db_user_achievement: ", db_user_achievement)
+		db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(db_user_achievement.AchievementID)).All(ctx, u.Exec)
 		if err != nil {
 			log.Println("db_achievement.Select error:", err)
 			return nil, err
 		}
 
-		db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
-		if err != nil {
-			log.Println("db_achievement_category.Select error:", err)
-			return nil, err
+		for _, db_achievement := range db_achievements {
+			db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(db_achievement.CategoryID)).One(ctx, u.Exec)
+			if err != nil {
+				log.Println("db_achievement_category.Select error:", err)
+				return nil, err
+			}
+
+			result = append(result, &model.Achievement{
+				ID:          db_achievement.ID,
+				Name:        db_achievement.Name,
+				Description: db_achievement.Description,
+				DisplayName: db_achievement_category.DisplayName,
+				Category: &model.AchievementCategory{
+					ID:          db_achievement_category.ID,
+					Name:        db_achievement_category.Name,
+					DisplayName: db_achievement_category.DisplayName,
+				},
+			})
 		}
 
-		result = append(result, &model.Achievement{
-			ID:          db_achievement.ID,
-			Name:        db_achievement.Name,
-			Description: db_achievement.Description,
-			DisplayName: db_achievement_category.DisplayName,
-			Category: &model.AchievementCategory{
-				ID:          db_achievement_category.ID,
-				Name:        db_achievement_category.Name,
-				DisplayName: db_achievement_category.DisplayName,
-			},
-		})
 	}
 
 	return result, nil
@@ -190,29 +194,31 @@ func (u *AchievementService) GetAvatarByUser(
 	ctx context.Context,
 	user *model.User,
 ) (*model.Achievement, error) {
-	if user.Avatar == nil {
+	if user.Avatar == nil || user.Avatar.ID == ""{
 		return &model.Achievement{}, nil
 	}
 
-	db_achievement, err := db.Achievements(db.AchievementWhere.ID.EQ(user.Avatar.ID)).One(ctx, u.Exec)
+	db_achievements, err := db.Achievements(db.AchievementWhere.ID.EQ(user.Avatar.ID)).All(ctx, u.Exec)
 	if err != nil {
-		log.Println("db_achievement.Select error:", err)
+		log.Println("1111db_achievement.Select error:", err)
 		return &model.Achievement{}, err
 	}
 
-	return &model.Achievement{
-		ID:          db_achievement.ID,
-		Name:        db_achievement.Name,
-		DisplayName: db_achievement.DisplayName,
-		Description: db_achievement.Description,
-	}, nil
+	for _, db_achievement := range db_achievements {
+		return &model.Achievement{
+			ID:          db_achievement.ID,
+			Name:        db_achievement.Name,
+			Description: db_achievement.Description,
+		}, nil
+	}
+	return &model.Achievement{}, nil
 }
 
 func (u *AchievementService) GetAchievementCategoryByAchievement(
 	ctx context.Context,
 	achievement *model.Achievement,
 ) (*model.AchievementCategory, error) {
-	if achievement == nil {
+	if achievement == nil || achievement.Category == nil {
 		return &model.AchievementCategory{}, nil
 	}
 
@@ -231,15 +237,15 @@ func (u *AchievementService) GetAchievementCategoryByAchievement(
 
 func (u *AchievementService) GetAchievementsByAchievementCategory(
 	ctx context.Context,
-	achievement_category *model.AchievementCategory,
+	achievementCategory *model.AchievementCategory,
 ) ([]*model.Achievement, error) {
-	if achievement_category == nil {
+	if achievementCategory == nil {
 		return []*model.Achievement{}, nil
 	}
 
 	result := []*model.Achievement{}
 
-	db_achievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(achievement_category.ID)).All(ctx, u.Exec)
+	db_achievements, err := db.Achievements(db.AchievementWhere.CategoryID.EQ(achievementCategory.ID)).All(ctx, u.Exec)
 	if err != nil {
 		log.Println("db_achievements.Select error:", err)
 		return nil, err

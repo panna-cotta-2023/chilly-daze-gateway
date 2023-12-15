@@ -39,7 +39,6 @@ func main() {
 			Srv: services,
 		},
 		Directives: graph.Directive,
-		Complexity: graph.ComplexityConfig(),
 	}))
 
 	http.Handle("/", auth.AuthMiddleware(srv))

@@ -98,15 +98,6 @@ func (u *ChillService) EndChill(
 			log.Println("db_tracePoint.Insert error:", err)
 			return nil, err
 		}
-
-		result.Traces = append(result.Traces, &model.TracePoint{
-			ID:        db_tracePoint.ID,
-			Timestamp: db_tracePoint.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-			Coordinate: &model.Coordinate{
-				Latitude:  db_tracePoint.Latitude,
-				Longitude: db_tracePoint.Longitude,
-			},
-		})
 	}
 
 	for _, photo := range endChill.Photos {
@@ -128,12 +119,6 @@ func (u *ChillService) EndChill(
 			log.Println("db_photo.Insert error:", err)
 			return nil, err
 		}
-
-		result.Photos = append(result.Photos, &model.Photo{
-			ID:        db_photo.ID,
-			Timestamp: db_photo.Timestamp.Format("2006-01-02T15:04:05+09:00"),
-			URL:       db_photo.URL,
-		})
 	}
 
 	createTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
@@ -143,6 +128,10 @@ func (u *ChillService) EndChill(
 	}
 
 	endTimeStamp, err := lib.ParseTimestamp(endChill.Timestamp)
+	if err != nil {
+		log.Println("lib.ParseTimestamp error:", err)
+		return nil, err
+	}
 
 	db_chill := &db.Chill{
 		ID:        result.ID,

@@ -25,28 +25,16 @@ func (r *chillResolver) Traces(ctx context.Context, obj *model.Chill) ([]*model.
 	return r.Srv.GetTracePointsByChill(ctx, obj)
 }
 
-// Photos is the resolver for the photos field.
-func (r *chillResolver) Photos(ctx context.Context, obj *model.Chill) ([]*model.Photo, error) {
-	return r.Srv.GetPhotosByChill(ctx, obj)
-}
-
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*model.User, error) {
 	uid := GetAuthToken(ctx)
+	return r.Srv.CreateUser(ctx, input, uid)
+}
 
-	if user, ok := r.Srv.GetUser(ctx, uid); ok {
-		updated_user, err := r.Srv.UpdateUser(ctx, *user, input.Name, input.Avatar)
-		if err != nil {
-			return nil, err
-		}
-		return updated_user, nil
-	} else {
-		user, err := r.Srv.CreateUser(ctx, input, uid)
-		if err != nil {
-			return nil, err
-		}
-		return user, nil
-	}
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
+	uid := GetAuthToken(ctx)
+	return r.Srv.UpdateUser(ctx, input, uid)
 }
 
 // StartChill is the resolver for the startChill field.
@@ -63,26 +51,6 @@ func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChil
 	}
 
 	return chill, nil
-}
-
-// AddTracePoints is the resolver for the addTracePoints field.
-func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error) {
-	tracePoints, err := r.Srv.AddTracePoints(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-
-	return tracePoints, nil
-}
-
-// AddPhotos is the resolver for the addPhotos field.
-func (r *mutationResolver) AddPhotos(ctx context.Context, input model.PhotosInput) ([]*model.Photo, error) {
-	photos, err := r.Srv.AddPhotos(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-
-	return photos, nil
 }
 
 // EndChill is the resolver for the endChill field.
