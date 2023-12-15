@@ -194,7 +194,7 @@ func (u *AchievementService) GetAvatarByUser(
 	if user == nil {
 		return &model.Achievement{}, nil
 	}
-	
+
 	db_achievement, err := db.Achievements(db.AchievementWhere.Name.EQ("avatar")).One(ctx, u.Exec)
 	if err != nil {
 		log.Println("db_achievement.Select error:", err)
@@ -206,5 +206,26 @@ func (u *AchievementService) GetAvatarByUser(
 		Name:        db_achievement.Name,
 		DisplayName: db_achievement.DisplayName,
 		Description: db_achievement.Description,
+	}, nil
+}
+
+func (u *AchievementService) GetAchievementCategoryByAchievement(
+	ctx context.Context,
+	achievement *model.Achievement,
+) (*model.AchievementCategory, error) {
+	if achievement == nil {
+		return &model.AchievementCategory{}, nil
+	}
+
+	db_achievement_category, err := db.AchievementCategories(db.AchievementCategoryWhere.ID.EQ(achievement.Category.ID)).One(ctx, u.Exec)
+	if err != nil {
+		log.Println("db_achievement_category.Select error:", err)
+		return &model.AchievementCategory{}, err
+	}
+
+	return &model.AchievementCategory{
+		ID: db_achievement_category.ID,
+		Name: db_achievement_category.Name,
+		DisplayName: db_achievement_category.DisplayName,
 	}, nil
 }

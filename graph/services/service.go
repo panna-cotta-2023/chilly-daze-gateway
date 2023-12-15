@@ -93,6 +93,10 @@ type AchievementService interface {
 		ctx context.Context,
 		user *model.User,
 	) (*model.Achievement, error)
+	GetAchievementCategoryByAchievement(
+		ctx context.Context,
+		achievement *model.Achievement,
+	) (*model.AchievementCategory, error)
 }
 
 type Services interface {
