@@ -189,3 +189,14 @@ mutation endChill($input: EndChillInput!) {
     distanceMeters
   }
 }
+
+mutation addTracePoints($input: TracePointsInput!) {
+  addTracePoints(input: $input) {
+    id
+    timestamp
+    coordinate {
+      latitude
+      longitude
+    }
+  }
+}
