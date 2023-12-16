@@ -222,7 +222,6 @@ func (u *AchievementService) GetNewAchievements(
 	chill *model.Chill,
 	userId string,
 ) ([]*model.Achievement, error) {
-	// ToDo: check achievement
 
 	achievementIds := []string{}
 	getAchievement, err := u.CheckAchievements(ctx, userId)
