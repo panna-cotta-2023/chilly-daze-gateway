@@ -88,6 +88,14 @@ type AchievementService interface {
 		chill *model.Chill,
 		userId string,
 	) ([]*model.Achievement, error)
+	CheckAchievementsOfFrequence(
+		ctx context.Context,
+		userId string,
+	) ([]*model.Achievement, error)
+	CheckAchievementsOfContinuous(
+		ctx context.Context,
+		userId string,
+	) ([]*model.Achievement, error)
 }
 
 type Services interface {

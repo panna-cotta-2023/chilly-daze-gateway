@@ -233,6 +233,17 @@ func (u *AchievementService) GetNewAchievements(
 		achievementIds = append(achievementIds, frequencyAchievement.ID)
 	}
 
+	continuousAchievements, err := u.CheckAchievementsOfContinuous(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfContinuous error:", err)
+		return nil, err
+	}
+	for _, continuousAchievement := range continuousAchievements {
+		achievementIds = append(achievementIds, continuousAchievement.ID)
+	}
+
+	log.Println("achievementIds:", achievementIds)
+
 	result := []*model.Achievement{}
 
 	userAchievements, err := db.UserAchievements(
