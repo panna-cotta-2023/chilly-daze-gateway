@@ -221,7 +221,7 @@ func (u *AchievementService) GetNewAchievements(
 	userId string,
 ) ([]*model.Achievement, error) {
 	// ToDo: check achievement
-	achievementIds := []string{"43d07cb1-d23d-42a9-b95a-28ac81aa8426", "dd4e3147-c6aa-4ed0-89fc-e9a62846554e", "423a969b-76bd-4848-88bf-9f6bf494fdc7", "56bd20af-91d3-4dd7-aeb1-5fa27ca12f50", "8f9c546e-3fb1-4839-b3d2-c9c448648585"}
+	achievementIds := []string{}
 
 	result := []*model.Achievement{}
 
@@ -233,7 +233,7 @@ func (u *AchievementService) GetNewAchievements(
 		return nil, err
 	}
 
-	newAchievementIds := []string{}
+	newAchievementIds := []string{"423a969b-76bd-4848-88bf-9f6bf494fdc7"}
 
 	for _, achievementId := range achievementIds {
 		flag := false
