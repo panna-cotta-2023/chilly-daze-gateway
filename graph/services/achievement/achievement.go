@@ -7,6 +7,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -157,7 +158,7 @@ func (u *AchievementService) GetAvatarByUser(
 			Description: dbAchievement.Description,
 			DisplayName: dbAchievement.DisplayName,
 			Category: &model.AchievementCategory{
-				ID:          dbAchievement.CategoryID,
+				ID: dbAchievement.CategoryID,
 			},
 		}, nil
 	}
@@ -307,7 +308,7 @@ func (u *AchievementService) GetNewAchievements(
 				DisplayName: dbAchievement.DisplayName,
 				Description: dbAchievement.Description,
 				Category: &model.AchievementCategory{
-					ID:          dbAchievement.CategoryID,
+					ID: dbAchievement.CategoryID,
 				},
 			})
 		}
@@ -340,6 +341,49 @@ func (u *AchievementService) CheckAchievementsOfFrequence(
 	case 20:
 		result = append(result, &model.Achievement{
 			ID: "cfeb362d-7158-4b08-98ca-4754656cec75",
+		})
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievementsOfContinuous(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	dbChills, err := db.Chills(
+		db.ChillWhere.UserID.EQ(userId),
+		qm.OrderBy("created_at DESC"),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills error:", err)
+		return nil, err
+	}
+
+	count := 0
+	for i, dbChill := range dbChills {
+		if dbChill.CreatedAt.Day() == dbChills[i+1].CreatedAt.Day()+1 {
+			count++
+		} else {
+			break
+		}
+	}
+
+	if count >= 2 {
+		result = append(result, &model.Achievement{
+			ID: "71e73e6e-a8b8-49b0-a9a9-19752f156a49",
+		})
+	}
+	if count >= 4 {
+		result = append(result, &model.Achievement{
+			ID: "8f9c546e-3fb1-4839-b3d2-c9c448648585",
+		})
+	}
+	if count >= 9 {
+		result = append(result, &model.Achievement{
+			ID: "c541846b-ed6b-44fe-ac3b-7d310205528f",
 		})
 	}
 
