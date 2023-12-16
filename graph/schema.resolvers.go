@@ -49,6 +49,11 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	return r.Srv.UpdateUser(ctx, userId, input)
 }
 
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+}
+
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
 	userId := GetAuthToken(ctx)
