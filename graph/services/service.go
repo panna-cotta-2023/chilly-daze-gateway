@@ -99,6 +99,14 @@ type AchievementService interface {
 		ctx context.Context,
 		userId string,
 	) ([]*model.Achievement, error)
+	CheckAchievementsOfArea(
+		ctx context.Context,
+		userId string,
+	) ([]*model.Achievement, error)
+	CheckAchievements(
+		ctx context.Context,
+		userId string,
+	) ([]*model.Achievement, error)
 }
 
 type Services interface {

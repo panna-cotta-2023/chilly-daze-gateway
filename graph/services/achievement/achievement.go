@@ -225,31 +225,14 @@ func (u *AchievementService) GetNewAchievements(
 	// ToDo: check achievement
 
 	achievementIds := []string{}
-	frequencyAchievements, err := u.CheckAchievementsOfFrequence(ctx, userId)
+	getAchievement, err := u.CheckAchievements(ctx, userId)
 	if err != nil {
-		log.Println("u.CheckAchievementsOfFrequence error:", err)
+		log.Println("u.CheckAchievements error:", err)
 		return nil, err
-	}
-	for _, frequencyAchievement := range frequencyAchievements {
-		achievementIds = append(achievementIds, frequencyAchievement.ID)
 	}
 
-	continuousAchievements, err := u.CheckAchievementsOfContinuous(ctx, userId)
-	if err != nil {
-		log.Println("u.CheckAchievementsOfContinuous error:", err)
-		return nil, err
-	}
-	for _, continuousAchievement := range continuousAchievements {
-		achievementIds = append(achievementIds, continuousAchievement.ID)
-	}
-
-	areaAchievements, err := u.CheckAchievementsOfArea(ctx, userId)
-	if err != nil {
-		log.Println("u.CheckAchievementsOfArea error:", err)
-		return nil, err
-	}
-	for _, areaAchievement := range areaAchievements {
-		achievementIds = append(achievementIds, areaAchievement.ID)
+	for _, achievement := range getAchievement {
+		achievementIds = append(achievementIds, achievement.ID)
 	}
 
 	result := []*model.Achievement{}
@@ -475,6 +458,36 @@ func (u *AchievementService) CheckAchievementsOfArea(
 			ID: "45d90aa7-5428-48a8-8d98-852c0ebe58b9",
 		})
 	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievements(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	frequencyAchievements, err := u.CheckAchievementsOfFrequence(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfFrequence error:", err)
+		return nil, err
+	}
+	result = append(result, frequencyAchievements...)
+
+	continuousAchievements, err := u.CheckAchievementsOfContinuous(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfContinuous error:", err)
+		return nil, err
+	}
+	result = append(result, continuousAchievements...)
+
+	areaAchievements, err := u.CheckAchievementsOfArea(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfArea error:", err)
+		return nil, err
+	}
+	result = append(result, areaAchievements...)
 
 	return result, nil
 }
