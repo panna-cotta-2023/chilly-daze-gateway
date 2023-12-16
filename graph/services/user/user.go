@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	firebase "firebase.google.com/go"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -85,8 +86,8 @@ func (u *UserService) UpdateUser(
 	}
 
 	result := &model.User{
-		ID:     dbUser.ID,
-		Name:   dbUser.Name,
+		ID:   dbUser.ID,
+		Name: dbUser.Name,
 		Avatar: &model.Achievement{
 			ID: dbUser.Avatar.String,
 		},
@@ -134,4 +135,55 @@ func (u *UserService) UpdateUser(
 
 	return result, nil
 
+}
+
+func (u *UserService) DeleteUser(
+	ctx context.Context,
+	userId string,
+) (*model.User, error) {
+	dbUser, err := db.Users(db.UserWhere.ID.EQ(userId)).One(ctx, u.Exec)
+	if err != nil {
+		log.Println("dbUser.Select error:", err)
+		return nil, err
+	}
+
+	result := &model.User{
+		ID:   dbUser.ID,
+		Name: dbUser.Name,
+		Avatar: &model.Achievement{
+			ID: dbUser.Avatar.String,
+		},
+	}
+
+	app, err := firebase.NewApp(ctx, nil)
+	if err != nil {
+		log.Println("firebase.NewApp error:", err)
+		return nil, err
+	}
+
+	client, err := app.Storage(ctx)
+	if err != nil {
+		log.Println("app.Storage error:", err)
+		return nil, err
+	}
+
+	bucket, err := client.DefaultBucket()
+	if err != nil {
+		log.Println("client.DefaultBucket error:", err)
+		return nil, err
+	}
+
+	err = bucket.Object("users/" + userId).Delete(ctx)
+	if err != nil {
+		log.Println("bucket.Object.Delete error:", err)
+		return nil, err
+	}
+
+	_, err = dbUser.Delete(ctx, u.Exec)
+	if err != nil {
+		log.Println("dbUser.Delete error:", err)
+		return nil, err
+	}
+
+	return result, nil
 }
