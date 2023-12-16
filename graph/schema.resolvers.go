@@ -68,7 +68,7 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 
 // AddTracePoints is the resolver for the AddTracePoints field.
 func (r *mutationResolver) AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error) {
-	panic(fmt.Errorf("not implemented: AddTracePoints - AddTracePoints"))
+	return r.Srv.AddTracePoints(ctx, input.TracePoints, input.ID)
 }
 
 // User is the resolver for the user field.

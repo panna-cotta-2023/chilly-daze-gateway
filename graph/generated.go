@@ -275,12 +275,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Coordinate.Longitude(childComplexity), true
 
-	case "Mutation.AddTracePoints":
+	case "Mutation.addTracePoints":
 		if e.complexity.Mutation.AddTracePoints == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_AddTracePoints_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_addTracePoints_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -565,7 +565,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_AddTracePoints_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_addTracePoints_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.TracePointsInput
@@ -1792,8 +1792,8 @@ func (ec *executionContext) fieldContext_Mutation_endChill(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_AddTracePoints(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_AddTracePoints(ctx, field)
+func (ec *executionContext) _Mutation_addTracePoints(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addTracePoints(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1843,7 +1843,7 @@ func (ec *executionContext) _Mutation_AddTracePoints(ctx context.Context, field 
 	return ec.marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_AddTracePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_addTracePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1868,7 +1868,7 @@ func (ec *executionContext) fieldContext_Mutation_AddTracePoints(ctx context.Con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_AddTracePoints_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_addTracePoints_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5215,9 +5215,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "AddTracePoints":
+		case "addTracePoints":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_AddTracePoints(ctx, field)
+				return ec._Mutation_addTracePoints(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
