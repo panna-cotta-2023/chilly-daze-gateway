@@ -27,6 +27,10 @@ type UserService interface {
 		userId string,
 		input model.UpdateUserInput,
 	) (*model.User, error)
+	DeleteUser(
+		ctx context.Context,
+		userId string,
+	) (*model.User, error)
 }
 
 type TraceService interface {
