@@ -98,4 +98,5 @@ type Mutation {
     updateUser(input: UpdateUserInput!): User! @isAuthenticated
     startChill(input: StartChillInput!): Chill! @isAuthenticated
     endChill(input: EndChillInput!): Chill! @isAuthenticated
+    AddTracePoint(input: [TracePointInput!]!): [TracePoint!]!
 }

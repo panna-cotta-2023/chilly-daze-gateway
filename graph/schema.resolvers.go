@@ -66,6 +66,11 @@ func (r *mutationResolver) EndChill(ctx context.Context, input model.EndChillInp
 	return r.Srv.EndChill(ctx, input, userId)
 }
 
+// AddTracePoint is the resolver for the AddTracePoint field.
+func (r *mutationResolver) AddTracePoint(ctx context.Context, input []*model.TracePointInput) ([]*model.TracePoint, error) {
+	panic(fmt.Errorf("not implemented: AddTracePoint - AddTracePoint"))
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	userId := GetAuthToken(ctx)
