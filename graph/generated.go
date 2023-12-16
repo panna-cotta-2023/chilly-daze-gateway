@@ -81,11 +81,11 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddTracePoint func(childComplexity int, input []*model.TracePointInput) int
-		EndChill      func(childComplexity int, input model.EndChillInput) int
-		RegisterUser  func(childComplexity int, input model.RegisterUserInput) int
-		StartChill    func(childComplexity int, input model.StartChillInput) int
-		UpdateUser    func(childComplexity int, input model.UpdateUserInput) int
+		AddTracePoints func(childComplexity int, input model.TracePointsInput) int
+		EndChill       func(childComplexity int, input model.EndChillInput) int
+		RegisterUser   func(childComplexity int, input model.RegisterUserInput) int
+		StartChill     func(childComplexity int, input model.StartChillInput) int
+		UpdateUser     func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	Photo struct {
@@ -131,7 +131,7 @@ type MutationResolver interface {
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
 	StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error)
 	EndChill(ctx context.Context, input model.EndChillInput) (*model.Chill, error)
-	AddTracePoint(ctx context.Context, input []*model.TracePointInput) ([]*model.TracePoint, error)
+	AddTracePoints(ctx context.Context, input model.TracePointsInput) ([]*model.TracePoint, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context) (*model.User, error)
@@ -275,17 +275,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Coordinate.Longitude(childComplexity), true
 
-	case "Mutation.AddTracePoint":
-		if e.complexity.Mutation.AddTracePoint == nil {
+	case "Mutation.AddTracePoints":
+		if e.complexity.Mutation.AddTracePoints == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_AddTracePoint_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_AddTracePoints_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddTracePoint(childComplexity, args["input"].([]*model.TracePointInput)), true
+		return e.complexity.Mutation.AddTracePoints(childComplexity, args["input"].(model.TracePointsInput)), true
 
 	case "Mutation.endChill":
 		if e.complexity.Mutation.EndChill == nil {
@@ -447,6 +447,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegisterUserInput,
 		ec.unmarshalInputStartChillInput,
 		ec.unmarshalInputTracePointInput,
+		ec.unmarshalInputTracePointsInput,
 		ec.unmarshalInputUpdateUserInput,
 	)
 	first := true
@@ -564,13 +565,13 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_AddTracePoint_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_AddTracePoints_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.TracePointInput
+	var arg0 model.TracePointsInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNTracePointInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNTracePointsInput2chilly_daze_gatewayᚋgraphᚋmodelᚐTracePointsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1791,8 +1792,8 @@ func (ec *executionContext) fieldContext_Mutation_endChill(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_AddTracePoint(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_AddTracePoint(ctx, field)
+func (ec *executionContext) _Mutation_AddTracePoints(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_AddTracePoints(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1804,8 +1805,28 @@ func (ec *executionContext) _Mutation_AddTracePoint(ctx context.Context, field g
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddTracePoint(rctx, fc.Args["input"].([]*model.TracePointInput))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().AddTracePoints(rctx, fc.Args["input"].(model.TracePointsInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*model.TracePoint); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*chilly_daze_gateway/graph/model.TracePoint`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1822,7 +1843,7 @@ func (ec *executionContext) _Mutation_AddTracePoint(ctx context.Context, field g
 	return ec.marshalNTracePoint2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_AddTracePoint(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_AddTracePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1847,7 +1868,7 @@ func (ec *executionContext) fieldContext_Mutation_AddTracePoint(ctx context.Cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_AddTracePoint_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_AddTracePoints_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4703,6 +4724,40 @@ func (ec *executionContext) unmarshalInputTracePointInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputTracePointsInput(ctx context.Context, obj interface{}) (model.TracePointsInput, error) {
+	var it model.TracePointsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "tracePoints"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "tracePoints":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tracePoints"))
+			data, err := ec.unmarshalNTracePointInput2ᚕᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TracePoints = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj interface{}) (model.UpdateUserInput, error) {
 	var it model.UpdateUserInput
 	asMap := map[string]interface{}{}
@@ -5160,9 +5215,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "AddTracePoint":
+		case "AddTracePoints":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_AddTracePoint(ctx, field)
+				return ec._Mutation_AddTracePoints(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6228,6 +6283,11 @@ func (ec *executionContext) unmarshalNTracePointInput2ᚕᚖchilly_daze_gateway�
 func (ec *executionContext) unmarshalNTracePointInput2ᚖchilly_daze_gatewayᚋgraphᚋmodelᚐTracePointInput(ctx context.Context, v interface{}) (*model.TracePointInput, error) {
 	res, err := ec.unmarshalInputTracePointInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNTracePointsInput2chilly_daze_gatewayᚋgraphᚋmodelᚐTracePointsInput(ctx context.Context, v interface{}) (model.TracePointsInput, error) {
+	res, err := ec.unmarshalInputTracePointsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateUserInput2chilly_daze_gatewayᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v interface{}) (model.UpdateUserInput, error) {

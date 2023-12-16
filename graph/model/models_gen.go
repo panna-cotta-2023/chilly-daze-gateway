@@ -74,6 +74,11 @@ type TracePointInput struct {
 	Coordinate *CoordinateInput `json:"coordinate"`
 }
 
+type TracePointsInput struct {
+	ID          string             `json:"id"`
+	TracePoints []*TracePointInput `json:"tracePoints"`
+}
+
 type UpdateUserInput struct {
 	Name   *string `json:"name,omitempty"`
 	Avatar *string `json:"avatar,omitempty"`
