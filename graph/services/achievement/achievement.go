@@ -155,6 +155,10 @@ func (u *AchievementService) GetAvatarByUser(
 			ID:          dbAchievement.ID,
 			Name:        dbAchievement.Name,
 			Description: dbAchievement.Description,
+			DisplayName: dbAchievement.DisplayName,
+			Category: &model.AchievementCategory{
+				ID:          dbAchievement.CategoryID,
+			},
 		}, nil
 	}
 	return &model.Achievement{}, nil
@@ -217,7 +221,7 @@ func (u *AchievementService) GetNewAchievements(
 	userId string,
 ) ([]*model.Achievement, error) {
 	// ToDo: check achievement
-	achievementIds := []string{"43d07cb1-d23d-42a9-b95a-28ac81aa8426", "dd4e3147-c6aa-4ed0-89fc-e9a62846554e", "423a969b-76bd-4848-88bf-9f6bf494fdc7"}
+	achievementIds := []string{"423a969b-76bd-4848-88bf-9f6bf494fdc7"}
 
 	result := []*model.Achievement{}
 
@@ -252,15 +256,6 @@ func (u *AchievementService) GetNewAchievements(
 	}
 
 	for _, dbNewAchievement := range dbNewAchievements {
-		result = append(result, &model.Achievement{
-			ID:          dbNewAchievement.ID,
-			Name:        dbNewAchievement.Name,
-			Description: dbNewAchievement.Description,
-			DisplayName: dbNewAchievement.DisplayName,
-			Category: &model.AchievementCategory{
-				ID: dbNewAchievement.CategoryID,
-			},
-		})
 
 		dbChillAchievement := &db.ChillAchievement{
 			ChillID:       chill.ID,
@@ -280,6 +275,32 @@ func (u *AchievementService) GetNewAchievements(
 		if err = dbUserAchievement.Insert(ctx, u.Exec, boil.Infer()); err != nil {
 			log.Println("db_user_achievement.Insert error:", err)
 			return nil, err
+		}
+	}
+
+	dbChillAchievemnts, err := db.ChillAchievements(db.ChillAchievementWhere.ChillID.EQ(chill.ID)).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.ChillAchievements error:", err)
+		return nil, err
+	}
+
+	for _, dbChillAchievement := range dbChillAchievemnts {
+		dbAchievements, err := db.Achievements(db.AchievementWhere.ID.EQ(dbChillAchievement.AchievementID)).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("db.Achievements error:", err)
+			return nil, err
+		}
+
+		for _, dbAchievement := range dbAchievements {
+			result = append(result, &model.Achievement{
+				ID:          dbAchievement.ID,
+				Name:        dbAchievement.Name,
+				DisplayName: dbAchievement.DisplayName,
+				Description: dbAchievement.Description,
+				Category: &model.AchievementCategory{
+					ID:          dbAchievement.CategoryID,
+				},
+			})
 		}
 	}
 
