@@ -3,11 +3,13 @@ package achievement
 import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
+	"time"
 
 	"context"
 	"log"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AchievementService struct {
@@ -157,7 +159,7 @@ func (u *AchievementService) GetAvatarByUser(
 			Description: dbAchievement.Description,
 			DisplayName: dbAchievement.DisplayName,
 			Category: &model.AchievementCategory{
-				ID:          dbAchievement.CategoryID,
+				ID: dbAchievement.CategoryID,
 			},
 		}, nil
 	}
@@ -221,7 +223,17 @@ func (u *AchievementService) GetNewAchievements(
 	userId string,
 ) ([]*model.Achievement, error) {
 	// ToDo: check achievement
-	achievementIds := []string{"423a969b-76bd-4848-88bf-9f6bf494fdc7"}
+
+	achievementIds := []string{}
+	getAchievement, err := u.CheckAchievements(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievements error:", err)
+		return nil, err
+	}
+
+	for _, achievement := range getAchievement {
+		achievementIds = append(achievementIds, achievement.ID)
+	}
 
 	result := []*model.Achievement{}
 
@@ -298,11 +310,184 @@ func (u *AchievementService) GetNewAchievements(
 				DisplayName: dbAchievement.DisplayName,
 				Description: dbAchievement.Description,
 				Category: &model.AchievementCategory{
-					ID:          dbAchievement.CategoryID,
+					ID: dbAchievement.CategoryID,
 				},
 			})
 		}
 	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievementsOfFrequence(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	userChills, err := db.Chills(db.ChillWhere.UserID.EQ(userId)).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills error:", err)
+		return nil, err
+	}
+
+	switch len(userChills) {
+	case 1:
+		result = append(result, &model.Achievement{
+			ID: "423a969b-76bd-4848-88bf-9f6bf494fdc7",
+		})
+	case 3:
+		result = append(result, &model.Achievement{
+			ID: "56bd20af-91d3-4dd7-aeb1-5fa27ca12f50",
+		})
+	case 20:
+		result = append(result, &model.Achievement{
+			ID: "cfeb362d-7158-4b08-98ca-4754656cec75",
+		})
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievementsOfContinuous(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	dbChills, err := db.Chills(
+		db.ChillWhere.UserID.EQ(userId),
+		qm.OrderBy("created_at DESC"),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills error:", err)
+		return nil, err
+	}
+
+	count := 0
+	for i, dbChill := range dbChills {
+		if i == len(dbChills)-1 {
+			break
+		}
+
+		if dbChill.CreatedAt.Day() == dbChills[i+1].CreatedAt.AddDate(0, 0, 1).Day() {
+			count++
+		} else {
+			break
+		}
+	}
+
+	if count >= 2 {
+		result = append(result, &model.Achievement{
+			ID: "71e73e6e-a8b8-49b0-a9a9-19752f156a49",
+		})
+	}
+	if count >= 4 {
+		result = append(result, &model.Achievement{
+			ID: "8f9c546e-3fb1-4839-b3d2-c9c448648585",
+		})
+	}
+	if count >= 9 {
+		result = append(result, &model.Achievement{
+			ID: "c541846b-ed6b-44fe-ac3b-7d310205528f",
+		})
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievementsOfArea(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	dbChills, err := db.Chills(
+		db.ChillWhere.UserID.EQ(userId),
+		qm.OrderBy("created_at DESC"),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills error:", err)
+		return nil, err
+	}
+
+	latestChillDay := time.Date(
+		dbChills[0].CreatedAt.Year(),
+		dbChills[0].CreatedAt.Month(),
+		dbChills[0].CreatedAt.Day(),
+		0,
+		0,
+		0,
+		0,
+		time.Local,
+	)
+
+	sumDistance := 0.0
+	for i, dbChill := range dbChills {
+		chillDay := time.Date(
+			dbChill.CreatedAt.Year(),
+			dbChill.CreatedAt.Month(),
+			dbChill.CreatedAt.Day(),
+			0,
+			0,
+			0,
+			0,
+			time.Local,
+		)
+		if i == 0 {
+			if dbChill.Distance >= 1000 {
+				result = append(result, &model.Achievement{
+					ID: "43d07cb1-d23d-42a9-b95a-28ac81aa8426",
+				})
+			}
+			sumDistance += dbChill.Distance
+		} else if latestChillDay.Sub(chillDay).Hours()/24 < 7 {
+			sumDistance += dbChill.Distance
+		} else {
+			break
+		}
+	}
+
+	if sumDistance >= 3500 {
+		result = append(result, &model.Achievement{
+			ID: "dd4e3147-c6aa-4ed0-89fc-e9a62846554e",
+		})
+	}
+	if sumDistance >= 7000 {
+		result = append(result, &model.Achievement{
+			ID: "45d90aa7-5428-48a8-8d98-852c0ebe58b9",
+		})
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievements(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	frequencyAchievements, err := u.CheckAchievementsOfFrequence(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfFrequence error:", err)
+		return nil, err
+	}
+	result = append(result, frequencyAchievements...)
+
+	continuousAchievements, err := u.CheckAchievementsOfContinuous(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfContinuous error:", err)
+		return nil, err
+	}
+	result = append(result, continuousAchievements...)
+
+	areaAchievements, err := u.CheckAchievementsOfArea(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfArea error:", err)
+		return nil, err
+	}
+	result = append(result, areaAchievements...)
 
 	return result, nil
 }
