@@ -3,12 +3,13 @@ package achievement
 import (
 	"chilly_daze_gateway/graph/db"
 	"chilly_daze_gateway/graph/model"
+	"time"
 
 	"context"
 	"log"
 
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AchievementService struct {
@@ -242,6 +243,15 @@ func (u *AchievementService) GetNewAchievements(
 		achievementIds = append(achievementIds, continuousAchievement.ID)
 	}
 
+	areaAchievements, err := u.CheckAchievementsOfArea(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfArea error:", err)
+		return nil, err
+	}
+	for _, areaAchievement := range areaAchievements {
+		achievementIds = append(achievementIds, areaAchievement.ID)
+	}
+
 	result := []*model.Achievement{}
 
 	userAchievements, err := db.UserAchievements(
@@ -377,7 +387,7 @@ func (u *AchievementService) CheckAchievementsOfContinuous(
 			break
 		}
 
-		if dbChill.CreatedAt.Day() == dbChills[i+1].CreatedAt.AddDate(0,0,1).Day() {
+		if dbChill.CreatedAt.Day() == dbChills[i+1].CreatedAt.AddDate(0, 0, 1).Day() {
 			count++
 		} else {
 			break
@@ -397,6 +407,72 @@ func (u *AchievementService) CheckAchievementsOfContinuous(
 	if count >= 9 {
 		result = append(result, &model.Achievement{
 			ID: "c541846b-ed6b-44fe-ac3b-7d310205528f",
+		})
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievementsOfArea(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	dbChills, err := db.Chills(
+		db.ChillWhere.UserID.EQ(userId),
+		qm.OrderBy("created_at DESC"),
+	).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills error:", err)
+		return nil, err
+	}
+
+	latestChillDay := time.Date(
+		dbChills[0].CreatedAt.Year(),
+		dbChills[0].CreatedAt.Month(),
+		dbChills[0].CreatedAt.Day(),
+		0,
+		0,
+		0,
+		0,
+		time.Local,
+	)
+
+	sumDistance := 0.0
+	for i, dbChill := range dbChills {
+		chillDay := time.Date(
+			dbChill.CreatedAt.Year(),
+			dbChill.CreatedAt.Month(),
+			dbChill.CreatedAt.Day(),
+			0,
+			0,
+			0,
+			0,
+			time.Local,
+		)
+		if i == 0 {
+			if dbChill.Distance >= 1000 {
+				result = append(result, &model.Achievement{
+					ID: "43d07cb1-d23d-42a9-b95a-28ac81aa8426",
+				})
+			}
+			sumDistance += dbChill.Distance
+		} else if latestChillDay.Sub(chillDay).Hours()/24 < 7 {
+			sumDistance += dbChill.Distance
+		} else {
+			break
+		}
+	}
+
+	if sumDistance >= 3500 {
+		result = append(result, &model.Achievement{
+			ID: "dd4e3147-c6aa-4ed0-89fc-e9a62846554e",
+		})
+	}
+	if sumDistance >= 7000 {
+		result = append(result, &model.Achievement{
+			ID: "45d90aa7-5428-48a8-8d98-852c0ebe58b9",
 		})
 	}
 
