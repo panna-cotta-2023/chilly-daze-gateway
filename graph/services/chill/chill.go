@@ -202,6 +202,7 @@ func (u *ChillService) GetChillsByUserId(
 			if dbChill.CreatedAt.AddDate(0, 0, 6).After(nowDate) {
 				result = append(result, &model.Chill{
 					ID: dbChill.ID,
+					DistanceMeters: dbChill.Distance,
 				})
 			}
 		}
