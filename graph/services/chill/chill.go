@@ -150,6 +150,7 @@ func (u *ChillService) EndChill(
 		UserID:    userId,
 		CreatedAt: createTimeStamp,
 		EndedAt:   null.TimeFrom(endTimeStamp),
+		Distance: endChill.DistanceMeters,
 	}
 
 	_, err = dbChill.Update(ctx, u.Exec, boil.Infer())
