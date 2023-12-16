@@ -58,6 +58,9 @@ type ChillService interface {
 		ctx context.Context,
 		userID string,
 	) ([]*model.Chill, error)
+	DeleteChillAfterOneDay(
+		ctx context.Context,
+	) error
 }
 
 type AchievementService interface {
