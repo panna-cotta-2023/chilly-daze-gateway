@@ -179,6 +179,7 @@ func (u *ChillService) GetChillsByUserId(
 	ctx context.Context,
 	userID string,
 ) ([]*model.Chill, error) {
+	nowDate := time.Now()
 	dbUserChills, err := db.Chills(db.ChillWhere.UserID.EQ(userID)).All(ctx, u.Exec)
 	if err != nil {
 		log.Println("dbUserChills.Select error:", err)
@@ -198,9 +199,11 @@ func (u *ChillService) GetChillsByUserId(
 		}
 
 		for _, dbChill := range dbChills {
-			result = append(result, &model.Chill{
-				ID: dbChill.ID,
-			})
+			if dbChill.CreatedAt.AddDate(0, 0, 6).After(nowDate) {
+				result = append(result, &model.Chill{
+					ID: dbChill.ID,
+				})
+			}
 		}
 	}
 
