@@ -242,8 +242,6 @@ func (u *AchievementService) GetNewAchievements(
 		achievementIds = append(achievementIds, continuousAchievement.ID)
 	}
 
-	log.Println("achievementIds:", achievementIds)
-
 	result := []*model.Achievement{}
 
 	userAchievements, err := db.UserAchievements(
@@ -375,7 +373,11 @@ func (u *AchievementService) CheckAchievementsOfContinuous(
 
 	count := 0
 	for i, dbChill := range dbChills {
-		if dbChill.CreatedAt.Day() == dbChills[i+1].CreatedAt.Day()+1 {
+		if i == len(dbChills)-1 {
+			break
+		}
+
+		if dbChill.CreatedAt.Day() == dbChills[i+1].CreatedAt.AddDate(0,0,1).Day() {
 			count++
 		} else {
 			break
