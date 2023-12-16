@@ -103,8 +103,14 @@ func (u *UserService) UpdateUser(
 				log.Println("db.Achievements error:", err)
 				return nil, err
 			}
-			if dbAchievement.Name == dbUser.Avatar.String {
-				dbUser.Avatar = null.StringFrom(dbAchievement.Name)
+
+			if dbAchievement.Name == *input.Avatar {
+				dbUser.Avatar = null.StringFrom(dbAchievement.ID)
+				result.Avatar = &model.Achievement{
+					ID: dbAchievement.ID,
+				}
+
+				break
 			}
 		}
 	}

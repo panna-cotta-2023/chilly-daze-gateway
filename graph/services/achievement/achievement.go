@@ -155,6 +155,10 @@ func (u *AchievementService) GetAvatarByUser(
 			ID:          dbAchievement.ID,
 			Name:        dbAchievement.Name,
 			Description: dbAchievement.Description,
+			DisplayName: dbAchievement.DisplayName,
+			Category: &model.AchievementCategory{
+				ID:          dbAchievement.CategoryID,
+			},
 		}, nil
 	}
 	return &model.Achievement{}, nil
