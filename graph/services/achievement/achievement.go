@@ -221,7 +221,16 @@ func (u *AchievementService) GetNewAchievements(
 	userId string,
 ) ([]*model.Achievement, error) {
 	// ToDo: check achievement
-	achievementIds := []string{"423a969b-76bd-4848-88bf-9f6bf494fdc7"}
+
+	achievementIds := []string{}
+	frequencyAchievements, err := u.CheckAchievementsOfFrequence(ctx, userId)
+	if err != nil {
+		log.Println("u.CheckAchievementsOfFrequence error:", err)
+		return nil, err
+	}
+	for _, frequencyAchievement := range frequencyAchievements {
+		achievementIds = append(achievementIds, frequencyAchievement.ID)
+	}
 
 	result := []*model.Achievement{}
 
@@ -302,6 +311,36 @@ func (u *AchievementService) GetNewAchievements(
 				},
 			})
 		}
+	}
+
+	return result, nil
+}
+
+func (u *AchievementService) CheckAchievementsOfFrequence(
+	ctx context.Context,
+	userId string,
+) ([]*model.Achievement, error) {
+	result := []*model.Achievement{}
+
+	userChills, err := db.Chills(db.ChillWhere.UserID.EQ(userId)).All(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills error:", err)
+		return nil, err
+	}
+
+	switch len(userChills) {
+	case 1:
+		result = append(result, &model.Achievement{
+			ID: "423a969b-76bd-4848-88bf-9f6bf494fdc7",
+		})
+	case 3:
+		result = append(result, &model.Achievement{
+			ID: "56bd20af-91d3-4dd7-aeb1-5fa27ca12f50",
+		})
+	case 20:
+		result = append(result, &model.Achievement{
+			ID: "cfeb362d-7158-4b08-98ca-4754656cec75",
+		})
 	}
 
 	return result, nil
