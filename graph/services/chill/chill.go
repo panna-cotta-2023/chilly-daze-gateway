@@ -188,9 +188,20 @@ func (u *ChillService) GetChillsByUserId(
 	result := []*model.Chill{}
 
 	for _, dbUserChill := range dbUserChills {
-		result = append(result, &model.Chill{
-			ID: dbUserChill.ID,
-		})
+		dbChills, err := db.Chills(
+			db.ChillWhere.ID.EQ(dbUserChill.ID),
+			db.ChillWhere.EndedAt.IsNotNull(),
+		).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("dbChill.Select error:", err)
+			return nil, err
+		}
+
+		for _, dbChill := range dbChills {
+			result = append(result, &model.Chill{
+				ID: dbChill.ID,
+			})
+		}
 	}
 
 	return result, nil
