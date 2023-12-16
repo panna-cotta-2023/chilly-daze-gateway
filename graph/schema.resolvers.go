@@ -8,6 +8,7 @@ import (
 	"chilly_daze_gateway/graph/model"
 	"context"
 	"fmt"
+	"log"
 )
 
 // Category is the resolver for the category field.
@@ -51,6 +52,11 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 // StartChill is the resolver for the startChill field.
 func (r *mutationResolver) StartChill(ctx context.Context, input model.StartChillInput) (*model.Chill, error) {
 	userId := GetAuthToken(ctx)
+	err := r.Srv.DeleteChillAfterOneDay(ctx)
+	if err != nil {
+		log.Println("r.Srv.DeleteChillAfterOneDay error:", err)
+	}
+
 	return r.Srv.StartChill(ctx, userId, input)
 }
 
