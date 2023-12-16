@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
@@ -161,7 +162,7 @@ func (u *ChillService) EndChill(
 			}
 		} else {
 			result.Traces = append(result.Traces, &model.TracePoint{
-				ID:        dbChill.ID,
+				ID: dbChill.ID,
 			})
 			result.DistanceMeters = dbChill.Distance
 			result.Photo = &model.Photo{
@@ -187,10 +188,38 @@ func (u *ChillService) GetChillsByUserId(
 	result := []*model.Chill{}
 
 	for _, dbUserChill := range dbUserChills {
-		result = append(result, &model.Chill{
-			ID: dbUserChill.ID,
-		})
+		dbChills, err := db.Chills(
+			db.ChillWhere.ID.EQ(dbUserChill.ID),
+			db.ChillWhere.EndedAt.IsNotNull(),
+		).All(ctx, u.Exec)
+		if err != nil {
+			log.Println("dbChill.Select error:", err)
+			return nil, err
+		}
+
+		for _, dbChill := range dbChills {
+			result = append(result, &model.Chill{
+				ID: dbChill.ID,
+			})
+		}
 	}
 
 	return result, nil
+}
+
+func (u *ChillService) DeleteChillAfterOneDay(
+	ctx context.Context,
+) error {
+	oneDayAgo := time.Now().AddDate(0, 0, -1)
+
+	_, err := db.Chills(
+		db.ChillWhere.CreatedAt.LT(oneDayAgo),
+		db.ChillWhere.EndedAt.IsNull(),
+	).DeleteAll(ctx, u.Exec)
+	if err != nil {
+		log.Println("db.Chills.DeleteAll error:", err)
+		return err
+	}
+
+	return nil
 }
