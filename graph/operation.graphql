@@ -190,8 +190,8 @@ mutation endChill($input: EndChillInput!) {
   }
 }
 
-mutation addTracePoints($input: AddTraceInput!) {
-  addTrace(input: $input) {
+mutation addTracePoints($input: TracePointsInput!) {
+  addTracePoints(input: $input) {
     id
     timestamp
     coordinate {
